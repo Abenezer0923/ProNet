@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { UserSkill } from './user-skill.entity';
 
 @Entity('users')
 export class User {
@@ -20,14 +28,23 @@ export class User {
   @Column({ nullable: true })
   profession: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   bio: string;
 
   @Column({ nullable: true })
   avatar: string;
 
+  @Column({ nullable: true })
+  location: string;
+
+  @Column({ nullable: true })
+  website: string;
+
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => UserSkill, (skill) => skill.user, { eager: true })
+  skills: UserSkill[];
 
   @CreateDateColumn()
   createdAt: Date;

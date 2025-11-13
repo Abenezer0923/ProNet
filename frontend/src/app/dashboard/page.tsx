@@ -37,9 +37,12 @@ export default function DashboardPage() {
               <span className="text-xl font-bold text-gray-900">ProNet</span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
+              <a
+                href="/profile"
+                className="text-gray-700 hover:text-gray-900"
+              >
                 {user.firstName} {user.lastName}
-              </span>
+              </a>
               <button
                 onClick={logout}
                 className="px-4 py-2 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -108,13 +111,16 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid md:grid-cols-2 gap-4">
+            <a
+              href="/profile"
+              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"
+            >
+              <h3 className="font-semibold text-gray-900 mb-1">View Profile</h3>
+              <p className="text-sm text-gray-600">See and edit your professional profile</p>
+            </a>
             <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left">
               <h3 className="font-semibold text-gray-900 mb-1">Join a Community</h3>
               <p className="text-sm text-gray-600">Find and join professional communities</p>
-            </button>
-            <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left">
-              <h3 className="font-semibold text-gray-900 mb-1">Create a Post</h3>
-              <p className="text-sm text-gray-600">Share your knowledge with the community</p>
             </button>
           </div>
         </div>

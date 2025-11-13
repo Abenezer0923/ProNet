@@ -10,4 +10,9 @@ export class ProxyController {
   async proxyToUserService(@Req() req: Request, @Res() res: Response) {
     return this.proxyService.forward(req, res, 'users');
   }
+
+  @All('auth/*')
+  async proxyToAuthService(@Req() req: Request, @Res() res: Response) {
+    return this.proxyService.forward(req, res, 'users');
+  }
 }
