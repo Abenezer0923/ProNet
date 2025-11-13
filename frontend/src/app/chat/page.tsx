@@ -21,6 +21,7 @@ interface Conversation {
 
 interface Message {
   id: string;
+  conversationId: string;
   content: string;
   senderId: string;
   sender: any;
