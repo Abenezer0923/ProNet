@@ -4,11 +4,15 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CommunitiesModule } from './communities/communities.module';
+import { PostsModule } from './posts/posts.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
 import { Connection } from './users/entities/connection.entity';
 import { Community } from './communities/entities/community.entity';
 import { CommunityMember } from './communities/entities/community-member.entity';
+import { Post } from './posts/entities/post.entity';
+import { Comment } from './posts/entities/comment.entity';
+import { PostLike } from './posts/entities/post-like.entity';
 
 @Module({
   imports: [
@@ -19,7 +23,16 @@ import { CommunityMember } from './communities/entities/community-member.entity'
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'profession_db',
-      entities: [User, UserSkill, Connection, Community, CommunityMember],
+      entities: [
+        User,
+        UserSkill,
+        Connection,
+        Community,
+        CommunityMember,
+        Post,
+        Comment,
+        PostLike,
+      ],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging
       ssl:
@@ -30,6 +43,7 @@ import { CommunityMember } from './communities/entities/community-member.entity'
     AuthModule,
     UsersModule,
     CommunitiesModule,
+    PostsModule,
   ],
   controllers: [AppController],
 })
