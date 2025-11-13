@@ -6,12 +6,10 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: [
-      'http://localhost:3100',
-      'https://pronet.vercel.app',
-      'https://*.vercel.app',
-    ],
+    origin: true, // Allow all origins in development
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   const port = process.env.PORT || 3000;
