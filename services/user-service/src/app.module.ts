@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
+import { UserSkill } from './users/entities/user-skill.entity';
 
 @Module({
   imports: [
@@ -13,12 +15,16 @@ import { User } from './users/entities/user.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'profession_db',
-      entities: [User],
+      entities: [User, UserSkill],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
 })
