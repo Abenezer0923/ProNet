@@ -131,6 +131,20 @@ export default function DashboardPage() {
               <h3 className="font-semibold text-gray-900 mb-1">Browse Communities</h3>
               <p className="text-sm text-gray-600">Find and join professional communities</p>
             </a>
+            <a
+              href="/chat"
+              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"
+            >
+              <h3 className="font-semibold text-gray-900 mb-1">Messages</h3>
+              <p className="text-sm text-gray-600">Chat with your connections in real-time</p>
+            </a>
+            <a
+              href="/connections"
+              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"
+            >
+              <h3 className="font-semibold text-gray-900 mb-1">Connections</h3>
+              <p className="text-sm text-gray-600">View your followers and following</p>
+            </a>
           </div>
         </div>
       </main>
