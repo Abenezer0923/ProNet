@@ -1,0 +1,39 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Lint Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run lint || true
+
+      - name: Lint API Gateway
+        working-directory: ./services/api-gateway
+        run: |
+          npm ci
+          npm run lint || true
+
+      - name: Lint User Service
+        working-directory: ./services/user-service
+        run: |
+          npm ci
+          npm run lint || true
