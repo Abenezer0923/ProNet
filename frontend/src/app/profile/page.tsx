@@ -22,7 +22,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/api/users/profile');
+      const response = await api.get('/users/profile');
       setProfile(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);

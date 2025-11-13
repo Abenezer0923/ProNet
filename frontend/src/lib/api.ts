@@ -26,10 +26,10 @@ export const authAPI = {
     firstName: string;
     lastName: string;
     profession?: string;
-  }) => api.post('/api/users/auth/register', data),
+  }) => api.post('/auth/register', data),
 
   login: (data: { email: string; password: string }) =>
-    api.post('/api/users/auth/login', data),
+    api.post('/auth/login', data),
 
-  getProfile: () => api.get('/api/users/auth/me'),
+  getProfile: () => api.get('/auth/me'),
 };
