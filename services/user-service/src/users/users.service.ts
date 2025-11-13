@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserSkill } from './entities/user-skill.entity';
+import { Connection } from './entities/connection.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 
@@ -13,6 +14,8 @@ export class UsersService {
     private userRepository: Repository<User>,
     @InjectRepository(UserSkill)
     private userSkillRepository: Repository<UserSkill>,
+    @InjectRepository(Connection)
+    private connectionRepository: Repository<Connection>,
   ) {}
 
   async getProfile(userId: string) {
@@ -67,5 +70,87 @@ export class UsersService {
 
   async getSkills(userId: string) {
     return await this.userSkillRepository.find({ where: { userId } });
+  }
+
+  // Connections
+  async followUser(followerId: string, followingId: string) {
+    if (followerId === followingId) {
+      throw new Error('Cannot follow yourself');
+    }
+
+    const existingConnection = await this.connectionRepository.findOne({
+      where: { followerId, followingId },
+    });
+
+    if (existingConnection) {
+      throw new Error('Already following this user');
+    }
+
+    const connection = this.connectionRepository.create({
+      followerId,
+      followingId,
+    });
+
+    return await this.connectionRepository.save(connection);
+  }
+
+  async unfollowUser(followerId: string, followingId: string) {
+    const connection = await this.connectionRepository.findOne({
+      where: { followerId, followingId },
+    });
+
+    if (!connection) {
+      throw new NotFoundException('Connection not found');
+    }
+
+    await this.connectionRepository.remove(connection);
+    return { message: 'Unfollowed successfully' };
+  }
+
+  async getFollowers(userId: string) {
+    const connections = await this.connectionRepository.find({
+      where: { followingId: userId },
+      relations: ['follower'],
+    });
+
+    return connections.map((conn) => {
+      const { password, ...user } = conn.follower;
+      return user;
+    });
+  }
+
+  async getFollowing(userId: string) {
+    const connections = await this.connectionRepository.find({
+      where: { followerId: userId },
+      relations: ['following'],
+    });
+
+    return connections.map((conn) => {
+      const { password, ...user } = conn.following;
+      return user;
+    });
+  }
+
+  async getConnectionStats(userId: string) {
+    const followersCount = await this.connectionRepository.count({
+      where: { followingId: userId },
+    });
+
+    const followingCount = await this.connectionRepository.count({
+      where: { followerId: userId },
+    });
+
+    return {
+      followers: followersCount,
+      following: followingCount,
+    };
+  }
+
+  async isFollowing(followerId: string, followingId: string) {
+    const connection = await this.connectionRepository.findOne({
+      where: { followerId, followingId },
+    });
+
+    return !!connection;
   }
 }

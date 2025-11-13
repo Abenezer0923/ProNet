@@ -80,7 +80,10 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-500 mt-1">Joined communities</p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm">
+          <a
+            href="/profile"
+            className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-gray-600 font-medium">Connections</h3>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -89,9 +92,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-            <p className="text-sm text-gray-500 mt-1">Professional connections</p>
-          </div>
+            <p className="text-3xl font-bold text-gray-900">View Profile</p>
+            <p className="text-sm text-gray-500 mt-1">See your followers & following</p>
+          </a>
 
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">

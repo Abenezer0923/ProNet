@@ -11,12 +11,14 @@ export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ followers: 0, following: 0 });
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     } else if (user) {
       fetchProfile();
+      fetchStats();
     }
   }, [user, authLoading, router]);
 
@@ -28,6 +30,15 @@ export default function ProfilePage() {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/users/connections/stats');
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
     }
   };
 
@@ -90,6 +101,22 @@ export default function ProfilePage() {
                   🔗 {profile.website}
                 </a>
               )}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-6 pt-6 border-t border-gray-200 flex space-x-8">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.followers}</p>
+              <p className="text-sm text-gray-600">Followers</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats.following}</p>
+              <p className="text-sm text-gray-600">Following</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">0</p>
+              <p className="text-sm text-gray-600">Posts</p>
             </div>
           </div>
 
