@@ -13,7 +13,12 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3100'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'https://pronet-api-gateway.onrender.com',
+      'https://*.onrender.com',
+    ],
     credentials: true,
   });
 
