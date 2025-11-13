@@ -1,7 +1,6 @@
 databases:
   - name: pronet-postgres
     databaseName: profession_db
-    user: postgres
     plan: free
 
 services:
