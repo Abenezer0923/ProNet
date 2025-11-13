@@ -1,30 +1,40 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const params = useParams();
+  const userId = params.id as string;
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [stats, setStats] = useState({ followers: 0, following: 0 });
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !currentUser) {
       router.push('/login');
-    } else if (user) {
+    } else if (currentUser && userId) {
+      // If viewing own profile, redirect to /profile
+      if (userId === currentUser.id) {
+        router.push('/profile');
+        return;
+      }
       fetchProfile();
+      checkFollowing();
       fetchStats();
     }
-  }, [user, authLoading, router]);
+  }, [currentUser, authLoading, userId, router]);
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/users/profile');
+      const response = await api.get(`/users/profile/${userId}`);
       setProfile(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -33,12 +43,41 @@ export default function ProfilePage() {
     }
   };
 
+  const checkFollowing = async () => {
+    try {
+      const response = await api.get(`/users/connections/is-following/${userId}`);
+      setIsFollowing(response.data.isFollowing);
+    } catch (error) {
+      console.error('Error checking following status:', error);
+    }
+  };
+
   const fetchStats = async () => {
     try {
-      const response = await api.get('/users/connections/stats');
+      const response = await api.get(`/users/connections/stats`);
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const handleFollow = async () => {
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await api.delete(`/users/unfollow/${userId}`);
+        setIsFollowing(false);
+        setStats({ ...stats, following: stats.following - 1 });
+      } else {
+        await api.post(`/users/follow/${userId}`);
+        setIsFollowing(true);
+        setStats({ ...stats, following: stats.following + 1 });
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      alert('Failed to update follow status');
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -62,12 +101,25 @@ export default function ProfilePage() {
               <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
               <span className="text-xl font-bold text-gray-900">ProNet</span>
             </Link>
-            <Link
-              href="/profile/edit"
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-            >
-              Edit Profile
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/profile"
+                className="text-gray-700 hover:text-gray-900"
+              >
+                My Profile
+              </Link>
+              <button
+                onClick={handleFollow}
+                disabled={followLoading}
+                className={`px-6 py-2 rounded-lg font-semibold transition disabled:opacity-50 ${
+                  isFollowing
+                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    : 'bg-primary-600 text-white hover:bg-primary-700'
+                }`}
+              >
+                {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -106,14 +158,14 @@ export default function ProfilePage() {
 
           {/* Stats */}
           <div className="mt-6 pt-6 border-t border-gray-200 flex space-x-8">
-            <Link href="/connections" className="hover:opacity-75 transition">
+            <div>
               <p className="text-2xl font-bold text-gray-900">{stats.followers}</p>
               <p className="text-sm text-gray-600">Followers</p>
-            </Link>
-            <Link href="/connections" className="hover:opacity-75 transition">
+            </div>
+            <div>
               <p className="text-2xl font-bold text-gray-900">{stats.following}</p>
               <p className="text-sm text-gray-600">Following</p>
-            </Link>
+            </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">0</p>
               <p className="text-sm text-gray-600">Posts</p>
