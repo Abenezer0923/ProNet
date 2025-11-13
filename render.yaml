@@ -1,0 +1,55 @@
+services:
+  # PostgreSQL Database (FREE)
+  - type: pserv
+    name: pronet-postgres
+    plan: free
+    databaseName: profession_db
+    databaseUser: postgres
+
+  # User Service
+  - type: web
+    name: pronet-user-service
+    runtime: node
+    plan: free
+    buildCommand: cd services/user-service && npm install --legacy-peer-deps && npm run build
+    startCommand: cd services/user-service && npm run start
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: pronet-postgres
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: pronet-postgres
+          property: port
+      - key: DATABASE_USER
+        fromDatabase:
+          name: pronet-postgres
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: pronet-postgres
+          property: password
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: pronet-postgres
+          property: database
+      - key: JWT_SECRET
+        generateValue: true
+        
+  # API Gateway
+  - type: web
+    name: pronet-api-gateway
+    runtime: node
+    plan: free
+    buildCommand: cd services/api-gateway && npm install --legacy-peer-deps && npm run build
+    startCommand: cd services/api-gateway && npm run start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: USER_SERVICE_URL
+        value: https://pronet-user-service.onrender.com
+      - key: JWT_SECRET
+        generateValue: true
