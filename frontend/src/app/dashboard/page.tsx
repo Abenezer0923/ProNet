@@ -67,7 +67,10 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm">
+          <a
+            href="/communities"
+            className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-gray-600 font-medium">Communities</h3>
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -76,9 +79,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-            <p className="text-sm text-gray-500 mt-1">Joined communities</p>
-          </div>
+            <p className="text-3xl font-bold text-gray-900">Browse</p>
+            <p className="text-sm text-gray-500 mt-1">Discover communities</p>
+          </a>
 
           <a
             href="/profile"
@@ -121,10 +124,13 @@ export default function DashboardPage() {
               <h3 className="font-semibold text-gray-900 mb-1">View Profile</h3>
               <p className="text-sm text-gray-600">See and edit your professional profile</p>
             </a>
-            <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left">
-              <h3 className="font-semibold text-gray-900 mb-1">Join a Community</h3>
+            <a
+              href="/communities"
+              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"
+            >
+              <h3 className="font-semibold text-gray-900 mb-1">Browse Communities</h3>
               <p className="text-sm text-gray-600">Find and join professional communities</p>
-            </button>
+            </a>
           </div>
         </div>
       </main>
