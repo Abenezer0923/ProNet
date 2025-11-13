@@ -3,9 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CommunitiesModule } from './communities/communities.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
 import { Connection } from './users/entities/connection.entity';
+import { Community } from './communities/entities/community.entity';
+import { CommunityMember } from './communities/entities/community-member.entity';
 
 @Module({
   imports: [
@@ -16,7 +19,7 @@ import { Connection } from './users/entities/connection.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'profession_db',
-      entities: [User, UserSkill, Connection],
+      entities: [User, UserSkill, Connection, Community, CommunityMember],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging
       ssl:
@@ -26,6 +29,7 @@ import { Connection } from './users/entities/connection.entity';
     }),
     AuthModule,
     UsersModule,
+    CommunitiesModule,
   ],
   controllers: [AppController],
 })
