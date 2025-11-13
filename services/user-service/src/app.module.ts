@@ -15,6 +15,8 @@ import { User } from './users/entities/user.entity';
       database: process.env.DATABASE_NAME || 'profession_db',
       entities: [User],
       synchronize: true, // Set to false in production
+      logging: true, // Enable SQL logging
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     AuthModule,
   ],

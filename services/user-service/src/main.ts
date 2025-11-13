@@ -26,6 +26,8 @@ async function bootstrap() {
   await app.listen(port);
   
   console.log(`🚀 User Service running on http://localhost:${port}`);
+  console.log(`📊 Database: ${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}`);
+  console.log(`📦 Database Name: ${process.env.DATABASE_NAME}`);
 }
 
 bootstrap();
