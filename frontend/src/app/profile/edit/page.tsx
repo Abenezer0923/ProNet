@@ -32,7 +32,7 @@ export default function EditProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/api/users/profile');
+      const response = await api.get('/users/profile');
       const profile = response.data;
       setFormData({
         firstName: profile.firstName || '',
@@ -57,7 +57,7 @@ export default function EditProfilePage() {
     setLoading(true);
 
     try {
-      await api.put('/api/users/profile', formData);
+      await api.put('/users/profile', formData);
       router.push('/profile');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -71,7 +71,7 @@ export default function EditProfilePage() {
     if (!newSkill.trim()) return;
 
     try {
-      const response = await api.post('/api/users/skills', {
+      const response = await api.post('/users/skills', {
         skillName: newSkill,
         proficiencyLevel,
       });
@@ -85,7 +85,7 @@ export default function EditProfilePage() {
 
   const handleRemoveSkill = async (skillId: string) => {
     try {
-      await api.delete(`/api/users/skills/${skillId}`);
+      await api.delete(`/users/skills/${skillId}`);
       setSkills(skills.filter((s) => s.id !== skillId));
     } catch (error) {
       console.error('Error removing skill:', error);
