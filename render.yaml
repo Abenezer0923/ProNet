@@ -1,18 +1,18 @@
-services:
-  # PostgreSQL Database (FREE)
-  - type: pserv
-    name: pronet-postgres
-    plan: free
+databases:
+  - name: pronet-postgres
     databaseName: profession_db
-    databaseUser: postgres
+    user: postgres
+    plan: free
 
+services:
   # User Service
   - type: web
     name: pronet-user-service
-    runtime: node
+    env: node
     plan: free
-    buildCommand: cd services/user-service && npm install --legacy-peer-deps && npm run build
-    startCommand: cd services/user-service && npm run start
+    rootDir: services/user-service
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm run start
     envVars:
       - key: PORT
         value: 3001
@@ -42,10 +42,11 @@ services:
   # API Gateway
   - type: web
     name: pronet-api-gateway
-    runtime: node
+    env: node
     plan: free
-    buildCommand: cd services/api-gateway && npm install --legacy-peer-deps && npm run build
-    startCommand: cd services/api-gateway && npm run start
+    rootDir: services/api-gateway
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm run start
     envVars:
       - key: PORT
         value: 3000
