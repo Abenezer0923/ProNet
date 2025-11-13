@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
+import { Connection } from './users/entities/connection.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { UserSkill } from './users/entities/user-skill.entity';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'profession_db',
-      entities: [User, UserSkill],
+      entities: [User, UserSkill, Connection],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging
       ssl:

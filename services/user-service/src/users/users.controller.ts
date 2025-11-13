@@ -48,4 +48,36 @@ export class UsersController {
   async getSkills(@Request() req) {
     return this.usersService.getSkills(req.user.sub);
   }
+
+  // Connections
+  @Post('follow/:userId')
+  async followUser(@Request() req, @Param('userId') userId: string) {
+    return this.usersService.followUser(req.user.sub, userId);
+  }
+
+  @Delete('unfollow/:userId')
+  async unfollowUser(@Request() req, @Param('userId') userId: string) {
+    return this.usersService.unfollowUser(req.user.sub, userId);
+  }
+
+  @Get('followers')
+  async getFollowers(@Request() req) {
+    return this.usersService.getFollowers(req.user.sub);
+  }
+
+  @Get('following')
+  async getFollowing(@Request() req) {
+    return this.usersService.getFollowing(req.user.sub);
+  }
+
+  @Get('connections/stats')
+  async getConnectionStats(@Request() req) {
+    return this.usersService.getConnectionStats(req.user.sub);
+  }
+
+  @Get('connections/is-following/:userId')
+  async isFollowing(@Request() req, @Param('userId') userId: string) {
+    const following = await this.usersService.isFollowing(req.user.sub, userId);
+    return { isFollowing: following };
+  }
 }
