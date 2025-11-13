@@ -16,35 +16,44 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password, firstName, lastName, profession } = registerDto;
+    try {
+      const { email, password, firstName, lastName, profession } = registerDto;
 
-    // Check if user exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
+      console.log('Registration attempt for:', email);
+
+      // Check if user exists
+      const existingUser = await this.userRepository.findOne({ where: { email } });
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const user = this.userRepository.create({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        profession,
+      });
+
+      console.log('Saving user to database...');
+      await this.userRepository.save(user);
+      console.log('User saved successfully');
+
+      // Generate token
+      const token = this.generateToken(user);
+
+      return {
+        user: this.sanitizeUser(user),
+        token,
+      };
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = this.userRepository.create({
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      profession,
-    });
-
-    await this.userRepository.save(user);
-
-    // Generate token
-    const token = this.generateToken(user);
-
-    return {
-      user: this.sanitizeUser(user),
-      token,
-    };
   }
 
   async login(loginDto: LoginDto) {
