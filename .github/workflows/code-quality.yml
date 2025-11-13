@@ -23,17 +23,17 @@ jobs:
       - name: Lint Frontend
         working-directory: ./frontend
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run lint || true
 
       - name: Lint API Gateway
         working-directory: ./services/api-gateway
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run lint || true
 
       - name: Lint User Service
         working-directory: ./services/user-service
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run lint || true
