@@ -80,4 +80,9 @@ export class UsersController {
     const following = await this.usersService.isFollowing(req.user.sub, userId);
     return { isFollowing: following };
   }
+
+  @Get('connections/stats/:userId')
+  async getUserConnectionStats(@Param('userId') userId: string) {
+    return this.usersService.getConnectionStats(userId);
+  }
 }
