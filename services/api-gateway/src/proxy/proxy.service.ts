@@ -11,8 +11,11 @@ export class ProxyService {
   async forward(req: Request, res: Response, service: string) {
     try {
       const serviceUrl = this.serviceUrls[service];
-      const path = req.url.replace(`/api/${service}`, '');
+      // Remove /api prefix and keep the rest of the path
+      const path = req.url.replace('/api', '');
       const url = `${serviceUrl}${path}`;
+
+      console.log(`Forwarding ${req.method} ${req.url} to ${url}`);
 
       const response = await axios({
         method: req.method,
@@ -26,6 +29,7 @@ export class ProxyService {
 
       res.status(response.status).json(response.data);
     } catch (error) {
+      console.error(`Proxy error for ${req.url}:`, error.message);
       if (error.response) {
         res.status(error.response.status).json(error.response.data);
       } else {
