@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { CommunitiesModule } from './communities/communities.module';
 import { PostsModule } from './posts/posts.module';
 import { ChatModule } from './chat/chat.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
 import { Connection } from './users/entities/connection.entity';
@@ -16,6 +17,7 @@ import { Comment } from './posts/entities/comment.entity';
 import { PostLike } from './posts/entities/post-like.entity';
 import { Conversation } from './chat/entities/conversation.entity';
 import { Message } from './chat/entities/message.entity';
+import { Notification } from './notifications/entities/notification.entity';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { Message } from './chat/entities/message.entity';
         PostLike,
         Conversation,
         Message,
+        Notification,
       ],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging
@@ -50,6 +53,7 @@ import { Message } from './chat/entities/message.entity';
     CommunitiesModule,
     PostsModule,
     ChatModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
 })

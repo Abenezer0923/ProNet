@@ -6,6 +6,7 @@ import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { Message } from './entities/message.entity';
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: '7d' },
     }),
+    NotificationsModule,
   ],
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],
