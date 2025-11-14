@@ -8,6 +8,9 @@ import { api } from '@/lib/api';
 
 type SearchType = 'all' | 'users' | 'communities' | 'posts';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function SearchPage() {
   const { user } = useAuth();
   const router = useRouter();
