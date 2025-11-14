@@ -145,6 +145,21 @@ export default function CommunityDetailPage() {
         </div>
       </header>
 
+      {/* Community Cover Image */}
+      <div className="bg-white">
+        {community.coverImage ? (
+          <div className="max-w-7xl mx-auto">
+            <img
+              src={community.coverImage}
+              alt={community.name}
+              className="w-full h-64 object-cover"
+            />
+          </div>
+        ) : (
+          <div className="max-w-7xl mx-auto h-64 bg-gradient-to-r from-primary-500 to-primary-600"></div>
+        )}
+      </div>
+
       {/* Community Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
