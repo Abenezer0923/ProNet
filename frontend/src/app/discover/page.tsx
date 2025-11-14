@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
-// Disable static generation for this page
-export const dynamic = 'force-dynamic';
-
-export default function DiscoverPage() {
+function DiscoverContent() {
   const { user } = useAuth();
   const [recommendedUsers, setRecommendedUsers] = useState<any[]>([]);
   const [recommendedCommunities, setRecommendedCommunities] = useState<any[]>([]);
@@ -151,5 +148,20 @@ export default function DiscoverPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="mt-2 text-gray-600">Loading recommendations...</p>
+        </div>
+      </div>
+    }>
+      <DiscoverContent />
+    </Suspense>
   );
 }
