@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function DashboardPage() {
               <span className="text-xl font-bold text-gray-900">ProNet</span>
             </div>
             <div className="flex items-center space-x-4">
+              <NotificationBell />
               <a
                 href="/profile"
                 className="text-gray-700 hover:text-gray-900"
