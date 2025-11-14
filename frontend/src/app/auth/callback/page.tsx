@@ -1,10 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AuthCallback() {
+// Loading component
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Completing sign in...</p>
+      </div>
+    </div>
+  );
+}
+
+// Callback handler component
+function CallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -17,7 +30,8 @@ export default function AuthCallback() {
       localStorage.setItem('token', token);
       
       // Fetch user data
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      fetch(`${apiUrl}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -36,12 +50,17 @@ export default function AuthCallback() {
     }
   }, [searchParams, router, login]);
 
+  return <LoadingSpinner />;
+}
+
+// Main component with Suspense boundary
+export default function AuthCallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Completing sign in...</p>
-      </div>
-    </div>
+    <Suspense fallback={<LoadingSpinner />}>
+      <CallbackHandler />
+    </Suspense>
   );
 }
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
