@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function CreateCommunityPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function CreateCommunityPage() {
     description: '',
     category: '',
     isPrivate: false,
+    coverImage: '',
   });
 
   useEffect(() => {
@@ -156,6 +158,15 @@ export default function CreateCommunityPage() {
             <label className="ml-2 text-sm text-gray-700">
               Make this community private (invite-only)
             </label>
+          </div>
+
+          <div>
+            <ImageUpload
+              type="community"
+              label="Cover Image"
+              currentImage={formData.coverImage}
+              onUploadComplete={(url) => setFormData({ ...formData, coverImage: url })}
+            />
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
