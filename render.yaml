@@ -10,7 +10,7 @@ services:
     env: node
     plan: free
     rootDir: services/user-service
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: bash render-build.sh
     startCommand: npm run start
     envVars:
       - key: PORT
@@ -44,7 +44,7 @@ services:
     env: node
     plan: free
     rootDir: services/api-gateway
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: bash render-build.sh
     startCommand: npm run start
     envVars:
       - key: PORT
