@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function EditProfilePage() {
     bio: '',
     location: '',
     website: '',
+    profilePicture: '',
   });
   const [skills, setSkills] = useState<any[]>([]);
   const [newSkill, setNewSkill] = useState('');
@@ -41,6 +43,7 @@ export default function EditProfilePage() {
         bio: profile.bio || '',
         location: profile.location || '',
         website: profile.website || '',
+        profilePicture: profile.profilePicture || '',
       });
       setSkills(profile.skills || []);
     } catch (error) {
@@ -212,6 +215,15 @@ export default function EditProfilePage() {
                 onChange={handleChange}
                 placeholder="https://yourwebsite.com"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <ImageUpload
+                type="profile"
+                label="Profile Picture"
+                currentImage={formData.profilePicture}
+                onUploadComplete={(url) => setFormData({ ...formData, profilePicture: url })}
               />
             </div>
           </div>
