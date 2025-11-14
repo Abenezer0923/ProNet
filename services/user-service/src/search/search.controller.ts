@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SearchService } from './search.service';
 import {
   SearchQueryDto,
@@ -40,11 +40,11 @@ export class SearchController {
 
   @Get('recommendations/users')
   async getRecommendedUsers(@Request() req, @Query('limit') limit?: number) {
-    return this.searchService.getRecommendedUsers(req.user.userId, limit);
+    return this.searchService.getRecommendedUsers(req.user.sub, limit);
   }
 
   @Get('recommendations/communities')
   async getRecommendedCommunities(@Request() req, @Query('limit') limit?: number) {
-    return this.searchService.getRecommendedCommunities(req.user.userId, limit);
+    return this.searchService.getRecommendedCommunities(req.user.sub, limit);
   }
 }
