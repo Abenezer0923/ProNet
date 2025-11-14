@@ -40,6 +40,9 @@ export class User {
   @Column({ nullable: true })
   website: string;
 
+  @Column({ nullable: true })
+  profilePicture: string;
+
   @Column({ default: true })
   isActive: boolean;
 

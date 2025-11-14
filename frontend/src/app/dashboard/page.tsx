@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
+import SearchBar from '@/components/SearchBar';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -36,6 +37,9 @@ export default function DashboardPage() {
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
               <span className="text-xl font-bold text-gray-900">ProNet</span>
+            </div>
+            <div className="flex-1 max-w-2xl mx-8">
+              <SearchBar />
             </div>
             <div className="flex items-center space-x-4">
               <NotificationBell />

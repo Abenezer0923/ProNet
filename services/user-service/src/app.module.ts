@@ -7,6 +7,8 @@ import { CommunitiesModule } from './communities/communities.module';
 import { PostsModule } from './posts/posts.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { UploadModule } from './upload/upload.module';
+import { SearchModule } from './search/search.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
 import { Connection } from './users/entities/connection.entity';
@@ -54,6 +56,8 @@ import { Notification } from './notifications/entities/notification.entity';
     PostsModule,
     ChatModule,
     NotificationsModule,
+    UploadModule,
+    SearchModule,
   ],
   controllers: [AppController],
 })
