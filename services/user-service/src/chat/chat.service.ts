@@ -5,6 +5,7 @@ import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +14,7 @@ export class ChatService {
     private conversationRepository: Repository<Conversation>,
     @InjectRepository(Message)
     private messageRepository: Repository<Message>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async createOrGetConversation(
@@ -144,10 +146,26 @@ export class ChatService {
       lastMessageAt: new Date(),
     });
 
-    return this.messageRepository.findOne({
+    // Create notification for the recipient
+    const recipientId =
+      conversation.participant1Id === userId
+        ? conversation.participant2Id
+        : conversation.participant1Id;
+
+    const sender = await this.messageRepository.findOne({
       where: { id: saved.id },
       relations: ['sender'],
     });
+
+    if (sender && sender.sender) {
+      await this.notificationsService.createMessageNotification(
+        userId,
+        recipientId,
+        `${sender.sender.firstName} ${sender.sender.lastName}`,
+      );
+    }
+
+    return sender;
   }
 
   async markAsRead(messageId: string, userId: string) {

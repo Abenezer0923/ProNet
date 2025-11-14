@@ -6,6 +6,7 @@ import { Comment } from './entities/comment.entity';
 import { PostLike } from './entities/post-like.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PostsService {
@@ -16,6 +17,7 @@ export class PostsService {
     private commentRepository: Repository<Comment>,
     @InjectRepository(PostLike)
     private likeRepository: Repository<PostLike>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(userId: string, createPostDto: CreatePostDto) {
@@ -92,6 +94,16 @@ export class PostsService {
     post.likeCount += 1;
     await this.postRepository.save(post);
 
+    // Create notification for post author
+    if (post.author) {
+      await this.notificationsService.createLikeNotification(
+        userId,
+        post.authorId,
+        postId,
+        `${post.author.firstName} ${post.author.lastName}`,
+      );
+    }
+
     return like;
   }
 
@@ -135,12 +147,22 @@ export class PostsService {
       authorId: userId,
     });
 
-    await this.commentRepository.save(comment);
+    const saved = await this.commentRepository.save(comment);
 
     post.commentCount += 1;
     await this.postRepository.save(post);
 
-    return comment;
+    // Create notification for post author
+    if (post.author) {
+      await this.notificationsService.createCommentNotification(
+        userId,
+        post.authorId,
+        postId,
+        `${post.author.firstName} ${post.author.lastName}`,
+      );
+    }
+
+    return saved;
   }
 
   async getComments(postId: string) {

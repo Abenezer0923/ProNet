@@ -6,6 +6,7 @@ import { UserSkill } from './entities/user-skill.entity';
 import { Connection } from './entities/connection.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,7 @@ export class UsersService {
     private userSkillRepository: Repository<UserSkill>,
     @InjectRepository(Connection)
     private connectionRepository: Repository<Connection>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getProfile(userId: string) {
@@ -91,7 +93,19 @@ export class UsersService {
       followingId,
     });
 
-    return await this.connectionRepository.save(connection);
+    const saved = await this.connectionRepository.save(connection);
+
+    // Create notification for the user being followed
+    const follower = await this.userRepository.findOne({ where: { id: followerId } });
+    if (follower) {
+      await this.notificationsService.createFollowNotification(
+        followerId,
+        followingId,
+        `${follower.firstName} ${follower.lastName}`,
+      );
+    }
+
+    return saved;
   }
 
   async unfollowUser(followerId: string, followingId: string) {
