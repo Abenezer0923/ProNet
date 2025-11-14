@@ -7,7 +7,7 @@ services:
   # User Service
   - type: web
     name: pronet-user-service
-    runtime: node
+    env: node
     plan: free
     rootDir: services/user-service
     buildCommand: npm install --legacy-peer-deps && npm run build
@@ -41,7 +41,7 @@ services:
   # API Gateway
   - type: web
     name: pronet-api-gateway
-    runtime: node
+    env: node
     plan: free
     rootDir: services/api-gateway
     buildCommand: npm install --legacy-peer-deps && npm run build
