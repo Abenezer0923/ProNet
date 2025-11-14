@@ -93,6 +93,38 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
+  async googleLogin(googleUser: any) {
+    try {
+      const { email, firstName, lastName, picture } = googleUser;
+
+      // Check if user exists
+      let user = await this.userRepository.findOne({ where: { email } });
+
+      if (!user) {
+        // Create new user from Google profile
+        user = this.userRepository.create({
+          email,
+          firstName,
+          lastName,
+          profilePicture: picture,
+          password: '', // No password for OAuth users
+        });
+        await this.userRepository.save(user);
+      }
+
+      // Generate token
+      const token = this.generateToken(user);
+
+      return {
+        user: this.sanitizeUser(user),
+        token,
+      };
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+  }
+
   private sanitizeUser(user: User) {
     const { password, ...result } = user;
     return result;
