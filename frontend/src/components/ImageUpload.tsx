@@ -30,10 +30,10 @@ export default function ImageUpload({
       return;
     }
 
-    // Validate file size (5MB for profile/post, 10MB for community)
-    const maxSize = type === 'community' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+    // Validate file size (15MB for all types)
+    const maxSize = 15 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(`File size must be less than ${type === 'community' ? '10' : '5'}MB`);
+      alert('File size must be less than 15MB');
       return;
     }
 
@@ -131,7 +131,7 @@ export default function ImageUpload({
           </svg>
           <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
           <p className="text-sm text-gray-500">
-            PNG, JPG, GIF, WebP up to {type === 'community' ? '10' : '5'}MB
+            PNG, JPG, GIF, WebP up to 15MB
           </p>
         </div>
       )}

@@ -34,7 +34,7 @@ export class UploadController {
       throw new BadRequestException('No file uploaded');
     }
 
-    this.validateImage(file, 10);
+    this.validateImage(file, 15);
     const url = await this.uploadService.uploadCommunityImage(file);
     return { url };
   }
@@ -51,7 +51,7 @@ export class UploadController {
     return { url };
   }
 
-  private validateImage(file: Express.Multer.File, maxSizeMB: number = 5) {
+  private validateImage(file: Express.Multer.File, maxSizeMB: number = 15) {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     
     if (!allowedMimeTypes.includes(file.mimetype)) {
