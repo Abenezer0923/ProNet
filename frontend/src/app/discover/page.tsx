@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function DiscoverPage() {
   const { user } = useAuth();
   const [recommendedUsers, setRecommendedUsers] = useState<any[]>([]);
