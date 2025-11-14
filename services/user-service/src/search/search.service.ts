@@ -237,26 +237,38 @@ export class SearchService {
     };
   }
 
-  async getRecommendedUsers(userId: number, limit: number = 10) {
-    // Get users with similar skills or from same location
+  async getRecommendedUsers(userId: string, limit: number = 10) {
+    // Get current user
     const currentUser = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['skills', 'connections'],
+      relations: ['skills'],
     });
 
     if (!currentUser) {
       return [];
     }
 
-    const connectedUserIds = currentUser.connections.map((c) => c.id);
+    // Get connected user IDs from Connection table
+    const connections = await this.userRepository.query(
+      `SELECT "followingId" FROM connections WHERE "followerId" = $1
+       UNION
+       SELECT "followerId" FROM connections WHERE "followingId" = $1`,
+      [userId]
+    );
+    
+    const connectedUserIds = connections.map((c: any) => c.followingId || c.followerId);
 
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.skills', 'skills')
-      .where('user.id != :userId', { userId })
-      .andWhere('user.id NOT IN (:...connectedUserIds)', {
-        connectedUserIds: connectedUserIds.length > 0 ? connectedUserIds : [0],
+      .where('user.id != :userId', { userId });
+
+    // Exclude already connected users
+    if (connectedUserIds.length > 0) {
+      queryBuilder.andWhere('user.id NOT IN (:...connectedUserIds)', {
+        connectedUserIds,
       });
+    }
 
     // Prioritize users from same location
     if (currentUser.location) {
@@ -279,18 +291,14 @@ export class SearchService {
     return users;
   }
 
-  async getRecommendedCommunities(userId: number, limit: number = 10) {
-    // Get communities user is not a member of
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['communities'],
-    });
-
-    if (!user) {
-      return [];
-    }
-
-    const joinedCommunityIds = user.communities.map((c) => c.id);
+  async getRecommendedCommunities(userId: string, limit: number = 10) {
+    // Get joined community IDs from CommunityMember table
+    const memberships = await this.communityRepository.query(
+      `SELECT "communityId" FROM community_members WHERE "userId" = $1`,
+      [userId]
+    );
+    
+    const joinedCommunityIds = memberships.map((m: any) => m.communityId);
 
     const queryBuilder = this.communityRepository
       .createQueryBuilder('community')
