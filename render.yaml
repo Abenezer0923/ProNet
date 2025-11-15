@@ -44,9 +44,9 @@ services:
       - key: CLOUDINARY_API_SECRET
         value: 7JHtL4bTAYqwq7RaQM60Ocf43fw
       - key: GOOGLE_CLIENT_ID
-        value: 1075769500266-gee3kfr5mt1obnc06q2c21vamscfcq0t.apps.googleusercontent.com
+        value: 1075769500266-9sq71r5tvc19m2b6bfb70kpqb1949g7q.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
-        value: 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
+        value: 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
       - key: GOOGLE_CALLBACK_URL
         value: https://pronet-user-service.onrender.com/auth/google/callback
       - key: FRONTEND_URL
