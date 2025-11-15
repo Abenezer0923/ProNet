@@ -77,21 +77,19 @@ export default function ConnectionsPage() {
             <div className="flex">
               <button
                 onClick={() => setActiveTab('followers')}
-                className={`flex-1 px-6 py-4 text-center font-semibold transition ${
-                  activeTab === 'followers'
+                className={`flex-1 px-6 py-4 text-center font-semibold transition ${activeTab === 'followers'
                     ? 'text-primary-600 border-b-2 border-primary-600'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Followers ({followers.length})
               </button>
               <button
                 onClick={() => setActiveTab('following')}
-                className={`flex-1 px-6 py-4 text-center font-semibold transition ${
-                  activeTab === 'following'
+                className={`flex-1 px-6 py-4 text-center font-semibold transition ${activeTab === 'following'
                     ? 'text-primary-600 border-b-2 border-primary-600'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Following ({following.length})
               </button>
