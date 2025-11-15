@@ -7,10 +7,10 @@ services:
   # User Service
   - type: web
     name: pronet-user-service
-    env: node
+    runtime: node
     plan: free
     rootDir: services/user-service
-    buildCommand: bash render-build.sh
+    buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npm run start
     envVars:
       - key: PORT
@@ -55,10 +55,10 @@ services:
   # API Gateway
   - type: web
     name: pronet-api-gateway
-    env: node
+    runtime: node
     plan: free
     rootDir: services/api-gateway
-    buildCommand: bash render-build.sh
+    buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npm run start
     envVars:
       - key: PORT
