@@ -20,13 +20,13 @@ function LoadingSpinner() {
 function CallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { loginWithToken } = useAuth();
 
   useEffect(() => {
     const token = searchParams.get('token');
     
     if (token) {
-      // Store token and redirect to dashboard
+      // Store token first
       localStorage.setItem('token', token);
       
       // Fetch user data
@@ -36,19 +36,29 @@ function CallbackHandler() {
           'Authorization': `Bearer ${token}`
         }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+          return res.json();
+        })
         .then(user => {
-          login(user, token);
-          router.push('/dashboard');
+          // Set user in context
+          loginWithToken(user, token);
+          // Small delay to ensure state is updated before redirect
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 100);
         })
         .catch(error => {
           console.error('Error fetching user:', error);
+          localStorage.removeItem('token');
           router.push('/login?error=auth_failed');
         });
     } else {
       router.push('/login?error=no_token');
     }
-  }, [searchParams, router, login]);
+  }, [searchParams, router, loginWithToken]);
 
   return <LoadingSpinner />;
 }
