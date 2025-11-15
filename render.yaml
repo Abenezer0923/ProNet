@@ -44,13 +44,13 @@ services:
       - key: CLOUDINARY_API_SECRET
         value: 7JHtL4bTAYqwq7RaQM60Ocf43fw
       - key: GOOGLE_CLIENT_ID
-        value: 1075769500266-h4qk4amb9du8pl4tnk3beht03dak9sju.apps.googleusercontent.com
+        value: 1075769500266-gee3kfr5mt1obnc06q2c21vamscfcq0t.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
-        value: 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
+        value: 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
       - key: GOOGLE_CALLBACK_URL
-        sync: false
+        value: https://pronet-user-service.onrender.com/api/auth/google/callback
       - key: FRONTEND_URL
-        sync: false
+        value: https://pro-net-ten.vercel.app
         
   # API Gateway
   - type: web
