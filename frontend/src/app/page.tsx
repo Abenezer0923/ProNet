@@ -75,7 +75,7 @@ export default function Home() {
               <div className="space-y-4">
                 <button 
                   onClick={() => {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
                     window.location.href = `${apiUrl}/auth/google`;
                   }}
                   className="w-full md:w-auto flex items-center justify-center space-x-3 px-8 py-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition shadow-sm"
