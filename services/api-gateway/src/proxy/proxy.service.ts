@@ -11,8 +11,8 @@ export class ProxyService {
   async forward(req: Request, res: Response, service: string) {
     try {
       const serviceUrl = this.serviceUrls[service];
-      // Forward the exact path to the service
-      const url = `${serviceUrl}${req.url}`;
+      // Forward the exact path to the service with /api prefix
+      const url = `${serviceUrl}/api${req.url}`;
 
       console.log(`Forwarding ${req.method} ${req.url} to ${url}`);
 
