@@ -46,9 +46,6 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ default: false })
-  emailVerified: boolean;
-
   @OneToMany(() => UserSkill, (skill) => skill.user, { eager: true })
   skills: UserSkill[];
 
