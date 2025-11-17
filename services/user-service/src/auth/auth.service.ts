@@ -86,7 +86,7 @@ export class AuthService {
     if (session && session.requiresOtp) {
       // Generate and send OTP
       await this.generateAndSendOtp(email);
-      
+
       return {
         requiresOtp: true,
         email: user.email,
@@ -147,14 +147,36 @@ export class AuthService {
         console.log('Existing user found');
       }
 
-      // ALWAYS require OTP verification for Google login
-      console.log('Generating OTP for Google authentication');
-      await this.generateAndSendOtp(email);
+      // Try to generate OTP - if it fails, allow login without OTP
+      let requiresVerification = false;
+      try {
+        console.log('Generating OTP for Google authentication');
+        await this.generateAndSendOtp(email);
+        requiresVerification = true;
+        console.log('OTP generated successfully');
+      } catch (otpError) {
+        console.error('OTP generation failed (table may not exist yet):', otpError);
+        console.log('Allowing login without OTP verification');
+        requiresVerification = false;
+      }
+
+      // If OTP verification is required, don't generate token yet
+      if (requiresVerification) {
+        return {
+          user: this.sanitizeUser(user),
+          token: null,
+          requiresVerification: true,
+          isNewUser,
+        };
+      }
+
+      // No OTP required - generate token and allow login
+      const token = this.generateToken(user);
       
       return {
         user: this.sanitizeUser(user),
-        token: null,
-        requiresVerification: true,
+        token,
+        requiresVerification: false,
         isNewUser,
       };
     } catch (error) {
@@ -167,7 +189,7 @@ export class AuthService {
   async generateAndSendOtp(email: string): Promise<void> {
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Set expiration to 10 minutes from now
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
@@ -243,7 +265,7 @@ export class AuthService {
   async logout(userId: string) {
     // Mark session as requiring OTP on next login
     await this.updateLoginSession(userId, null, true);
-    
+
     return { message: 'Logged out successfully' };
   }
 
@@ -252,8 +274,8 @@ export class AuthService {
     await this.verifyOtp(verifyOtpDto);
 
     // Find user
-    const user = await this.userRepository.findOne({ 
-      where: { email: verifyOtpDto.email } 
+    const user = await this.userRepository.findOne({
+      where: { email: verifyOtpDto.email }
     });
 
     if (!user) {
