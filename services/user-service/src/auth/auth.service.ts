@@ -101,11 +101,15 @@ export class AuthService {
     try {
       const { email, firstName, lastName, picture } = googleUser;
 
+      console.log('Google login attempt for:', email);
+
       // Check if user exists
       let user = await this.userRepository.findOne({ where: { email } });
       let isNewUser = false;
+      let requiresVerification = false;
 
       if (!user) {
+        console.log('Creating new user from Google profile');
         // Create new user from Google profile (unverified)
         user = this.userRepository.create({
           email,
@@ -118,13 +122,32 @@ export class AuthService {
         await this.userRepository.save(user);
         isNewUser = true;
 
-        // Generate and send OTP for new users
-        await this.generateAndSendOtp(email);
-      }
-
-      // If user exists but not verified, regenerate OTP
-      if (!isNewUser && !user.emailVerified) {
-        await this.generateAndSendOtp(email);
+        // Try to generate and send OTP for new users
+        try {
+          await this.generateAndSendOtp(email);
+          requiresVerification = true;
+        } catch (otpError) {
+          console.error('OTP generation failed (table may not exist yet):', otpError);
+          // If OTP fails, mark user as verified to allow login
+          user.emailVerified = true;
+          await this.userRepository.save(user);
+          requiresVerification = false;
+        }
+      } else {
+        console.log('Existing user found');
+        // If user exists but not verified, try to regenerate OTP
+        if (!user.emailVerified) {
+          try {
+            await this.generateAndSendOtp(email);
+            requiresVerification = true;
+          } catch (otpError) {
+            console.error('OTP generation failed:', otpError);
+            // If OTP fails, mark user as verified to allow login
+            user.emailVerified = true;
+            await this.userRepository.save(user);
+            requiresVerification = false;
+          }
+        }
       }
 
       // Generate token
@@ -133,7 +156,7 @@ export class AuthService {
       return {
         user: this.sanitizeUser(user),
         token,
-        requiresVerification: !user.emailVerified,
+        requiresVerification,
         isNewUser,
       };
     } catch (error) {

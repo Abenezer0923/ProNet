@@ -26,17 +26,17 @@ function CallbackHandler() {
     const token = searchParams.get('token');
     const requiresVerification = searchParams.get('requiresVerification') === 'true';
     const email = searchParams.get('email');
-    
+
     if (token) {
       // Store token first
       localStorage.setItem('token', token);
-      
+
       // If requires verification, redirect to OTP page
       if (requiresVerification && email) {
         router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
         return;
       }
-      
+
       // Fetch user data
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
       fetch(`${apiUrl}/auth/me`, {

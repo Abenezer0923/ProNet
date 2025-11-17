@@ -30,15 +30,21 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
-    const result = await this.authService.googleLogin(req.user);
-    // Redirect to frontend with token and verification status
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const params = new URLSearchParams({
-      token: result.token,
-      requiresVerification: result.requiresVerification.toString(),
-      email: req.user.email,
-    });
-    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    try {
+      const result = await this.authService.googleLogin(req.user);
+      // Redirect to frontend with token and verification status
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const params = new URLSearchParams({
+        token: result.token,
+        requiresVerification: result.requiresVerification.toString(),
+        email: req.user.email,
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    } catch (error) {
+      console.error('Google callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
   }
 
   @Post('verify-otp')
