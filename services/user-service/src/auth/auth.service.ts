@@ -151,9 +151,10 @@ export class AuthService {
 
       // Try to generate OTP - if it fails, allow login without OTP
       let requiresVerification = false;
+      let otpCode = '';
       try {
         console.log('Generating OTP for Google authentication');
-        await this.generateAndSendOtp(email);
+        otpCode = await this.generateAndSendOtp(email);
         requiresVerification = true;
         console.log('OTP generated successfully');
       } catch (otpError) {
@@ -169,6 +170,7 @@ export class AuthService {
           token: null,
           requiresVerification: true,
           isNewUser,
+          otpCode, // Include OTP for demo purposes
         };
       }
 
@@ -188,7 +190,7 @@ export class AuthService {
     }
   }
 
-  async generateAndSendOtp(email: string): Promise<void> {
+  async generateAndSendOtp(email: string): Promise<string> {
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -219,6 +221,9 @@ export class AuthService {
       .catch((error) => {
         console.error(`⚠️  Failed to send email to ${email}:`, error.message);
       });
+
+    // Return OTP for demo purposes
+    return otp;
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ success: boolean; message: string }> {
@@ -257,7 +262,7 @@ export class AuthService {
     };
   }
 
-  async resendOtp(email: string): Promise<{ message: string }> {
+  async resendOtp(email: string): Promise<{ message: string; otpCode: string }> {
     // Check if user exists
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
@@ -265,10 +270,11 @@ export class AuthService {
     }
 
     // Generate and send new OTP
-    await this.generateAndSendOtp(email);
+    const otpCode = await this.generateAndSendOtp(email);
 
     return {
       message: 'OTP sent successfully',
+      otpCode, // Include OTP for demo purposes
     };
   }
 

@@ -34,11 +34,12 @@ export class AuthController {
       const result = await this.authService.googleLogin(req.user);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-      // If OTP verification is required, redirect to OTP page
+      // If OTP verification is required, redirect to OTP page with OTP code (for demo)
       if (result.requiresVerification) {
         const params = new URLSearchParams({
           email: req.user.email,
           type: 'login',
+          otp: result.otpCode || '', // Include OTP for demo purposes
         });
         res.redirect(`${frontendUrl}/verify-otp?${params.toString()}`);
         return;
@@ -65,7 +66,9 @@ export class AuthController {
 
   @Post('resend-otp')
   async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
-    return this.authService.resendOtp(resendOtpDto.email);
+    const result = await this.authService.resendOtp(resendOtpDto.email);
+    // For demo: include OTP in response
+    return { ...result, otpCode: result.otpCode };
   }
 
   @Post('login-with-otp')

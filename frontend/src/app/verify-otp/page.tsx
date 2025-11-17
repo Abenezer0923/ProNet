@@ -16,13 +16,19 @@ function VerifyOtpForm() {
 
   const [verificationType, setVerificationType] = useState<'register' | 'login'>('register');
 
+  const [demoOtp, setDemoOtp] = useState('');
+
   useEffect(() => {
     const emailParam = searchParams.get('email');
     const typeParam = searchParams.get('type') as 'register' | 'login' | null;
+    const otpParam = searchParams.get('otp');
     
     if (emailParam) {
       setEmail(emailParam);
       setVerificationType(typeParam || 'register');
+      if (otpParam) {
+        setDemoOtp(otpParam);
+      }
     } else {
       router.push('/login');
     }
@@ -139,6 +145,10 @@ function VerifyOtpForm() {
 
       setSuccess('OTP sent successfully! Check your email.');
       setOtp(['', '', '', '', '', '']);
+      // For demo: display OTP if returned
+      if (data.otpCode) {
+        setDemoOtp(data.otpCode);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP');
     } finally {
@@ -165,6 +175,12 @@ function VerifyOtpForm() {
             <p className="text-sm text-gray-500 mt-2">
               For security, we need to verify it's you
             </p>
+          )}
+          {demoOtp && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 font-semibold">Demo Mode - Your OTP:</p>
+              <p className="text-2xl font-bold text-yellow-900 mt-1">{demoOtp}</p>
+            </div>
           )}
         </div>
 
