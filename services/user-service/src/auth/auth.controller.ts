@@ -32,11 +32,22 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     try {
       const result = await this.authService.googleLogin(req.user);
-      // Redirect to frontend with token and verification status
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      
+      // If OTP verification is required, redirect to OTP page
+      if (result.requiresVerification) {
+        const params = new URLSearchParams({
+          email: req.user.email,
+          type: 'login',
+        });
+        res.redirect(`${frontendUrl}/verify-otp?${params.toString()}`);
+        return;
+      }
+      
+      // Normal flow - redirect to callback with token
       const params = new URLSearchParams({
         token: result.token,
-        requiresVerification: result.requiresVerification.toString(),
+        requiresVerification: 'false',
         email: req.user.email,
       });
       res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);

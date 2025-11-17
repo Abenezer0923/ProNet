@@ -145,7 +145,28 @@ export class AuthService {
         console.log('New user created successfully');
       } else {
         console.log('Existing user found');
+        
+        // Check if user needs OTP verification (logged out previously)
+        const session = await this.loginSessionRepository.findOne({
+          where: { userId: user.id },
+        });
+
+        if (session && session.requiresOtp) {
+          console.log('User requires OTP verification');
+          // Generate and send OTP
+          await this.generateAndSendOtp(email);
+          
+          return {
+            user: this.sanitizeUser(user),
+            token: null,
+            requiresVerification: true,
+            isNewUser: false,
+          };
+        }
       }
+
+      // Create or update session - no OTP required
+      await this.updateLoginSession(user.id, email, false);
 
       // Generate token
       const token = this.generateToken(user);
@@ -153,7 +174,7 @@ export class AuthService {
       return {
         user: this.sanitizeUser(user),
         token,
-        requiresVerification: false, // Disable OTP for now
+        requiresVerification: false,
         isNewUser,
       };
     } catch (error) {
