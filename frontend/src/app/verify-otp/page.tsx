@@ -14,10 +14,15 @@ function VerifyOtpForm() {
   const [resending, setResending] = useState(false);
   const [success, setSuccess] = useState('');
 
+  const [verificationType, setVerificationType] = useState<'register' | 'login'>('register');
+
   useEffect(() => {
     const emailParam = searchParams.get('email');
+    const typeParam = searchParams.get('type') as 'register' | 'login' | null;
+    
     if (emailParam) {
       setEmail(emailParam);
+      setVerificationType(typeParam || 'register');
     } else {
       router.push('/login');
     }
@@ -72,7 +77,13 @@ function VerifyOtpForm() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiUrl}/auth/verify-otp`, {
+      
+      // Use different endpoint based on verification type
+      const endpoint = verificationType === 'login' 
+        ? `${apiUrl}/auth/login-with-otp`
+        : `${apiUrl}/auth/verify-otp`;
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +97,12 @@ function VerifyOtpForm() {
         throw new Error(data.message || 'Verification failed');
       }
 
-      setSuccess('Email verified successfully! Redirecting...');
+      // For login, store token and redirect
+      if (verificationType === 'login' && data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      setSuccess('Verification successful! Redirecting...');
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
@@ -135,11 +151,18 @@ function VerifyOtpForm() {
             <div className="w-10 h-10 bg-primary-600 rounded-lg"></div>
             <span className="text-2xl font-bold text-gray-900">ProNet</span>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {verificationType === 'login' ? 'Verify Your Identity' : 'Verify Your Email'}
+          </h1>
           <p className="text-gray-600">
             We've sent a 6-digit code to<br />
             <span className="font-semibold">{email}</span>
           </p>
+          {verificationType === 'login' && (
+            <p className="text-sm text-gray-500 mt-2">
+              For security, we need to verify it's you
+            </p>
+          )}
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-8">

@@ -167,4 +167,24 @@ export class UsersService {
 
     return !!connection;
   }
+
+  async deleteAccount(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Delete all user's connections (as follower and following)
+    await this.connectionRepository.delete({ followerId: userId });
+    await this.connectionRepository.delete({ followingId: userId });
+
+    // Delete all user's skills
+    await this.userSkillRepository.delete({ userId });
+
+    // Delete the user
+    await this.userRepository.remove(user);
+
+    return { message: 'Account deleted successfully' };
+  }
 }

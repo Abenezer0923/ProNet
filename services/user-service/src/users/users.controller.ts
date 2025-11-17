@@ -85,4 +85,9 @@ export class UsersController {
   async getUserConnectionStats(@Param('userId') userId: string) {
     return this.usersService.getConnectionStats(userId);
   }
+
+  @Delete('account')
+  async deleteAccount(@Request() req) {
+    return this.usersService.deleteAccount(req.user.sub);
+  }
 }

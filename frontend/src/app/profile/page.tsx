@@ -129,7 +129,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Skills */}
-        <div className="bg-white rounded-xl shadow-sm p-8">
+        <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Skills</h2>
           {profile.skills && profile.skills.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -151,7 +151,41 @@ export default function ProfilePage() {
             <p className="text-gray-500">No skills added yet</p>
           )}
         </div>
+
+        {/* Danger Zone */}
+        <div className="bg-white rounded-xl shadow-sm p-8 border-2 border-red-200">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
+          <p className="text-gray-600 mb-4">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <button
+            onClick={handleDeleteAccount}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold"
+          >
+            Delete Account
+          </button>
+        </div>
       </main>
     </div>
   );
+
+  async function handleDeleteAccount() {
+    if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    if (!confirm('This will permanently delete all your data, including posts, connections, and messages. Continue?')) {
+      return;
+    }
+
+    try {
+      await api.delete('/users/account');
+      alert('Your account has been deleted successfully.');
+      // Clear local storage and redirect to home
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to delete account');
+    }
+  }
 }

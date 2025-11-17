@@ -32,4 +32,15 @@ export const authAPI = {
     api.post('/auth/login', data),
 
   getProfile: () => api.get('/auth/me'),
+
+  logout: () => api.post('/auth/logout'),
+
+  verifyOtp: (data: { email: string; otp: string }) =>
+    api.post('/auth/verify-otp', data),
+
+  loginWithOtp: (data: { email: string; otp: string }) =>
+    api.post('/auth/login-with-otp', data),
+
+  resendOtp: (data: { email: string }) =>
+    api.post('/auth/resend-otp', data),
 };

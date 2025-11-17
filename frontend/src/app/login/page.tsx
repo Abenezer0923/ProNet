@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { authAPI } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { loginWithToken } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,7 +20,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      const response = await authAPI.login({ email, password });
+      
+      // Check if OTP is required
+      if (response.data.requiresOtp) {
+        // Redirect to OTP verification page
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=login`);
+        return;
+      }
+
+      // Normal login flow
+      const { user, token } = response.data;
+      localStorage.setItem('token', token);
+      loginWithToken(user, token);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');

@@ -57,6 +57,17 @@ export class AuthController {
     return this.authService.resendOtp(resendOtpDto.email);
   }
 
+  @Post('login-with-otp')
+  async loginWithOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.loginWithOtp(verifyOtpDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Request() req) {
+    return this.authService.logout(req.user.sub);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {

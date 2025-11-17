@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Otp } from './entities/otp.entity';
+import { LoginSession } from './entities/login-session.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -16,6 +17,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(Otp)
     private otpRepository: Repository<Otp>,
+    @InjectRepository(LoginSession)
+    private loginSessionRepository: Repository<LoginSession>,
     private jwtService: JwtService,
   ) { }
 
@@ -75,12 +78,32 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if user needs OTP verification (logged out previously)
+    const session = await this.loginSessionRepository.findOne({
+      where: { userId: user.id },
+    });
+
+    if (session && session.requiresOtp) {
+      // Generate and send OTP
+      await this.generateAndSendOtp(email);
+      
+      return {
+        requiresOtp: true,
+        email: user.email,
+        message: 'OTP sent to your email',
+      };
+    }
+
+    // Create or update session
+    await this.updateLoginSession(user.id, email, false);
+
     // Generate token
     const token = this.generateToken(user);
 
     return {
       user: this.sanitizeUser(user),
       token,
+      requiresOtp: false,
     };
   }
 
@@ -214,6 +237,59 @@ export class AuthService {
     return {
       message: 'OTP sent successfully',
     };
+  }
+
+  async logout(userId: string) {
+    // Mark session as requiring OTP on next login
+    await this.updateLoginSession(userId, null, true);
+    
+    return { message: 'Logged out successfully' };
+  }
+
+  async loginWithOtp(verifyOtpDto: VerifyOtpDto) {
+    // Verify OTP first
+    await this.verifyOtp(verifyOtpDto);
+
+    // Find user
+    const user = await this.userRepository.findOne({ 
+      where: { email: verifyOtpDto.email } 
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Update session - no longer requires OTP
+    await this.updateLoginSession(user.id, user.email, false);
+
+    // Generate token
+    const token = this.generateToken(user);
+
+    return {
+      user: this.sanitizeUser(user),
+      token,
+    };
+  }
+
+  private async updateLoginSession(userId: string, email: string | null, requiresOtp: boolean) {
+    let session = await this.loginSessionRepository.findOne({
+      where: { userId },
+    });
+
+    if (session) {
+      session.requiresOtp = requiresOtp;
+      session.lastLoginAt = new Date();
+      if (email) session.email = email;
+    } else {
+      session = this.loginSessionRepository.create({
+        userId,
+        email: email || '',
+        requiresOtp,
+        lastLoginAt: new Date(),
+      });
+    }
+
+    await this.loginSessionRepository.save(session);
   }
 
   private sanitizeUser(user: User) {
