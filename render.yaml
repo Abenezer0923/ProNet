@@ -51,6 +51,10 @@ services:
         value: https://pronet-user-service.onrender.com/auth/google/callback
       - key: FRONTEND_URL
         value: https://pro-net-ten.vercel.app
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
         
   # API Gateway
   - type: web

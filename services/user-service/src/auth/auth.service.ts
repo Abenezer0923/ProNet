@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Otp } from './entities/otp.entity';
 import { LoginSession } from './entities/login-session.entity';
+import { EmailService } from './email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -20,6 +21,7 @@ export class AuthService {
     @InjectRepository(LoginSession)
     private loginSessionRepository: Repository<LoginSession>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) { }
 
   async register(registerDto: RegisterDto) {
@@ -205,10 +207,15 @@ export class AuthService {
     });
     await this.otpRepository.save(otpEntity);
 
-    // TODO: Send OTP via email service
-    // For now, log it (in production, use a proper email service)
-    console.log(`OTP for ${email}: ${otp}`);
-    console.log(`OTP expires at: ${expiresAt}`);
+    // Send OTP via email
+    try {
+      await this.emailService.sendOtpEmail(email, otp);
+      console.log(`OTP email sent successfully to ${email}`);
+    } catch (error) {
+      // Log to console as fallback
+      console.log(`Failed to send email, OTP for ${email}: ${otp}`);
+      console.log(`OTP expires at: ${expiresAt}`);
+    }
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ success: boolean; message: string }> {
