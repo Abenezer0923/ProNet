@@ -89,7 +89,7 @@ export class EmailService {
       console.log(`📬 Message ID: ${info.messageId}`);
     } catch (error) {
       console.error('❌ Error sending OTP email:', error);
-      
+
       // Provide helpful error messages
       if (error.code === 'EAUTH') {
         console.error('🔐 Authentication failed. Please check:');
@@ -98,7 +98,7 @@ export class EmailService {
         console.error('   3. 2-Step Verification is enabled in your Google Account');
         console.error('   4. Generate App Password at: https://myaccount.google.com/apppasswords');
       }
-      
+
       throw error;
     }
   }
