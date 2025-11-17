@@ -207,17 +207,18 @@ export class AuthService {
     });
     await this.otpRepository.save(otpEntity);
 
-    // Send OTP via email
-    try {
-      await this.emailService.sendOtpEmail(email, otp);
-      console.log(`✅ OTP email sent successfully to ${email}`);
-    } catch (error) {
-      // Log to console as fallback
-      console.error(`⚠️  Failed to send email to ${email}:`, error.message);
-      console.log(`📧 OTP for ${email}: ${otp}`);
-      console.log(`⏰ OTP expires at: ${expiresAt}`);
-      // Don't throw error - allow login to continue with console OTP
-    }
+    // Log OTP immediately for console fallback
+    console.log(`📧 OTP for ${email}: ${otp}`);
+    console.log(`⏰ OTP expires at: ${expiresAt}`);
+
+    // Send OTP via email asynchronously (don't wait for it)
+    this.emailService.sendOtpEmail(email, otp)
+      .then(() => {
+        console.log(`✅ OTP email sent successfully to ${email}`);
+      })
+      .catch((error) => {
+        console.error(`⚠️  Failed to send email to ${email}:`, error.message);
+      });
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ success: boolean; message: string }> {
