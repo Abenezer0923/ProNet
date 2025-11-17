@@ -20,6 +20,8 @@ import { PostLike } from './posts/entities/post-like.entity';
 import { Conversation } from './chat/entities/conversation.entity';
 import { Message } from './chat/entities/message.entity';
 import { Notification } from './notifications/entities/notification.entity';
+import { Otp } from './auth/entities/otp.entity';
+import { LoginSession } from './auth/entities/login-session.entity';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { Notification } from './notifications/entities/notification.entity';
         Conversation,
         Message,
         Notification,
+        Otp,
+        LoginSession,
       ],
       synchronize: true, // Set to false in production
       logging: true, // Enable SQL logging

@@ -172,7 +172,7 @@ export class AuthService {
 
       // No OTP required - generate token and allow login
       const token = this.generateToken(user);
-      
+
       return {
         user: this.sanitizeUser(user),
         token,
