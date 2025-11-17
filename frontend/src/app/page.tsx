@@ -65,10 +65,10 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-6 leading-tight">
-                Welcome to your professional community
+                Build connections that matter for your career
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                Connect with professionals in your field, share knowledge, and accelerate your career growth.
+                Join a thriving network of professionals, collaborate on meaningful projects, and unlock new opportunities together.
               </p>
               
               {/* Google Sign Up Button */}
@@ -125,10 +125,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4">
-              Explore collaborative articles
+              Discover what makes ProNet different
             </h2>
             <p className="text-xl text-gray-600">
-              We're unlocking community knowledge in a new way. Experts add insights directly into each article.
+              A platform designed to empower professionals with the tools and connections they need to succeed.
             </p>
           </div>
 
@@ -271,10 +271,10 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-light text-white mb-6">
-            Ready to take the next step in your career?
+            Your next career breakthrough starts here
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of professionals already growing their network on ProNet
+            Be part of a dynamic community where professionals connect, collaborate, and grow together
           </p>
           <a href="/register" className="inline-block px-10 py-4 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-100 transition text-lg">
             Join ProNet today
