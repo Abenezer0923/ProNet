@@ -192,12 +192,6 @@ export class AuthService {
     otpEntity.verified = true;
     await this.otpRepository.save(otpEntity);
 
-    // Mark user as verified
-    await this.userRepository.update(
-      { email },
-      { emailVerified: true },
-    );
-
     // Delete the OTP after successful verification
     await this.otpRepository.delete({ id: otpEntity.id });
 
@@ -212,10 +206,6 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new BadRequestException('User not found');
-    }
-
-    if (user.emailVerified) {
-      throw new BadRequestException('Email already verified');
     }
 
     // Generate and send new OTP
