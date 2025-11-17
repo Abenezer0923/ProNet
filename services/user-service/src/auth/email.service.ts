@@ -6,6 +6,13 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.warn('⚠️  Email credentials not configured. OTP will be logged to console only.');
+      this.transporter = null;
+      return;
+    }
+
     // Create transporter with Gmail
     this.transporter = nodemailer.createTransporter({
       service: 'gmail',
@@ -14,9 +21,16 @@ export class EmailService {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
+
+    console.log(`📧 Email service initialized with: ${process.env.EMAIL_USER}`);
   }
 
   async sendOtpEmail(email: string, otp: string): Promise<void> {
+    // If transporter is not configured, throw error
+    if (!this.transporter) {
+      throw new Error('Email service not configured. Please set EMAIL_USER and EMAIL_PASSWORD environment variables.');
+    }
+
     try {
       const mailOptions = {
         from: `"ProNet" <${process.env.EMAIL_USER}>`,
@@ -70,11 +84,22 @@ export class EmailService {
         `,
       };
 
-      await this.transporter.sendMail(mailOptions);
-      console.log(`OTP email sent successfully to ${email}`);
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ OTP email sent successfully to ${email}`);
+      console.log(`📬 Message ID: ${info.messageId}`);
     } catch (error) {
-      console.error('Error sending OTP email:', error);
-      throw new Error('Failed to send OTP email');
+      console.error('❌ Error sending OTP email:', error);
+      
+      // Provide helpful error messages
+      if (error.code === 'EAUTH') {
+        console.error('🔐 Authentication failed. Please check:');
+        console.error('   1. EMAIL_USER is correct');
+        console.error('   2. EMAIL_PASSWORD is a Gmail App Password (not your regular password)');
+        console.error('   3. 2-Step Verification is enabled in your Google Account');
+        console.error('   4. Generate App Password at: https://myaccount.google.com/apppasswords');
+      }
+      
+      throw error;
     }
   }
 }
