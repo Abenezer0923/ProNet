@@ -145,36 +145,16 @@ export class AuthService {
         console.log('New user created successfully');
       } else {
         console.log('Existing user found');
-        
-        // Check if user needs OTP verification (logged out previously)
-        const session = await this.loginSessionRepository.findOne({
-          where: { userId: user.id },
-        });
-
-        if (session && session.requiresOtp) {
-          console.log('User requires OTP verification');
-          // Generate and send OTP
-          await this.generateAndSendOtp(email);
-          
-          return {
-            user: this.sanitizeUser(user),
-            token: null,
-            requiresVerification: true,
-            isNewUser: false,
-          };
-        }
       }
 
-      // Create or update session - no OTP required
-      await this.updateLoginSession(user.id, email, false);
-
-      // Generate token
-      const token = this.generateToken(user);
-
+      // ALWAYS require OTP verification for Google login
+      console.log('Generating OTP for Google authentication');
+      await this.generateAndSendOtp(email);
+      
       return {
         user: this.sanitizeUser(user),
-        token,
-        requiresVerification: false,
+        token: null,
+        requiresVerification: true,
         isNewUser,
       };
     } catch (error) {
@@ -280,7 +260,7 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Update session - no longer requires OTP
+    // Create or update session - mark as not requiring OTP (until next logout)
     await this.updateLoginSession(user.id, user.email, false);
 
     // Generate token

@@ -33,7 +33,7 @@ export class AuthController {
     try {
       const result = await this.authService.googleLogin(req.user);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      
+
       // If OTP verification is required, redirect to OTP page
       if (result.requiresVerification) {
         const params = new URLSearchParams({
@@ -43,7 +43,7 @@ export class AuthController {
         res.redirect(`${frontendUrl}/verify-otp?${params.toString()}`);
         return;
       }
-      
+
       // Normal flow - redirect to callback with token
       const params = new URLSearchParams({
         token: result.token,
