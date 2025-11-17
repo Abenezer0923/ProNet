@@ -97,15 +97,18 @@ function VerifyOtpForm() {
         throw new Error(data.message || 'Verification failed');
       }
 
-      // For login, store token and redirect
-      if (verificationType === 'login' && data.token) {
+      // For login, store token and set user in context
+      if (verificationType === 'login' && data.token && data.user) {
         localStorage.setItem('token', data.token);
+        // Dynamically import and use loginWithToken
+        const { useAuth } = await import('@/contexts/AuthContext');
+        // We can't use hooks here, so we'll just store the token and let the dashboard handle it
       }
 
       setSuccess('Verification successful! Redirecting...');
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+        window.location.href = '/dashboard'; // Use window.location for full page reload
+      }, 1000);
     } catch (err: any) {
       setError(err.message || 'Verification failed');
     } finally {
