@@ -72,14 +72,14 @@ export default function Home() {
               </p>
               
               {/* Google Sign Up Button */}
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-md">
                 <button 
                   onClick={() => {
                     // OAuth goes directly to user service, not through API gateway
                     const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001';
                     window.location.href = `${authUrl}/auth/google`;
                   }}
-                  className="w-full md:w-auto flex items-center justify-center space-x-3 px-8 py-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition shadow-sm"
+                  className="w-full flex items-center justify-center space-x-3 px-6 py-3.5 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition shadow-sm"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -98,7 +98,7 @@ export default function Home() {
 
                 <a 
                   href="/register"
-                  className="block w-full md:w-auto text-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition"
+                  className="block w-full text-center px-6 py-3.5 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition"
                 >
                   Sign up with email
                 </a>

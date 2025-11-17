@@ -2,6 +2,8 @@ import { Controller, Post, Body, Get, UseGuards, Request, Req, Res } from '@nest
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -29,9 +31,24 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
     const result = await this.authService.googleLogin(req.user);
-    // Redirect to frontend with token
+    // Redirect to frontend with token and verification status
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?token=${result.token}`);
+    const params = new URLSearchParams({
+      token: result.token,
+      requiresVerification: result.requiresVerification.toString(),
+      email: req.user.email,
+    });
+    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyOtp(verifyOtpDto);
+  }
+
+  @Post('resend-otp')
+  async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
+    return this.authService.resendOtp(resendOtpDto.email);
   }
 
   @UseGuards(JwtAuthGuard)
