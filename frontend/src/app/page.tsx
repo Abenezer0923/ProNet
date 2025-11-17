@@ -219,7 +219,7 @@ export default function Home() {
             <div className="relative order-2 md:order-1">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl transform -rotate-6 opacity-20"></div>
               <img
-                src="/web design_#4.jpg"
+                src="/web%20design_%234.jpg"
                 alt="Join communities"
                 className="relative w-full h-auto rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
               />
