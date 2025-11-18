@@ -10,6 +10,7 @@ import { EmailService } from './email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { generateUniqueUsername } from '../users/utils/username.util';
 
 @Injectable()
 export class AuthService {
@@ -39,9 +40,13 @@ export class AuthService {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      // Generate unique username
+      const username = await this.generateAvailableUsername(firstName, lastName);
+
       // Create user
       const user = this.userRepository.create({
         email,
+        username,
         password: hashedPassword,
         firstName,
         lastName,
@@ -134,9 +139,13 @@ export class AuthService {
 
       if (!user) {
         console.log('Creating new user from Google profile');
+        // Generate unique username
+        const username = await this.generateAvailableUsername(firstName, lastName);
+        
         // Create new user from Google profile
         user = this.userRepository.create({
           email,
+          username,
           firstName,
           lastName,
           profilePicture: picture,
@@ -334,5 +343,33 @@ export class AuthService {
   private sanitizeUser(user: User) {
     const { password, ...result } = user;
     return result;
+  }
+
+  private async generateAvailableUsername(
+    firstName: string,
+    lastName: string,
+  ): Promise<string> {
+    let username = generateUniqueUsername(firstName, lastName);
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Keep trying until we find an available username
+    while (attempts < maxAttempts) {
+      const existing = await this.userRepository.findOne({
+        where: { username },
+      });
+
+      if (!existing) {
+        return username;
+      }
+
+      // Add random number and try again
+      const random = Math.floor(Math.random() * 9999);
+      username = `${generateUniqueUsername(firstName, lastName)}-${random}`;
+      attempts++;
+    }
+
+    // Fallback: use timestamp
+    return `${generateUniqueUsername(firstName, lastName)}-${Date.now()}`;
   }
 }

@@ -16,6 +16,9 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Column({ unique: true, length: 30 })
+  username: string;
+
   @Column()
   password: string;
 
@@ -48,6 +51,18 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ default: 0 })
+  profileViews: number;
+
+  @Column({ default: true })
+  isProfilePublic: boolean;
+
+  @Column({ default: true })
+  showEmail: boolean;
+
+  @Column({ default: true })
+  showConnections: boolean;
 
   @OneToMany(() => UserSkill, (skill) => skill.user, { eager: true })
   skills: UserSkill[];
