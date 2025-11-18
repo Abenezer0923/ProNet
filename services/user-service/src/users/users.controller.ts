@@ -16,6 +16,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 import { UpdateUsernameDto } from './dto/update-username.dto';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { CreateEducationDto } from './dto/create-education.dto';
+import { UpdateEducationDto } from './dto/update-education.dto';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
@@ -126,5 +130,55 @@ export class UsersController {
   @Post('migrate-usernames')
   async migrateUsernames() {
     return this.usersService.migrateUsernames();
+  }
+
+  // Experience endpoints
+  @Post('experiences')
+  async addExperience(@Request() req, @Body() dto: CreateExperienceDto) {
+    return this.usersService.addExperience(req.user.sub, dto);
+  }
+
+  @Put('experiences/:id')
+  async updateExperience(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: UpdateExperienceDto,
+  ) {
+    return this.usersService.updateExperience(req.user.sub, id, dto);
+  }
+
+  @Delete('experiences/:id')
+  async deleteExperience(@Request() req, @Param('id') id: string) {
+    return this.usersService.deleteExperience(req.user.sub, id);
+  }
+
+  @Get('experiences')
+  async getExperiences(@Request() req) {
+    return this.usersService.getExperiences(req.user.sub);
+  }
+
+  // Education endpoints
+  @Post('educations')
+  async addEducation(@Request() req, @Body() dto: CreateEducationDto) {
+    return this.usersService.addEducation(req.user.sub, dto);
+  }
+
+  @Put('educations/:id')
+  async updateEducation(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: UpdateEducationDto,
+  ) {
+    return this.usersService.updateEducation(req.user.sub, id, dto);
+  }
+
+  @Delete('educations/:id')
+  async deleteEducation(@Request() req, @Param('id') id: string) {
+    return this.usersService.deleteEducation(req.user.sub, id);
+  }
+
+  @Get('educations')
+  async getEducations(@Request() req) {
+    return this.usersService.getEducations(req.user.sub);
   }
 }
