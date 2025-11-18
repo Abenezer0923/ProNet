@@ -43,6 +43,9 @@ export class User {
   @Column({ nullable: true })
   profilePicture: string;
 
+  @Column({ nullable: true })
+  coverPhoto: string;
+
   @Column({ default: true })
   isActive: boolean;
 
