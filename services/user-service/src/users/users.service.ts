@@ -197,7 +197,6 @@ export class UsersService {
 
     return { message: 'Account deleted successfully' };
   }
-}
 
   // Username methods
   async checkUsernameAvailability(username: string) {
@@ -294,3 +293,4 @@ export class UsersService {
 
     return `${generateUniqueUsername(firstName, lastName)}-${Date.now()}`;
   }
+}
