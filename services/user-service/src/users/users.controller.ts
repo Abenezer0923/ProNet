@@ -27,7 +27,7 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('profile/:id')
   async getProfile(@Param('id') id: string) {
