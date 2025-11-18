@@ -5,7 +5,9 @@ import * as express from 'express';
 
 async function bootstrap() {
   try {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+      bodyParser: true,
+    });
 
     // Increase payload size limit for file uploads
     app.use(express.json({ limit: '50mb' }));

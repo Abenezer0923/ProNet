@@ -5,6 +5,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -23,14 +24,25 @@ export class UploadController {
         throw new BadRequestException('No file uploaded');
       }
 
-      console.log('Uploading file:', file.originalname, 'Size:', file.size);
+      console.log('Uploading file:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        buffer: file.buffer ? 'present' : 'missing',
+      });
+
       this.validateImage(file);
       const url = await this.uploadService.uploadProfilePicture(file);
       console.log('Upload successful:', url);
       return { url };
     } catch (error) {
       console.error('Upload controller error:', error);
-      throw error;
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error.message || 'Failed to upload file',
+      );
     }
   }
 
