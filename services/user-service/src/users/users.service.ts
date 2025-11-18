@@ -9,8 +9,14 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UserSkill } from './entities/user-skill.entity';
 import { Connection } from './entities/connection.entity';
+import { Experience } from './entities/experience.entity';
+import { Education } from './entities/education.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { CreateEducationDto } from './dto/create-education.dto';
+import { UpdateEducationDto } from './dto/update-education.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import {
   validateUsername,
@@ -27,6 +33,10 @@ export class UsersService {
     private userSkillRepository: Repository<UserSkill>,
     @InjectRepository(Connection)
     private connectionRepository: Repository<Connection>,
+    @InjectRepository(Experience)
+    private experienceRepository: Repository<Experience>,
+    @InjectRepository(Education)
+    private educationRepository: Repository<Education>,
     private notificationsService: NotificationsService,
   ) { }
 
@@ -292,5 +302,75 @@ export class UsersService {
     }
 
     return `${generateUniqueUsername(firstName, lastName)}-${Date.now()}`;
+  }
+
+  // Experience methods
+  async addExperience(userId: string, dto: CreateExperienceDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    
+    const experience = this.experienceRepository.create({ ...dto, user });
+    return this.experienceRepository.save(experience);
+  }
+
+  async updateExperience(userId: string, id: string, dto: UpdateExperienceDto) {
+    const experience = await this.experienceRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!experience) throw new NotFoundException('Experience not found');
+    
+    Object.assign(experience, dto);
+    return this.experienceRepository.save(experience);
+  }
+
+  async deleteExperience(userId: string, id: string) {
+    const result = await this.experienceRepository.delete({
+      id,
+      user: { id: userId },
+    });
+    if (result.affected === 0) throw new NotFoundException('Experience not found');
+    return { message: 'Experience deleted successfully' };
+  }
+
+  async getExperiences(userId: string) {
+    return this.experienceRepository.find({
+      where: { user: { id: userId } },
+      order: { startDate: 'DESC' },
+    });
+  }
+
+  // Education methods
+  async addEducation(userId: string, dto: CreateEducationDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    
+    const education = this.educationRepository.create({ ...dto, user });
+    return this.educationRepository.save(education);
+  }
+
+  async updateEducation(userId: string, id: string, dto: UpdateEducationDto) {
+    const education = await this.educationRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!education) throw new NotFoundException('Education not found');
+    
+    Object.assign(education, dto);
+    return this.educationRepository.save(education);
+  }
+
+  async deleteEducation(userId: string, id: string) {
+    const result = await this.educationRepository.delete({
+      id,
+      user: { id: userId },
+    });
+    if (result.affected === 0) throw new NotFoundException('Education not found');
+    return { message: 'Education deleted successfully' };
+  }
+
+  async getEducations(userId: string) {
+    return this.educationRepository.find({
+      where: { user: { id: userId } },
+      order: { startDate: 'DESC' },
+    });
   }
 }

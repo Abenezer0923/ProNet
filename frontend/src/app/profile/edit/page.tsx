@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
+import ExperienceForm from '@/components/ExperienceForm';
+import EducationForm from '@/components/EducationForm';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -28,75 +30,79 @@ export default function EditProfilePage() {
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameError, setUsernameError] = useState('');
-
-  // Experience state
-  const [experienceList, setExperienceList] = useState<any[]>([]);
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [educations, setEducations] = useState<any[]>([]);
   const [showExperienceForm, setShowExperienceForm] = useState(false);
-  const [expTitle, setExpTitle] = useState('');
-  const [expCompany, setExpCompany] = useState('');
-  const [expYears, setExpYears] = useState('');
-  const [editExpIdx, setEditExpIdx] = useState<number | null>(null);
-
-  // Education state
-  const [educationList, setEducationList] = useState<any[]>([]);
   const [showEducationForm, setShowEducationForm] = useState(false);
-  const [eduDegree, setEduDegree] = useState('');
-  const [eduSchool, setEduSchool] = useState('');
-  const [eduYears, setEduYears] = useState('');
-  const [editEduIdx, setEditEduIdx] = useState<number | null>(null);
+  const [editingExperience, setEditingExperience] = useState<any>(null);
+  const [editingEducation, setEditingEducation] = useState<any>(null);
 
   // Experience handlers
-  const handleExperienceSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editExpIdx !== null) {
-      const updated = [...experienceList];
-      updated[editExpIdx] = { title: expTitle, company: expCompany, years: expYears };
-      setExperienceList(updated);
-      setEditExpIdx(null);
-    } else {
-      setExperienceList([...experienceList, { title: expTitle, company: expCompany, years: expYears }]);
-    }
-    setExpTitle('');
-    setExpCompany('');
-    setExpYears('');
-    setShowExperienceForm(false);
-  };
-  const handleEditExperience = (idx: number) => {
-    setEditExpIdx(idx);
-    setExpTitle(experienceList[idx].title);
-    setExpCompany(experienceList[idx].company);
-    setExpYears(experienceList[idx].years);
+  const handleAddExperience = () => {
+    setEditingExperience(null);
     setShowExperienceForm(true);
   };
-  const handleDeleteExperience = (idx: number) => {
-    setExperienceList(experienceList.filter((_: any, i: number) => i !== idx));
+
+  const handleEditExperience = (experience: any) => {
+    setEditingExperience(experience);
+    setShowExperienceForm(true);
+  };
+
+  const handleDeleteExperience = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this experience?')) return;
+    
+    try {
+      await api.delete(`/users/experiences/${id}`);
+      setExperiences(experiences.filter(exp => exp.id !== id));
+    } catch (error) {
+      alert('Failed to delete experience');
+    }
+  };
+
+  const handleExperienceSave = async () => {
+    setShowExperienceForm(false);
+    setEditingExperience(null);
+    // Reload experiences
+    try {
+      const response = await api.get('/users/experiences');
+      setExperiences(response.data);
+    } catch (error) {
+      console.error('Error reloading experiences:', error);
+    }
   };
 
   // Education handlers
-  const handleEducationSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editEduIdx !== null) {
-      const updated = [...educationList];
-      updated[editEduIdx] = { degree: eduDegree, school: eduSchool, years: eduYears };
-      setEducationList(updated);
-      setEditEduIdx(null);
-    } else {
-      setEducationList([...educationList, { degree: eduDegree, school: eduSchool, years: eduYears }]);
-    }
-    setEduDegree('');
-    setEduSchool('');
-    setEduYears('');
-    setShowEducationForm(false);
-  };
-  const handleEditEducation = (idx: number) => {
-    setEditEduIdx(idx);
-    setEduDegree(educationList[idx].degree);
-    setEduSchool(educationList[idx].school);
-    setEduYears(educationList[idx].years);
+  const handleAddEducation = () => {
+    setEditingEducation(null);
     setShowEducationForm(true);
   };
-  const handleDeleteEducation = (idx: number) => {
-    setEducationList(educationList.filter((_: any, i: number) => i !== idx));
+
+  const handleEditEducation = (education: any) => {
+    setEditingEducation(education);
+    setShowEducationForm(true);
+  };
+
+  const handleDeleteEducation = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this education?')) return;
+    
+    try {
+      await api.delete(`/users/educations/${id}`);
+      setEducations(educations.filter(edu => edu.id !== id));
+    } catch (error) {
+      alert('Failed to delete education');
+    }
+  };
+
+  const handleEducationSave = async () => {
+    setShowEducationForm(false);
+    setEditingEducation(null);
+    // Reload educations
+    try {
+      const response = await api.get('/users/educations');
+      setEducations(response.data);
+    } catch (error) {
+      console.error('Error reloading educations:', error);
+    }
   };
 
   useEffect(() => {
@@ -123,6 +129,8 @@ export default function EditProfilePage() {
       });
       setSkills(profile.skills || []);
       setUsername(profile.username || '');
+      setExperiences(profile.experiences || []);
+      setEducations(profile.educations || []);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -518,47 +526,121 @@ export default function EditProfilePage() {
 
           {/* Experience Section */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Experience</h2>
-            {experienceList.map((exp: any, idx: number) => (
-              <div key={idx} className="mb-2 flex justify-between items-center">
-                <span>{exp.title} at {exp.company} ({exp.years})</span>
-                <button onClick={() => handleEditExperience(idx)} className="text-primary-600">Edit</button>
-                <button onClick={() => handleDeleteExperience(idx)} className="text-red-500 ml-2">Delete</button>
-              </div>
-            ))}
-            {showExperienceForm ? (
-              <form onSubmit={handleExperienceSubmit} className="mt-4">
-                <input type="text" placeholder="Title" value={expTitle} onChange={e => setExpTitle(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <input type="text" placeholder="Company" value={expCompany} onChange={e => setExpCompany(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <input type="text" placeholder="Years" value={expYears} onChange={e => setExpYears(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <button type="submit" className="bg-primary-600 text-white px-3 py-1 rounded">{editExpIdx !== null ? 'Update' : 'Add'}</button>
-                <button type="button" onClick={() => setShowExperienceForm(false)} className="ml-2 px-3 py-1 rounded border">Cancel</button>
-              </form>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
+              <button
+                type="button"
+                onClick={handleAddExperience}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+              >
+                + Add Experience
+              </button>
+            </div>
+            
+            {experiences.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No experience added yet</p>
             ) : (
-              <button type="button" onClick={() => setShowExperienceForm(true)} className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition mt-4">+ Add Experience</button>
+              <div className="space-y-4">
+                {experiences.map((experience) => (
+                  <div key={experience.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{experience.title}</h3>
+                        <p className="text-gray-600">{experience.company}</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(experience.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
+                          {experience.currentlyWorking ? ' Present' : ' ' + new Date(experience.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </p>
+                        {experience.location && (
+                          <p className="text-sm text-gray-500">{experience.location}</p>
+                        )}
+                        {experience.description && (
+                          <p className="text-sm text-gray-700 mt-2">{experience.description}</p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditExperience(experience)}
+                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteExperience(experience.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           {/* Education Section */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Education</h2>
-            {educationList.map((edu: any, idx: number) => (
-              <div key={idx} className="mb-2 flex justify-between items-center">
-                <span>{edu.degree} at {edu.school} ({edu.years})</span>
-                <button onClick={() => handleEditEducation(idx)} className="text-primary-600">Edit</button>
-                <button onClick={() => handleDeleteEducation(idx)} className="text-red-500 ml-2">Delete</button>
-              </div>
-            ))}
-            {showEducationForm ? (
-              <form onSubmit={handleEducationSubmit} className="mt-4">
-                <input type="text" placeholder="Degree" value={eduDegree} onChange={e => setEduDegree(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <input type="text" placeholder="School" value={eduSchool} onChange={e => setEduSchool(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <input type="text" placeholder="Years" value={eduYears} onChange={e => setEduYears(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
-                <button type="submit" className="bg-primary-600 text-white px-3 py-1 rounded">{editEduIdx !== null ? 'Update' : 'Add'}</button>
-                <button type="button" onClick={() => setShowEducationForm(false)} className="ml-2 px-3 py-1 rounded border">Cancel</button>
-              </form>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Education</h2>
+              <button
+                type="button"
+                onClick={handleAddEducation}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+              >
+                + Add Education
+              </button>
+            </div>
+            
+            {educations.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No education added yet</p>
             ) : (
-              <button type="button" onClick={() => setShowEducationForm(true)} className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition mt-4">+ Add Education</button>
+              <div className="space-y-4">
+                {educations.map((education) => (
+                  <div key={education.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{education.school}</h3>
+                        <p className="text-gray-600">
+                          {education.degree}
+                          {education.fieldOfStudy && `, ${education.fieldOfStudy}`}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(education.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
+                          {education.currentlyStudying ? ' Present' : ' ' + new Date(education.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </p>
+                        {education.grade && (
+                          <p className="text-sm text-gray-500">Grade: {education.grade}</p>
+                        )}
+                        {education.activities && (
+                          <p className="text-sm text-gray-700 mt-1">Activities: {education.activities}</p>
+                        )}
+                        {education.description && (
+                          <p className="text-sm text-gray-700 mt-2">{education.description}</p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditEducation(education)}
+                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteEducation(education.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -608,6 +690,30 @@ export default function EditProfilePage() {
           </button>
         </div>
       </main>
+
+      {/* Experience Form Modal */}
+      {showExperienceForm && (
+        <ExperienceForm
+          experience={editingExperience}
+          onSave={handleExperienceSave}
+          onCancel={() => {
+            setShowExperienceForm(false);
+            setEditingExperience(null);
+          }}
+        />
+      )}
+
+      {/* Education Form Modal */}
+      {showEducationForm && (
+        <EducationForm
+          education={editingEducation}
+          onSave={handleEducationSave}
+          onCancel={() => {
+            setShowEducationForm(false);
+            setEditingEducation(null);
+          }}
+        />
+      )}
     </div>
   );
 }

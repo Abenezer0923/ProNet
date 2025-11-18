@@ -7,6 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UserSkill } from './user-skill.entity';
+import { Experience } from './experience.entity';
+import { Education } from './education.entity';
 
 @Entity('users')
 export class User {
@@ -66,6 +68,12 @@ export class User {
 
   @OneToMany(() => UserSkill, (skill) => skill.user, { eager: true })
   skills: UserSkill[];
+
+  @OneToMany(() => Experience, (experience) => experience.user)
+  experiences: Experience[];
+
+  @OneToMany(() => Education, (education) => education.user)
+  educations: Education[];
 
   @CreateDateColumn()
   createdAt: Date;
