@@ -21,7 +21,7 @@ export default function PublicProfilePage() {
     if (username) {
       fetchProfileByUsername();
     }
-  }, [username]);
+  }, [username, currentUser]); // Re-check when currentUser changes
 
   const fetchProfileByUsername = async () => {
     try {
