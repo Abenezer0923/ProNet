@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
 import axios from 'axios';
-import * as FormData from 'form-data';
+import FormData from 'form-data';
 
 @Injectable()
 export class ProxyService {
@@ -18,30 +18,38 @@ export class ProxyService {
       console.log(`Content-Type: ${req.headers['content-type']}`);
 
       // Check if this is a multipart/form-data request (file upload)
-      const isMultipart = req.headers['content-type']?.includes('multipart/form-data');
+      const isMultipart =
+        req.headers['content-type']?.includes('multipart/form-data');
 
-      let requestData;
-      let requestHeaders = { ...req.headers };
+      let requestData: any;
+      let requestHeaders: any = { ...req.headers };
       delete requestHeaders.host;
+      delete requestHeaders['content-length']; // Let axios calculate this
 
       if (isMultipart && req['file']) {
         // Handle file upload - recreate FormData
         console.log('Handling file upload, file:', req['file']?.originalname);
         const formData = new FormData();
+
+        // Append the file buffer as a stream
         formData.append('file', req['file'].buffer, {
           filename: req['file'].originalname,
           contentType: req['file'].mimetype,
+          knownLength: req['file'].size,
         });
-        
+
         requestData = formData;
+        
+        // Use FormData's headers (includes proper boundary)
         requestHeaders = {
-          ...requestHeaders,
+          ...req.headers,
           ...formData.getHeaders(),
+          authorization: req.headers.authorization, // Preserve auth
         };
-      } else if (isMultipart) {
-        // Multipart but no file parsed yet - stream the raw body
-        console.log('Streaming multipart data');
-        requestData = req;
+        delete requestHeaders.host;
+        delete requestHeaders['content-length'];
+
+        console.log('FormData headers:', formData.getHeaders());
       } else {
         // Regular JSON request
         requestData = req.body;
@@ -54,13 +62,16 @@ export class ProxyService {
         headers: requestHeaders,
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
+        timeout: 60000, // 60 second timeout for uploads
       });
 
       res.status(response.status).json(response.data);
     } catch (error) {
       console.error(`Proxy error for ${req.url}:`, error.message);
+      console.error('Error stack:', error.stack);
       if (error.response) {
-        console.error('Error response:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
         res.status(error.response.status).json(error.response.data);
       } else {
         res.status(500).json({
