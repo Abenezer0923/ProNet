@@ -67,12 +67,27 @@ export default function EditProfilePage() {
     setLoading(true);
 
     try {
+      // Update profile data
       await api.put('/users/profile', formData);
-      // Redirect to username-based profile if available
-      if (user?.username) {
-        router.push(`/in/${user.username}`);
+      
+      // Update username if it changed
+      if (username && username !== user?.username) {
+        if (!usernameAvailable) {
+          alert('Please choose an available username');
+          setLoading(false);
+          return;
+        }
+        await api.patch('/users/username', { username });
+        alert('Profile updated successfully! Redirecting...');
+        window.location.href = `/in/${username}`;
       } else {
-        router.push('/profile');
+        alert('Profile updated successfully!');
+        // Redirect to username-based profile if available
+        if (user?.username) {
+          router.push(`/in/${user.username}`);
+        } else {
+          router.push('/profile');
+        }
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -163,26 +178,26 @@ export default function EditProfilePage() {
     return () => clearTimeout(timeoutId);
   };
 
-  const handleUpdateUsername = async () => {
-    if (!username || username === user?.username) {
-      alert('Please enter a new username');
+  const handleDeleteAccount = async () => {
+    if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
       return;
     }
 
-    if (!usernameAvailable) {
-      alert('Please choose an available username');
+    if (!confirm('This will permanently delete all your data, including posts, connections, and messages. Continue?')) {
       return;
     }
 
     try {
-      await api.patch('/users/username', { username });
-      alert('Username updated successfully! Redirecting...');
-      window.location.href = `/in/${username}`;
+      await api.delete('/users/account');
+      alert('Your account has been deleted successfully.');
+      localStorage.removeItem('token');
+      window.location.href = '/';
     } catch (error: any) {
-      console.error('Error updating username:', error);
-      alert(error.response?.data?.message || 'Failed to update username');
+      alert(error.response?.data?.message || 'Failed to delete account');
     }
   };
+
+
 
   if (authLoading) {
     return (
@@ -331,6 +346,7 @@ export default function EditProfilePage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Profile URL</h2>
             <p className="text-sm text-gray-600 mb-4">
               Your custom profile URL: <span className="font-mono text-indigo-600">pro-net-ten.vercel.app/in/{username || 'your-username'}</span>
+              {username !== user?.username && <span className="text-orange-600 ml-2">(will update when you save)</span>}
             </p>
 
             <div>
@@ -366,15 +382,6 @@ export default function EditProfilePage() {
                     </div>
                   )}
                 </div>
-                {username !== user?.username && usernameAvailable && (
-                  <button
-                    type="button"
-                    onClick={handleUpdateUsername}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold"
-                  >
-                    Update
-                  </button>
-                )}
               </div>
               {usernameError && (
                 <p className="mt-2 text-sm text-red-600">{usernameError}</p>
@@ -498,6 +505,20 @@ export default function EditProfilePage() {
             </button>
           </div>
         </form>
+
+        {/* Danger Zone - Outside the form */}
+        <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-red-200 mt-6">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
+          <p className="text-gray-600 mb-4">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <button
+            onClick={handleDeleteAccount}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold"
+          >
+            Delete Account
+          </button>
+        </div>
       </main>
     </div>
   );
