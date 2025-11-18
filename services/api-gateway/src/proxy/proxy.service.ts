@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
 import axios from 'axios';
-import FormData from 'form-data';
+import * as FormData from 'form-data';
 
 @Injectable()
 export class ProxyService {
