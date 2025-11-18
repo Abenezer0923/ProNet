@@ -23,6 +23,10 @@ export default function EditProfilePage() {
   const [skills, setSkills] = useState<any[]>([]);
   const [newSkill, setNewSkill] = useState('');
   const [proficiencyLevel, setProficiencyLevel] = useState('intermediate');
+  const [username, setUsername] = useState('');
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -46,6 +50,7 @@ export default function EditProfilePage() {
         profilePicture: profile.profilePicture || '',
       });
       setSkills(profile.skills || []);
+      setUsername(profile.username || '');
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -97,6 +102,83 @@ export default function EditProfilePage() {
       setSkills(skills.filter((s) => s.id !== skillId));
     } catch (error) {
       console.error('Error removing skill:', error);
+    }
+  };
+
+  const checkUsernameAvailability = async (newUsername: string) => {
+    if (!newUsername || newUsername === user?.username) {
+      setUsernameAvailable(null);
+      setUsernameError('');
+      return;
+    }
+
+    // Validate username format
+    if (!/^[a-z0-9-]+$/.test(newUsername)) {
+      setUsernameError('Username can only contain lowercase letters, numbers, and hyphens');
+      setUsernameAvailable(false);
+      return;
+    }
+
+    if (newUsername.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      setUsernameAvailable(false);
+      return;
+    }
+
+    if (newUsername.length > 30) {
+      setUsernameError('Username must be less than 30 characters');
+      setUsernameAvailable(false);
+      return;
+    }
+
+    setCheckingUsername(true);
+    setUsernameError('');
+
+    try {
+      const response = await api.get(`/users/username/${newUsername}/available`);
+      setUsernameAvailable(response.data.available);
+      if (!response.data.available) {
+        setUsernameError('Username is already taken');
+      }
+    } catch (error) {
+      console.error('Error checking username:', error);
+      setUsernameError('Failed to check username availability');
+      setUsernameAvailable(false);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUsername = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setUsername(newUsername);
+    
+    // Debounce the availability check
+    const timeoutId = setTimeout(() => {
+      checkUsernameAvailability(newUsername);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  const handleUpdateUsername = async () => {
+    if (!username || username === user?.username) {
+      alert('Please enter a new username');
+      return;
+    }
+
+    if (!usernameAvailable) {
+      alert('Please choose an available username');
+      return;
+    }
+
+    try {
+      await api.patch('/users/username', { username });
+      alert('Username updated successfully! Redirecting...');
+      window.location.href = `/in/${username}`;
+    } catch (error: any) {
+      console.error('Error updating username:', error);
+      alert(error.response?.data?.message || 'Failed to update username');
     }
   };
 
@@ -230,6 +312,68 @@ export default function EditProfilePage() {
                 currentImage={formData.profilePicture}
                 onUploadComplete={(url) => setFormData({ ...formData, profilePicture: url })}
               />
+            </div>
+          </div>
+
+          {/* Username Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Profile URL</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Your custom profile URL: <span className="font-mono text-indigo-600">pro-net-ten.vercel.app/in/{username || 'your-username'}</span>
+            </p>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Username
+              </label>
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    placeholder="your-username"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                  />
+                  {checkingUsername && (
+                    <div className="absolute right-3 top-3">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                    </div>
+                  )}
+                  {!checkingUsername && usernameAvailable === true && username !== user?.username && (
+                    <div className="absolute right-3 top-3 text-green-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                  {!checkingUsername && usernameAvailable === false && (
+                    <div className="absolute right-3 top-3 text-red-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {username !== user?.username && usernameAvailable && (
+                  <button
+                    type="button"
+                    onClick={handleUpdateUsername}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold"
+                  >
+                    Update
+                  </button>
+                )}
+              </div>
+              {usernameError && (
+                <p className="mt-2 text-sm text-red-600">{usernameError}</p>
+              )}
+              {usernameAvailable === true && username !== user?.username && (
+                <p className="mt-2 text-sm text-green-600">✓ Username is available!</p>
+              )}
+              <p className="mt-2 text-xs text-gray-500">
+                Username can only contain lowercase letters, numbers, and hyphens (3-30 characters)
+              </p>
             </div>
           </div>
 
