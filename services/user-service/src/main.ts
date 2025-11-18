@@ -4,11 +4,12 @@ import { AppModule } from './app.module';
 import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  try {
+    const app = await NestFactory.create(AppModule);
 
-  // Increase payload size limit for file uploads
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+    // Increase payload size limit for file uploads
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // Enable validation
   app.useGlobalPipes(new ValidationPipe({
@@ -24,12 +25,16 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
+    const port = process.env.PORT || 3001;
+    await app.listen(port);
 
-  console.log(`🚀 User Service running on http://localhost:${port}`);
-  console.log(`📊 Database: ${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}`);
-  console.log(`📦 Database Name: ${process.env.DATABASE_NAME}`);
+    console.log(`🚀 User Service running on http://localhost:${port}`);
+    console.log(`📊 Database: ${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}`);
+    console.log(`📦 Database Name: ${process.env.DATABASE_NAME}`);
+  } catch (error) {
+    console.error('❌ Failed to start application:', error);
+    process.exit(1);
+  }
 }
 
 bootstrap();

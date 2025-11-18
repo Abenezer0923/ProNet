@@ -16,29 +16,46 @@ export class UploadService {
     file: Express.Multer.File,
     folder: string = 'pronet',
   ): Promise<{ url: string; publicId: string }> {
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          resource_type: 'auto',
-          transformation: [
-            { quality: 'auto', fetch_format: 'auto' },
-          ],
-        },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-          });
-        },
-      );
+    try {
+      // Check if Cloudinary is configured
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
+        console.warn('Cloudinary not configured, using placeholder image');
+        return {
+          url: `https://ui-avatars.com/api/?name=${encodeURIComponent(file.originalname)}&size=200`,
+          publicId: 'placeholder',
+        };
+      }
 
-      const bufferStream = new Readable();
-      bufferStream.push(file.buffer);
-      bufferStream.push(null);
-      bufferStream.pipe(uploadStream);
-    });
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'auto',
+            transformation: [
+              { quality: 'auto', fetch_format: 'auto' },
+            ],
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              return reject(error);
+            }
+            resolve({
+              url: result.secure_url,
+              publicId: result.public_id,
+            });
+          },
+        );
+
+        const bufferStream = new Readable();
+        bufferStream.push(file.buffer);
+        bufferStream.push(null);
+        bufferStream.pipe(uploadStream);
+      });
+    } catch (error) {
+      console.error('Upload service error:', error);
+      throw error;
+    }
   }
 
   async uploadProfilePicture(file: Express.Multer.File): Promise<string> {

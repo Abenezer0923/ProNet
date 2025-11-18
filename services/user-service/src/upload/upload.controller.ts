@@ -18,13 +18,20 @@ export class UploadController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
+    try {
+      if (!file) {
+        throw new BadRequestException('No file uploaded');
+      }
 
-    this.validateImage(file);
-    const url = await this.uploadService.uploadProfilePicture(file);
-    return { url };
+      console.log('Uploading file:', file.originalname, 'Size:', file.size);
+      this.validateImage(file);
+      const url = await this.uploadService.uploadProfilePicture(file);
+      console.log('Upload successful:', url);
+      return { url };
+    } catch (error) {
+      console.error('Upload controller error:', error);
+      throw error;
+    }
   }
 
   @Post('profile-picture')
