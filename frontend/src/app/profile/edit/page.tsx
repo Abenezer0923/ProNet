@@ -439,6 +439,48 @@ export default function EditProfilePage() {
             </div>
           </div>
 
+          {/* Experience Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Experience</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Add your work experience (Coming soon - will be fully functional in next update)
+            </p>
+            <button
+              type="button"
+              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
+            >
+              + Add Experience
+            </button>
+          </div>
+
+          {/* Education Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Education</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Add your education history (Coming soon - will be fully functional in next update)
+            </p>
+            <button
+              type="button"
+              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
+            >
+              + Add Education
+            </button>
+          </div>
+
+          {/* Certifications Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Certifications</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Add your certifications and licenses (Coming soon - will be fully functional in next update)
+            </p>
+            <button
+              type="button"
+              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
+            >
+              + Add Certification
+            </button>
+          </div>
+
           {/* Submit */}
           <div className="flex justify-end space-x-4">
             <Link

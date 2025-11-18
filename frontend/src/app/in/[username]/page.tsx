@@ -29,8 +29,13 @@ export default function PublicProfilePage() {
       setProfile(response.data);
       
       // Check if this is the current user's profile
-      if (currentUser && response.data.id === currentUser.id) {
-        setIsOwnProfile(true);
+      // Check by ID or username
+      if (currentUser) {
+        const isOwn = response.data.id === currentUser.id || 
+                      response.data.username === currentUser.username;
+        setIsOwnProfile(isOwn);
+      } else {
+        setIsOwnProfile(false);
       }
       
       // Fetch stats
@@ -76,14 +81,29 @@ export default function PublicProfilePage() {
                 <Link href="/chat" className="text-gray-700 hover:text-gray-900 font-medium">Messaging</Link>
               </div>
             </div>
-            {isOwnProfile && (
-              <Link
-                href="/profile/edit"
-                className="px-4 py-2 text-indigo-600 border border-indigo-600 rounded-full hover:bg-indigo-50 font-semibold transition"
-              >
-                Edit Profile
-              </Link>
-            )}
+            <div className="flex items-center gap-3">
+              {isOwnProfile ? (
+                <Link
+                  href="/profile/edit"
+                  className="px-4 py-2 text-indigo-600 border border-indigo-600 rounded-full hover:bg-indigo-50 font-semibold transition"
+                >
+                  Edit Profile
+                </Link>
+              ) : currentUser ? (
+                <button
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
+                >
+                  Connect
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
+                >
+                  Sign in to connect
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -184,6 +204,39 @@ export default function PublicProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Experience Section */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Experience</h2>
+          <div className="space-y-6">
+            {/* Placeholder for experience - you can add this to backend later */}
+            <div className="flex space-x-4">
+              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0"></div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{profile.profession || 'Position'}</h3>
+                <p className="text-gray-600">Company Name</p>
+                <p className="text-sm text-gray-500">Jan 2023 - Present · 1 yr</p>
+                <p className="text-sm text-gray-500">{profile.location || 'Location'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Education Section */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Education</h2>
+          <div className="space-y-6">
+            {/* Placeholder for education */}
+            <div className="flex space-x-4">
+              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0"></div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">University Name</h3>
+                <p className="text-gray-600">Bachelor's Degree, Computer Science</p>
+                <p className="text-sm text-gray-500">2019 - 2023</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Contact Info */}
         {profile.showEmail && (
