@@ -15,6 +15,18 @@ import { UploadService } from './upload.service';
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    this.validateImage(file);
+    const url = await this.uploadService.uploadProfilePicture(file);
+    return { url };
+  }
+
   @Post('profile-picture')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfilePicture(@UploadedFile() file: Express.Multer.File) {

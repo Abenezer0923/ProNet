@@ -28,4 +28,12 @@ export class UpdateProfileDto {
   @IsString()
   @IsOptional()
   avatar?: string;
+
+  @IsString()
+  @IsOptional()
+  profilePicture?: string;
+
+  @IsString()
+  @IsOptional()
+  coverPhoto?: string;
 }
