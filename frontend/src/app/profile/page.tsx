@@ -72,7 +72,7 @@ export default function ProfilePage() {
       });
       
       // Update profile with new image URL
-      await api.patch('/users/profile', {
+      await api.put('/users/profile', {
         profilePicture: response.data.url,
       });
       
@@ -112,7 +112,7 @@ export default function ProfilePage() {
       });
       
       // Update profile with new cover photo URL
-      await api.patch('/users/profile', {
+      await api.put('/users/profile', {
         coverPhoto: response.data.url,
       });
       
