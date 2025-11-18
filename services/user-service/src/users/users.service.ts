@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -7,6 +12,11 @@ import { Connection } from './entities/connection.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  validateUsername,
+  normalizeUsername,
+  generateUniqueUsername,
+} from './utils/username.util';
 
 @Injectable()
 export class UsersService {
@@ -188,3 +198,99 @@ export class UsersService {
     return { message: 'Account deleted successfully' };
   }
 }
+
+  // Username methods
+  async checkUsernameAvailability(username: string) {
+    const validation = validateUsername(username);
+    if (!validation.valid) {
+      return { available: false, error: validation.error };
+    }
+
+    const normalized = normalizeUsername(username);
+    const existing = await this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
+      .getOne();
+
+    return { available: !existing, username };
+  }
+
+  async updateUsername(userId: string, newUsername: string) {
+    const validation = validateUsername(newUsername);
+    if (!validation.valid) {
+      throw new BadRequestException(validation.error);
+    }
+
+    const normalized = normalizeUsername(newUsername);
+    const existing = await this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
+      .andWhere('user.id != :userId', { userId })
+      .getOne();
+
+    if (existing) {
+      throw new ConflictException('Username is already taken');
+    }
+
+    await this.userRepository.update(userId, { username: newUsername });
+    return { message: 'Username updated successfully', username: newUsername };
+  }
+
+  async getUserByUsername(username: string) {
+    const normalized = normalizeUsername(username);
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.skills', 'skills')
+      .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async migrateUsernames() {
+    const users = await this.userRepository.find();
+    let migrated = 0;
+    let skipped = 0;
+
+    for (const user of users) {
+      if (!user.username) {
+        try {
+          const username = await this.generateAvailableUsername(
+            user.firstName,
+            user.lastName,
+          );
+          user.username = username;
+          await this.userRepository.save(user);
+          migrated++;
+        } catch (error) {
+          console.error(`Failed to migrate user ${user.id}:`, error);
+          skipped++;
+        }
+      } else {
+        skipped++;
+      }
+    }
+
+    return { message: 'Username migration complete', migrated, skipped, total: users.length };
+  }
+
+  private async generateAvailableUsername(firstName: string, lastName: string): Promise<string> {
+    let username = generateUniqueUsername(firstName, lastName);
+    let attempts = 0;
+
+    while (attempts < 10) {
+      const existing = await this.userRepository.findOne({ where: { username } });
+      if (!existing) return username;
+      
+      const random = Math.floor(Math.random() * 9999);
+      username = `${generateUniqueUsername(firstName, lastName)}-${random}`;
+      attempts++;
+    }
+
+    return `${generateUniqueUsername(firstName, lastName)}-${Date.now()}`;
+  }

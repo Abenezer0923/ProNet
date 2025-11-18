@@ -8,11 +8,13 @@ import {
   Param,
   UseGuards,
   Request,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
+import { UpdateUsernameDto } from './dto/update-username.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -89,5 +91,33 @@ export class UsersController {
   @Delete('account')
   async deleteAccount(@Request() req) {
     return this.usersService.deleteAccount(req.user.sub);
+  }
+
+  // Username endpoints
+  @Get('username/:username/available')
+  async checkUsernameAvailability(@Param('username') username: string) {
+    return this.usersService.checkUsernameAvailability(username);
+  }
+
+  @Patch('username')
+  async updateUsername(
+    @Request() req,
+    @Body() updateUsernameDto: UpdateUsernameDto,
+  ) {
+    return this.usersService.updateUsername(
+      req.user.sub,
+      updateUsernameDto.username,
+    );
+  }
+
+  @Get('in/:username')
+  async getUserByUsername(@Param('username') username: string) {
+    return this.usersService.getUserByUsername(username);
+  }
+
+  // Migration endpoint - generate usernames for existing users
+  @Post('migrate-usernames')
+  async migrateUsernames() {
+    return this.usersService.migrateUsernames();
   }
 }
