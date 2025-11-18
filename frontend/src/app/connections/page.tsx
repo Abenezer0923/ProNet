@@ -58,7 +58,7 @@ export default function ConnectionsPage() {
               <span className="text-xl font-bold text-gray-900">ProNet</span>
             </Link>
             <Link
-              href="/profile"
+              href={user?.username ? `/in/${user.username}` : '/profile'}
               className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Back to Profile

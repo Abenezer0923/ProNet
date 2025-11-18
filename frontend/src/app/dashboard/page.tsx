@@ -43,12 +43,12 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center space-x-4">
               <NotificationBell />
-              <a
-                href="/profile"
+              <Link
+                href={user?.username ? `/in/${user.username}` : '/profile'}
                 className="text-gray-700 hover:text-gray-900"
               >
                 {user.firstName} {user.lastName}
-              </a>
+              </Link>
               <button
                 onClick={logout}
                 className="px-4 py-2 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -89,8 +89,8 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-500 mt-1">Discover communities</p>
           </a>
 
-          <a
-            href="/profile"
+          <Link
+            href={user?.username ? `/in/${user.username}` : '/profile'}
             className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
           >
             <div className="flex items-center justify-between mb-4">
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-3xl font-bold text-gray-900">View Profile</p>
             <p className="text-sm text-gray-500 mt-1">See your followers & following</p>
-          </a>
+          </Link>
 
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -123,13 +123,13 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <a
-              href="/profile"
+            <Link
+              href={user?.username ? `/in/${user.username}` : '/profile'}
               className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"
             >
               <h3 className="font-semibold text-gray-900 mb-1">View Profile</h3>
               <p className="text-sm text-gray-600">See and edit your professional profile</p>
-            </a>
+            </Link>
             <a
               href="/communities"
               className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left"

@@ -103,7 +103,7 @@ export default function UserProfilePage() {
                         </Link>
                         <div className="flex items-center space-x-4">
                             <Link
-                                href="/profile"
+                                href={currentUser?.username ? `/in/${currentUser.username}` : '/profile'}
                                 className="text-gray-700 hover:text-gray-900"
                             >
                                 My Profile
