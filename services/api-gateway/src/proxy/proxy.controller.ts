@@ -1,12 +1,28 @@
-import { Controller, All, Req, Res } from '@nestjs/common';
+import { Controller, All, Req, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProxyService } from './proxy.service';
 
 @Controller()
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
-  // Forward all requests to user service
+  // Handle file upload requests
+  @All('upload*')
+  @UseInterceptors(FileInterceptor('file'))
+  async proxyFileUpload(
+    @Req() req: Request,
+    @Res() res: Response,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (file) {
+      req['file'] = file;
+      console.log('File intercepted in gateway:', file.originalname, file.size);
+    }
+    return this.proxyService.forward(req, res, 'users');
+  }
+
+  // Forward all other requests to user service
   @All('*')
   async proxyToUserService(@Req() req: Request, @Res() res: Response) {
     // Skip health check
