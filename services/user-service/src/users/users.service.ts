@@ -28,7 +28,7 @@ export class UsersService {
     @InjectRepository(Connection)
     private connectionRepository: Repository<Connection>,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async getProfile(userId: string) {
     const user = await this.userRepository.findOne({
@@ -285,7 +285,7 @@ export class UsersService {
     while (attempts < 10) {
       const existing = await this.userRepository.findOne({ where: { username } });
       if (!existing) return username;
-      
+
       const random = Math.floor(Math.random() * 9999);
       username = `${generateUniqueUsername(firstName, lastName)}-${random}`;
       attempts++;
