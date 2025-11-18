@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,76 @@ export default function EditProfilePage() {
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameError, setUsernameError] = useState('');
+
+  // Experience state
+  const [experienceList, setExperienceList] = useState<any[]>([]);
+  const [showExperienceForm, setShowExperienceForm] = useState(false);
+  const [expTitle, setExpTitle] = useState('');
+  const [expCompany, setExpCompany] = useState('');
+  const [expYears, setExpYears] = useState('');
+  const [editExpIdx, setEditExpIdx] = useState<number | null>(null);
+
+  // Education state
+  const [educationList, setEducationList] = useState<any[]>([]);
+  const [showEducationForm, setShowEducationForm] = useState(false);
+  const [eduDegree, setEduDegree] = useState('');
+  const [eduSchool, setEduSchool] = useState('');
+  const [eduYears, setEduYears] = useState('');
+  const [editEduIdx, setEditEduIdx] = useState<number | null>(null);
+
+  // Experience handlers
+  const handleExperienceSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editExpIdx !== null) {
+      const updated = [...experienceList];
+      updated[editExpIdx] = { title: expTitle, company: expCompany, years: expYears };
+      setExperienceList(updated);
+      setEditExpIdx(null);
+    } else {
+      setExperienceList([...experienceList, { title: expTitle, company: expCompany, years: expYears }]);
+    }
+    setExpTitle('');
+    setExpCompany('');
+    setExpYears('');
+    setShowExperienceForm(false);
+  };
+  const handleEditExperience = (idx: number) => {
+    setEditExpIdx(idx);
+    setExpTitle(experienceList[idx].title);
+    setExpCompany(experienceList[idx].company);
+    setExpYears(experienceList[idx].years);
+    setShowExperienceForm(true);
+  };
+  const handleDeleteExperience = (idx: number) => {
+    setExperienceList(experienceList.filter((_: any, i: number) => i !== idx));
+  };
+
+  // Education handlers
+  const handleEducationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editEduIdx !== null) {
+      const updated = [...educationList];
+      updated[editEduIdx] = { degree: eduDegree, school: eduSchool, years: eduYears };
+      setEducationList(updated);
+      setEditEduIdx(null);
+    } else {
+      setEducationList([...educationList, { degree: eduDegree, school: eduSchool, years: eduYears }]);
+    }
+    setEduDegree('');
+    setEduSchool('');
+    setEduYears('');
+    setShowEducationForm(false);
+  };
+  const handleEditEducation = (idx: number) => {
+    setEditEduIdx(idx);
+    setEduDegree(educationList[idx].degree);
+    setEduSchool(educationList[idx].school);
+    setEduYears(educationList[idx].years);
+    setShowEducationForm(true);
+  };
+  const handleDeleteEducation = (idx: number) => {
+    setEducationList(educationList.filter((_: any, i: number) => i !== idx));
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -449,29 +519,47 @@ export default function EditProfilePage() {
           {/* Experience Section */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Experience</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Add your work experience (Coming soon - will be fully functional in next update)
-            </p>
-            <button
-              type="button"
-              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
-            >
-              + Add Experience
-            </button>
+            {experienceList.map((exp: any, idx: number) => (
+              <div key={idx} className="mb-2 flex justify-between items-center">
+                <span>{exp.title} at {exp.company} ({exp.years})</span>
+                <button onClick={() => handleEditExperience(idx)} className="text-primary-600">Edit</button>
+                <button onClick={() => handleDeleteExperience(idx)} className="text-red-500 ml-2">Delete</button>
+              </div>
+            ))}
+            {showExperienceForm ? (
+              <form onSubmit={handleExperienceSubmit} className="mt-4">
+                <input type="text" placeholder="Title" value={expTitle} onChange={e => setExpTitle(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <input type="text" placeholder="Company" value={expCompany} onChange={e => setExpCompany(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <input type="text" placeholder="Years" value={expYears} onChange={e => setExpYears(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <button type="submit" className="bg-primary-600 text-white px-3 py-1 rounded">{editExpIdx !== null ? 'Update' : 'Add'}</button>
+                <button type="button" onClick={() => setShowExperienceForm(false)} className="ml-2 px-3 py-1 rounded border">Cancel</button>
+              </form>
+            ) : (
+              <button type="button" onClick={() => setShowExperienceForm(true)} className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition mt-4">+ Add Experience</button>
+            )}
           </div>
 
           {/* Education Section */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Education</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Add your education history (Coming soon - will be fully functional in next update)
-            </p>
-            <button
-              type="button"
-              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
-            >
-              + Add Education
-            </button>
+            {educationList.map((edu: any, idx: number) => (
+              <div key={idx} className="mb-2 flex justify-between items-center">
+                <span>{edu.degree} at {edu.school} ({edu.years})</span>
+                <button onClick={() => handleEditEducation(idx)} className="text-primary-600">Edit</button>
+                <button onClick={() => handleDeleteEducation(idx)} className="text-red-500 ml-2">Delete</button>
+              </div>
+            ))}
+            {showEducationForm ? (
+              <form onSubmit={handleEducationSubmit} className="mt-4">
+                <input type="text" placeholder="Degree" value={eduDegree} onChange={e => setEduDegree(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <input type="text" placeholder="School" value={eduSchool} onChange={e => setEduSchool(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <input type="text" placeholder="Years" value={eduYears} onChange={e => setEduYears(e.target.value)} className="border rounded px-2 py-1 mr-2" required />
+                <button type="submit" className="bg-primary-600 text-white px-3 py-1 rounded">{editEduIdx !== null ? 'Update' : 'Add'}</button>
+                <button type="button" onClick={() => setShowEducationForm(false)} className="ml-2 px-3 py-1 rounded border">Cancel</button>
+              </form>
+            ) : (
+              <button type="button" onClick={() => setShowEducationForm(true)} className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition mt-4">+ Add Education</button>
+            )}
           </div>
 
           {/* Certifications Section */}
