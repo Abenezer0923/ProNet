@@ -39,7 +39,7 @@ export class ProxyService {
         });
 
         requestData = formData;
-        
+
         // Use FormData's headers (includes proper boundary)
         requestHeaders = {
           ...req.headers,
