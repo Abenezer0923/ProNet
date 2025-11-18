@@ -9,12 +9,16 @@ import {
   UseGuards,
   Request,
   Patch,
+  SetMetadata,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 import { UpdateUsernameDto } from './dto/update-username.dto';
+
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -83,6 +87,7 @@ export class UsersController {
     return { isFollowing: following };
   }
 
+  @Public()
   @Get('connections/stats/:userId')
   async getUserConnectionStats(@Param('userId') userId: string) {
     return this.usersService.getConnectionStats(userId);
@@ -94,6 +99,7 @@ export class UsersController {
   }
 
   // Username endpoints
+  @Public()
   @Get('username/:username/available')
   async checkUsernameAvailability(@Param('username') username: string) {
     return this.usersService.checkUsernameAvailability(username);
@@ -110,6 +116,7 @@ export class UsersController {
     );
   }
 
+  @Public()
   @Get('in/:username')
   async getUserByUsername(@Param('username') username: string) {
     return this.usersService.getUserByUsername(username);

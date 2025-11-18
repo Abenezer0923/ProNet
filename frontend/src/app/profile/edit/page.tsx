@@ -19,6 +19,7 @@ export default function EditProfilePage() {
     location: '',
     website: '',
     profilePicture: '',
+    coverPhoto: '',
   });
   const [skills, setSkills] = useState<any[]>([]);
   const [newSkill, setNewSkill] = useState('');
@@ -48,6 +49,7 @@ export default function EditProfilePage() {
         location: profile.location || '',
         website: profile.website || '',
         profilePicture: profile.profilePicture || '',
+        coverPhoto: profile.coverPhoto || '',
       });
       setSkills(profile.skills || []);
       setUsername(profile.username || '');
@@ -311,6 +313,15 @@ export default function EditProfilePage() {
                 label="Profile Picture"
                 currentImage={formData.profilePicture}
                 onUploadComplete={(url) => setFormData({ ...formData, profilePicture: url })}
+              />
+            </div>
+
+            <div>
+              <ImageUpload
+                type="cover"
+                label="Cover Photo"
+                currentImage={formData.coverPhoto}
+                onUploadComplete={(url) => setFormData({ ...formData, coverPhoto: url })}
               />
             </div>
           </div>

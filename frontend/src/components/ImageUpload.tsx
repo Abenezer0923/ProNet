@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 interface ImageUploadProps {
   onUploadComplete: (url: string) => void;
   currentImage?: string;
-  type: 'profile' | 'community' | 'post';
+  type: 'profile' | 'community' | 'post' | 'cover';
   label?: string;
 }
 
