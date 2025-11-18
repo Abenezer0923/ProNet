@@ -10,6 +10,7 @@ interface User {
   lastName: string;
   profession?: string;
   avatar?: string;
+  username?: string;
 }
 
 interface AuthContextType {
