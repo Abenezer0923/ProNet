@@ -312,7 +312,7 @@ export class UsersService {
   async addExperience(userId: string, dto: CreateExperienceDto) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    
+
     const experience = this.experienceRepository.create({ ...dto, user });
     return this.experienceRepository.save(experience);
   }
@@ -322,7 +322,7 @@ export class UsersService {
       where: { id, user: { id: userId } },
     });
     if (!experience) throw new NotFoundException('Experience not found');
-    
+
     Object.assign(experience, dto);
     return this.experienceRepository.save(experience);
   }
@@ -347,7 +347,7 @@ export class UsersService {
   async addEducation(userId: string, dto: CreateEducationDto) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    
+
     const education = this.educationRepository.create({ ...dto, user });
     return this.educationRepository.save(education);
   }
@@ -357,7 +357,7 @@ export class UsersService {
       where: { id, user: { id: userId } },
     });
     if (!education) throw new NotFoundException('Education not found');
-    
+
     Object.assign(education, dto);
     return this.educationRepository.save(education);
   }

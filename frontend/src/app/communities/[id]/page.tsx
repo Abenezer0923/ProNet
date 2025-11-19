@@ -1,302 +1,501 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
-export default function CommunityDetailPage() {
-  const router = useRouter();
+type TabType = 'home' | 'groups' | 'posts' | 'members';
+
+interface Community {
+  id: string;
+  name: string;
+  description: string;
+  coverImage?: string;
+  logo?: string;
+  privacy: string;
+  memberCount: number;
+  owner: any;
+  members: any[];
+  groups: Group[];
+}
+
+interface Group {
+  id: string;
+  name: string;
+  description?: string;
+  type: string;
+  category?: string;
+  privacy: string;
+  position: number;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  author: any;
+  createdAt: string;
+}
+
+export default function CommunityPage() {
   const params = useParams();
-  const communityId = params.id as string;
-  const { user, loading: authLoading } = useAuth();
-  const [community, setCommunity] = useState<any>(null);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [isMember, setIsMember] = useState(false);
+  const router = useRouter();
+  const { user } = useAuth();
+  const communityId = params?.id as string;
+  
+  const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
-  const [joinLoading, setJoinLoading] = useState(false);
-  const [newPost, setNewPost] = useState('');
-  const [postLoading, setPostLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [isMember, setIsMember] = useState(false);
+  const [userRole, setUserRole] = useState<string>('');
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupType, setNewGroupType] = useState('chat');
+  const [newGroupCategory, setNewGroupCategory] = useState('');
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    } else if (user && communityId) {
+    if (communityId) {
       fetchCommunity();
-      checkMembership();
-      fetchPosts();
     }
-  }, [user, authLoading, communityId, router]);
+  }, [communityId]);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      fetchMessages();
+    }
+  }, [selectedGroup]);
 
   const fetchCommunity = async () => {
     try {
       const response = await api.get(`/communities/${communityId}`);
       setCommunity(response.data);
+      
+      if (user) {
+        const member = response.data.members?.find((m: any) => m.user.id === user.id);
+        setIsMember(!!member);
+        setUserRole(member?.role || '');
+      }
     } catch (error) {
       console.error('Error fetching community:', error);
+      router.push('/communities');
     } finally {
       setLoading(false);
     }
   };
 
-  const checkMembership = async () => {
+  const fetchMessages = async () => {
+    if (!selectedGroup) return;
     try {
-      const response = await api.get(`/communities/${communityId}/is-member`);
-      setIsMember(response.data.isMember);
+      const response = await api.get(`/communities/groups/${selectedGroup.id}/messages`);
+      setMessages(response.data);
     } catch (error) {
-      console.error('Error checking membership:', error);
+      console.error('Error fetching messages:', error);
     }
   };
 
-  const fetchPosts = async () => {
+  const handleJoinCommunity = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     try {
-      const response = await api.get(`/posts?communityId=${communityId}`);
-      setPosts(response.data);
+      await api.post(`/communities/${communityId}/join`);
+      setIsMember(true);
+      fetchCommunity();
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Error joining community:', error);
     }
   };
 
-  const handleJoin = async () => {
-    setJoinLoading(true);
+  const handleLeaveCommunity = async () => {
+    if (!confirm('Are you sure you want to leave this community?')) return;
+
     try {
-      if (isMember) {
-        await api.delete(`/communities/${communityId}/leave`);
-        setIsMember(false);
-        if (community) {
-          setCommunity({ ...community, memberCount: community.memberCount - 1 });
-        }
-      } else {
-        await api.post(`/communities/${communityId}/join`);
-        setIsMember(true);
-        if (community) {
-          setCommunity({ ...community, memberCount: community.memberCount + 1 });
-        }
-      }
-    } catch (error: any) {
-      console.error('Error toggling membership:', error);
-      alert(error.response?.data?.message || 'Failed to update membership');
-    } finally {
-      setJoinLoading(false);
+      await api.post(`/communities/${communityId}/leave`);
+      setIsMember(false);
+      setUserRole('');
+      fetchCommunity();
+    } catch (error) {
+      console.error('Error leaving community:', error);
     }
   };
 
-  const handleCreatePost = async (e: React.FormEvent) => {
+  const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.trim()) return;
-
-    setPostLoading(true);
     try {
-      const response = await api.post('/posts', {
-        content: newPost,
-        communityId,
+      await api.post(`/communities/${communityId}/groups`, {
+        name: newGroupName,
+        type: newGroupType,
+        category: newGroupCategory || 'General',
+        privacy: 'public',
       });
-      setPosts([response.data, ...posts]);
-      setNewPost('');
+      setShowCreateGroup(false);
+      setNewGroupName('');
+      setNewGroupType('chat');
+      setNewGroupCategory('');
+      fetchCommunity();
     } catch (error) {
-      console.error('Error creating post:', error);
-      alert('Failed to create post');
-    } finally {
-      setPostLoading(false);
+      console.error('Error creating group:', error);
     }
   };
 
-  const handleLike = async (postId: string) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedGroup) return;
+
     try {
-      await api.post(`/posts/${postId}/like`);
-      setPosts(
-        posts.map((p) =>
-          p.id === postId ? { ...p, likeCount: p.likeCount + 1 } : p
-        )
-      );
+      const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, {
+        content: newMessage,
+      });
+      setMessages([...messages, response.data]);
+      setNewMessage('');
     } catch (error) {
-      console.error('Error liking post:', error);
+      console.error('Error sending message:', error);
     }
   };
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!community) return null;
 
+  const tabs = [
+    { id: 'home', label: 'Home', icon: '🏠' },
+    { id: 'groups', label: 'Groups', icon: '💬' },
+    { id: 'posts', label: 'Posts', icon: '📱' },
+    { id: 'members', label: 'Members', icon: '👥' },
+  ];
+
+  const groupsByCategory = community.groups?.reduce((acc, group) => {
+    const category = group.category || 'General';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(group);
+    return acc;
+  }, {} as Record<string, Group[]>) || {};
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
-              <span className="text-xl font-bold text-gray-900">ProNet</span>
-            </Link>
-            <Link
-              href="/communities"
-              className="text-gray-700 hover:text-gray-900"
-            >
-              ← Back to Communities
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Community Cover Image */}
-      <div className="bg-white">
-        {community.coverImage ? (
-          <div className="max-w-7xl mx-auto">
-            <img
-              src={community.coverImage}
-              alt={community.name}
-              className="w-full h-64 object-cover"
-            />
-          </div>
-        ) : (
-          <div className="max-w-7xl mx-auto h-64 bg-gradient-to-r from-primary-500 to-primary-600"></div>
-        )}
-      </div>
-
-      {/* Community Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-4">
-              <div className="w-20 h-20 bg-primary-600 rounded-lg flex items-center justify-center text-white text-3xl font-bold">
-                {community.name[0]}
+      {/* Cover Photo */}
+      <div className="relative">
+        <div 
+          className="h-64 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+          style={{
+            backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        
+        {/* Community Header */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative -mt-16">
+            <div className="flex items-end space-x-5">
+              <div className="relative">
+                <img
+                  src={community.logo || `https://ui-avatars.com/api/?name=${community.name}&size=128&background=4F46E5&color=fff`}
+                  alt={community.name}
+                  className="w-32 h-32 rounded-lg border-4 border-white shadow-xl object-cover"
+                />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {community.name}
-                </h1>
-                <p className="text-gray-600 mb-2">{community.category}</p>
-                <p className="text-gray-700 mb-4">{community.description}</p>
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>{community.memberCount} members</span>
-                  <span>•</span>
-                  <span>
-                    Created by {community.creator?.firstName}{' '}
-                    {community.creator?.lastName}
-                  </span>
+              
+              <div className="flex-1 pb-4">
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h1 className="text-3xl font-bold text-gray-900">{community.name}</h1>
+                      <p className="text-gray-600 mt-2">{community.description}</p>
+                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          {community.members?.length || 0} members
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {community.privacy}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-3">
+                      {isMember ? (
+                        <>
+                          <button
+                            onClick={handleLeaveCommunity}
+                            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-semibold transition"
+                          >
+                            Leave
+                          </button>
+                          {['owner', 'admin'].includes(userRole) && (
+                            <Link
+                              href={`/communities/${communityId}/settings`}
+                              className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
+                            >
+                              Settings
+                            </Link>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          onClick={handleJoinCommunity}
+                          className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
+                        >
+                          Join Community
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <button
-              onClick={handleJoin}
-              disabled={joinLoading}
-              className={`px-6 py-2 rounded-lg font-semibold transition disabled:opacity-50 ${
-                isMember
-                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  : 'bg-primary-600 text-white hover:bg-primary-700'
-              }`}
-            >
-              {joinLoading ? 'Loading...' : isMember ? 'Leave' : 'Join'}
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Create Post */}
-        {isMember && (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <form onSubmit={handleCreatePost}>
-              <textarea
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                placeholder="Share something with the community..."
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-4"
-              />
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={postLoading || !newPost.trim()}
-                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {postLoading ? 'Posting...' : 'Post'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+      {/* Tabs Navigation */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`
+                  py-4 px-1 border-b-2 font-medium text-sm transition
+                  ${activeTab === tab.id
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-        {/* Posts */}
-        <div className="space-y-6">
-          {posts.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-              <p className="text-gray-500">
-                {isMember
-                  ? 'No posts yet. Be the first to post!'
-                  : 'Join the community to see posts'}
-              </p>
-            </div>
-          ) : (
-            posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {post.author?.firstName?.[0]}
-                    {post.author?.lastName?.[0]}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="font-semibold text-gray-900">
-                        {post.author?.firstName} {post.author?.lastName}
-                      </span>
-                      <span className="text-gray-500 text-sm">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 mb-4">{post.content}</p>
-                    <div className="flex items-center space-x-6 text-sm text-gray-500">
+      {/* Tab Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar - Groups */}
+          {activeTab === 'groups' && (
+            <div className="w-80 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-sm p-4 sticky top-24">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-gray-900">Groups</h3>
+                  {['owner', 'admin', 'moderator'].includes(userRole) && (
+                    <button
+                      onClick={() => setShowCreateGroup(true)}
+                      className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                    >
+                      + Add
+                    </button>
+                  )}
+                </div>
+                
+                {showCreateGroup && (
+                  <form onSubmit={handleCreateGroup} className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <input
+                      type="text"
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      placeholder="Group name"
+                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      required
+                    />
+                    <input
+                      type="text"
+                      value={newGroupCategory}
+                      onChange={(e) => setNewGroupCategory(e.target.value)}
+                      placeholder="Category (optional)"
+                      className="w-full px-3 py-2 border rounded-md mb-2"
+                    />
+                    <select
+                      value={newGroupType}
+                      onChange={(e) => setNewGroupType(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md mb-2"
+                    >
+                      <option value="chat">Chat</option>
+                      <option value="announcement">Announcement</option>
+                      <option value="meeting">Meeting</option>
+                      <option value="mentorship">Mentorship</option>
+                    </select>
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => handleLike(post.id)}
-                        className="flex items-center space-x-1 hover:text-primary-600"
+                        type="submit"
+                        className="flex-1 px-3 py-1 bg-indigo-600 text-white rounded-md text-sm"
                       >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                          />
-                        </svg>
-                        <span>{post.likeCount}</span>
+                        Create
                       </button>
-                      <button className="flex items-center space-x-1 hover:text-primary-600">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                          />
-                        </svg>
-                        <span>{post.commentCount}</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateGroup(false)}
+                        className="flex-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm"
+                      >
+                        Cancel
                       </button>
                     </div>
+                  </form>
+                )}
+                
+                {Object.entries(groupsByCategory).map(([category, groups]) => (
+                  <div key={category} className="mb-4">
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      {category}
+                    </h4>
+                    <div className="space-y-1">
+                      {groups.map((group) => (
+                        <button
+                          key={group.id}
+                          onClick={() => setSelectedGroup(group)}
+                          className={`
+                            w-full text-left px-3 py-2 rounded-md text-sm transition
+                            ${selectedGroup?.id === group.id
+                              ? 'bg-indigo-100 text-indigo-700'
+                              : 'text-gray-700 hover:bg-gray-100'
+                            }
+                          `}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">
+                              {group.type === 'announcement' ? '📢' : 
+                               group.type === 'meeting' ? '🎥' :
+                               group.type === 'mentorship' ? '🤝' : '💬'}
+                            </span>
+                            <span className="truncate">{group.name}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {activeTab === 'home' && (
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <h2 className="text-2xl font-bold mb-4">Welcome to {community.name}</h2>
+                <p className="text-gray-600 mb-6">{community.description}</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-indigo-50 rounded-lg">
+                    <div className="text-3xl font-bold text-indigo-600">{community.members?.length || 0}</div>
+                    <div className="text-sm text-gray-600">Members</div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <div className="text-3xl font-bold text-purple-600">{community.groups?.length || 0}</div>
+                    <div className="text-sm text-gray-600">Groups</div>
+                  </div>
+                  <div className="p-4 bg-pink-50 rounded-lg">
+                    <div className="text-3xl font-bold text-pink-600">{community.privacy}</div>
+                    <div className="text-sm text-gray-600">Privacy</div>
                   </div>
                 </div>
               </div>
-            ))
-          )}
+            )}
+
+            {activeTab === 'groups' && selectedGroup && (
+              <div className="bg-white rounded-lg shadow-sm flex flex-col h-[calc(100vh-300px)]">
+                {/* Group Header */}
+                <div className="p-4 border-b">
+                  <h2 className="text-xl font-bold">{selectedGroup.name}</h2>
+                  {selectedGroup.description && (
+                    <p className="text-sm text-gray-600">{selectedGroup.description}</p>
+                  )}
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                        {message.author?.firstName?.[0]}{message.author?.lastName?.[0]}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-semibold text-sm">
+                            {message.author?.firstName} {message.author?.lastName}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(message.createdAt).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 mt-1">{message.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Message Input */}
+                <form onSubmit={handleSendMessage} className="p-4 border-t">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                    >
+                      Send
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {activeTab === 'groups' && !selectedGroup && (
+              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                <p className="text-gray-500">Select a group to start chatting</p>
+              </div>
+            )}
+
+            {activeTab === 'members' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-bold mb-4">Members</h2>
+                <div className="space-y-3">
+                  {community.members?.map((member: any) => (
+                    <div key={member.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                          {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
+                        </div>
+                        <div>
+                          <div className="font-semibold">
+                            {member.user?.firstName} {member.user?.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">{member.role}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

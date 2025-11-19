@@ -16,6 +16,13 @@ import { Experience } from './users/entities/experience.entity';
 import { Education } from './users/entities/education.entity';
 import { Community } from './communities/entities/community.entity';
 import { CommunityMember } from './communities/entities/community-member.entity';
+import { Group } from './communities/entities/group.entity';
+import { GroupMessage } from './communities/entities/group-message.entity';
+import { Article } from './communities/entities/article.entity';
+import { ArticleClap } from './communities/entities/article-clap.entity';
+import { ArticleComment } from './communities/entities/article-comment.entity';
+import { CommunityEvent } from './communities/entities/community-event.entity';
+import { EventAttendee } from './communities/entities/event-attendee.entity';
 import { Post } from './posts/entities/post.entity';
 import { Comment } from './posts/entities/comment.entity';
 import { PostLike } from './posts/entities/post-like.entity';
@@ -42,6 +49,13 @@ import { LoginSession } from './auth/entities/login-session.entity';
         Education,
         Community,
         CommunityMember,
+        Group,
+        GroupMessage,
+        Article,
+        ArticleClap,
+        ArticleComment,
+        CommunityEvent,
+        EventAttendee,
         Post,
         Comment,
         PostLike,

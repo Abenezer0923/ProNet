@@ -8,11 +8,16 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
+  Patch,
 } from '@nestjs/common';
 import { CommunitiesService } from './communities.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
+import { CreateGroupDto } from './dto/create-group.dto';
+import { CreateGroupMessageDto } from './dto/create-group-message.dto';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 
 @Controller('communities')
 @UseGuards(JwtAuthGuard)
@@ -77,5 +82,67 @@ export class CommunitiesController {
   async isMember(@Param('id') id: string, @Request() req) {
     const isMember = await this.communitiesService.isMember(id, req.user.sub);
     return { isMember };
+  }
+
+  @Delete(':id/members/:userId')
+  async removeMember(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.removeMember(id, userId, req.user.sub);
+  }
+
+  @Patch(':id/members/:userId/role')
+  async updateMemberRole(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Body() updateMemberRoleDto: UpdateMemberRoleDto,
+    @Request() req,
+  ) {
+    return this.communitiesService.updateMemberRole(id, userId, updateMemberRoleDto.role, req.user.sub);
+  }
+
+  // Group endpoints
+  @Post(':id/groups')
+  async createGroup(
+    @Param('id') communityId: string,
+    @Body() createGroupDto: CreateGroupDto,
+    @Request() req,
+  ) {
+    return this.communitiesService.createGroup(communityId, req.user.sub, createGroupDto);
+  }
+
+  @Get(':id/groups')
+  async getGroups(@Param('id') communityId: string) {
+    return this.communitiesService.getGroups(communityId);
+  }
+
+  @Get('groups/:groupId')
+  async getGroup(@Param('groupId') groupId: string) {
+    return this.communitiesService.getGroup(groupId);
+  }
+
+  @Delete('groups/:groupId')
+  async deleteGroup(@Param('groupId') groupId: string, @Request() req) {
+    return this.communitiesService.deleteGroup(groupId, req.user.sub);
+  }
+
+  @Post('groups/:groupId/messages')
+  async sendMessage(
+    @Param('groupId') groupId: string,
+    @Body() createMessageDto: CreateGroupMessageDto,
+    @Request() req,
+  ) {
+    return this.communitiesService.sendMessage(groupId, req.user.sub, createMessageDto);
+  }
+
+  @Get('groups/:groupId/messages')
+  async getMessages(
+    @Param('groupId') groupId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.communitiesService.getMessages(groupId, page, limit);
   }
 }
