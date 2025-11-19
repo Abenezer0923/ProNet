@@ -43,7 +43,7 @@ export class UsersService {
   async getProfile(userId: string) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['skills'],
+      relations: ['skills', 'experiences', 'educations'],
     });
 
     if (!user) {
@@ -250,7 +250,11 @@ export class UsersService {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.skills', 'skills')
+      .leftJoinAndSelect('user.experiences', 'experiences')
+      .leftJoinAndSelect('user.educations', 'educations')
       .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
+      .orderBy('experiences.startDate', 'DESC')
+      .addOrderBy('educations.startDate', 'DESC')
       .getOne();
 
     if (!user) {
