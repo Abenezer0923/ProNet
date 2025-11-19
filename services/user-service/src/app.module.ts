@@ -12,6 +12,8 @@ import { SearchModule } from './search/search.module';
 import { User } from './users/entities/user.entity';
 import { UserSkill } from './users/entities/user-skill.entity';
 import { Connection } from './users/entities/connection.entity';
+import { Experience } from './users/entities/experience.entity';
+import { Education } from './users/entities/education.entity';
 import { Community } from './communities/entities/community.entity';
 import { CommunityMember } from './communities/entities/community-member.entity';
 import { Post } from './posts/entities/post.entity';
@@ -36,6 +38,8 @@ import { LoginSession } from './auth/entities/login-session.entity';
         User,
         UserSkill,
         Connection,
+        Experience,
+        Education,
         Community,
         CommunityMember,
         Post,
