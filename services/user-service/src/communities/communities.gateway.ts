@@ -160,6 +160,8 @@ export class CommunitiesGateway
       const userId = client.data.userId;
       const { groupId, content, attachments } = data;
 
+      console.log(`Saving message to database: group=${groupId}, user=${userId}, content=${content}`);
+
       // Save message to database
       const message = await this.communitiesService.sendMessage(
         groupId,
@@ -167,13 +169,15 @@ export class CommunitiesGateway
         { content, attachments },
       );
 
-      // Broadcast to all users in the group
-      this.server.to(`group:${groupId}`).emit('message_received', {
-        ...message,
-        groupId,
-      });
+      console.log(`Message saved with ID: ${message.id}`);
 
-      console.log(`Message sent in group ${groupId} by user ${userId}`);
+      // Broadcast to all users in the group (including sender)
+      this.server.to(`group:${groupId}`).emit('message_received', message);
+
+      // Also emit to sender to ensure they receive it
+      client.emit('message_received', message);
+
+      console.log(`Message broadcast to group ${groupId} by user ${userId}`);
     } catch (error) {
       console.error('Error sending message:', error);
       client.emit('error', { message: 'Failed to send message' });

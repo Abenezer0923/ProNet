@@ -99,12 +99,12 @@ export default function CommunityPage() {
       if (user) {
         console.log('Current user:', user);
         console.log('Community members:', response.data.members);
-        
+
         const member = response.data.members?.find((m: any) => {
           console.log('Checking member:', m.user?.id, 'against user:', user.id);
           return m.user?.id === user.id || m.userId === user.id;
         });
-        
+
         console.log('Found member:', member);
         setIsMember(!!member);
         setUserRole(member?.role || '');
@@ -184,14 +184,20 @@ export default function CommunityPage() {
     e.preventDefault();
     if (!newMessage.trim() || !selectedGroup) return;
 
+    console.log('Sending message:', newMessage, 'via', isConnected ? 'WebSocket' : 'HTTP');
+
     try {
       // Send via WebSocket if connected, otherwise use HTTP
       if (isConnected) {
+        console.log('Sending via WebSocket to group:', selectedGroup.id);
         sendSocketMessage(newMessage);
+        console.log('Message sent via WebSocket');
       } else {
+        console.log('Sending via HTTP to group:', selectedGroup.id);
         const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, {
           content: newMessage,
         });
+        console.log('Message saved via HTTP:', response.data);
         setMessages([...messages, response.data]);
       }
       setNewMessage('');
@@ -200,7 +206,7 @@ export default function CommunityPage() {
       console.error('Error sending message:', error);
       const errorMessage = error.response?.data?.message || 'Failed to send message';
       alert(errorMessage);
-      
+
       // If not a member, refresh community data
       if (errorMessage.includes('member')) {
         fetchCommunity();
