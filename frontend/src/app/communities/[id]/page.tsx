@@ -44,7 +44,7 @@ export default function CommunityPage() {
   const router = useRouter();
   const { user } = useAuth();
   const communityId = params?.id as string;
-  
+
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -95,11 +95,20 @@ export default function CommunityPage() {
     try {
       const response = await api.get(`/communities/${communityId}`);
       setCommunity(response.data);
-      
+
       if (user) {
-        const member = response.data.members?.find((m: any) => m.user.id === user.id);
+        console.log('Current user:', user);
+        console.log('Community members:', response.data.members);
+        
+        const member = response.data.members?.find((m: any) => {
+          console.log('Checking member:', m.user?.id, 'against user:', user.id);
+          return m.user?.id === user.id || m.userId === user.id;
+        });
+        
+        console.log('Found member:', member);
         setIsMember(!!member);
         setUserRole(member?.role || '');
+        console.log('Is member:', !!member, 'Role:', member?.role);
       }
     } catch (error) {
       console.error('Error fetching community:', error);
@@ -187,23 +196,30 @@ export default function CommunityPage() {
       }
       setNewMessage('');
       stopTyping();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to send message';
+      alert(errorMessage);
+      
+      // If not a member, refresh community data
+      if (errorMessage.includes('member')) {
+        fetchCommunity();
+      }
     }
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-    
+
     // Start typing indicator
     if (e.target.value && isConnected) {
       startTyping();
-      
+
       // Clear existing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+
       // Stop typing after 2 seconds of inactivity
       typingTimeoutRef.current = setTimeout(() => {
         stopTyping();
@@ -241,7 +257,7 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Cover Photo */}
       <div className="relative">
-        <div 
+        <div
           className="h-64 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
           style={{
             backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
@@ -249,7 +265,7 @@ export default function CommunityPage() {
             backgroundPosition: 'center',
           }}
         />
-        
+
         {/* Community Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative -mt-16">
@@ -261,7 +277,7 @@ export default function CommunityPage() {
                   className="w-32 h-32 rounded-lg border-4 border-white shadow-xl object-cover"
                 />
               </div>
-              
+
               <div className="flex-1 pb-4">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex justify-between items-start">
@@ -283,7 +299,7 @@ export default function CommunityPage() {
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Action Buttons */}
                     <div className="flex items-center gap-3">
                       {isMember ? (
@@ -362,7 +378,7 @@ export default function CommunityPage() {
                     </button>
                   )}
                 </div>
-                
+
                 {showCreateGroup && (
                   <form onSubmit={handleCreateGroup} className="mb-4 p-3 bg-gray-50 rounded-lg">
                     <input
@@ -407,7 +423,7 @@ export default function CommunityPage() {
                     </div>
                   </form>
                 )}
-                
+
                 {Object.entries(groupsByCategory).map(([category, groups]) => (
                   <div key={category} className="mb-4">
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
@@ -428,9 +444,9 @@ export default function CommunityPage() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg">
-                              {group.type === 'announcement' ? '📢' : 
-                               group.type === 'meeting' ? '🎥' :
-                               group.type === 'mentorship' ? '🤝' : '💬'}
+                              {group.type === 'announcement' ? '📢' :
+                                group.type === 'meeting' ? '🎥' :
+                                  group.type === 'mentorship' ? '🤝' : '💬'}
                             </span>
                             <span className="truncate">{group.name}</span>
                           </div>
@@ -502,7 +518,7 @@ export default function CommunityPage() {
                       </div>
                     ))
                   )}
-                  
+
                   {/* Typing Indicator */}
                   {typingUsers.length > 0 && (
                     <div className="flex gap-3 items-center text-gray-500 text-sm italic">
@@ -514,7 +530,7 @@ export default function CommunityPage() {
                       <span>Someone is typing...</span>
                     </div>
                   )}
-                  
+
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -523,26 +539,25 @@ export default function CommunityPage() {
                   <div className="flex items-center gap-2">
                     {/* Connection Status */}
                     <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} title={isConnected ? 'Connected' : 'Disconnected'} />
-                    
+
                     <input
                       type="text"
                       value={newMessage}
                       onChange={handleTyping}
                       placeholder="Type a message..."
                       className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      disabled={!isMember}
                     />
                     <button
                       type="submit"
-                      disabled={!newMessage.trim() || !isMember}
+                      disabled={!newMessage.trim()}
                       className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Send
                     </button>
                   </div>
                   {!isMember && (
-                    <p className="text-xs text-gray-500 mt-2 text-center">
-                      Join the community to send messages
+                    <p className="text-xs text-yellow-600 mt-2 text-center">
+                      ⚠️ You may need to join the community to send messages
                     </p>
                   )}
                 </form>
