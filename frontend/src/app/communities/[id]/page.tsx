@@ -81,6 +81,8 @@ export default function CommunityPage() {
 
   useEffect(() => {
     if (selectedGroup) {
+      console.log('Selected group changed, fetching messages for:', selectedGroup.id);
+      setMessages([]); // Clear previous messages
       fetchMessages();
     }
   }, [selectedGroup]);
@@ -110,8 +112,13 @@ export default function CommunityPage() {
   const fetchMessages = async () => {
     if (!selectedGroup) return;
     try {
+      console.log('Fetching messages for group:', selectedGroup.id);
       const response = await api.get(`/communities/groups/${selectedGroup.id}/messages`);
-      setMessages(response.data);
+      console.log('Received messages:', response.data.length);
+      // Messages come in DESC order, reverse for display (oldest first)
+      const reversedMessages = response.data.reverse();
+      setMessages(reversedMessages);
+      console.log('Messages set:', reversedMessages.length);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }

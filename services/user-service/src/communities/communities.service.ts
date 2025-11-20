@@ -370,7 +370,15 @@ export class CommunitiesService {
       author: { id: userId } as any,
     });
 
-    return this.messageRepository.save(message);
+    const savedMessage = await this.messageRepository.save(message);
+
+    // Fetch the complete message with author details
+    const completeMessage = await this.messageRepository.findOne({
+      where: { id: savedMessage.id },
+      relations: ['author', 'group'],
+    });
+
+    return completeMessage;
   }
 
   async getMessages(groupId: string, page = 0, limit = 50) {
