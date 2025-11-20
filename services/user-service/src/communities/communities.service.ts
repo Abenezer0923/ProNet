@@ -36,11 +36,11 @@ export class CommunitiesService {
 
     const savedCommunity = await this.communityRepository.save(community);
 
-    // Add creator as admin
+    // Add creator as owner
     const member = this.memberRepository.create({
       communityId: savedCommunity.id,
       userId,
-      role: 'admin',
+      role: 'owner',
     });
 
     await this.memberRepository.save(member);
@@ -82,15 +82,21 @@ export class CommunitiesService {
     userId: string,
     updateCommunityDto: UpdateCommunityDto,
   ) {
-    const community = await this.findOne(id);
-
     // Check if user is admin
     const member = await this.memberRepository.findOne({
-      where: { communityId: id, userId, role: 'admin' },
+      where: { communityId: id, userId },
     });
 
-    if (!member) {
+    if (!member || !['admin', 'owner'].includes(member.role)) {
       throw new ForbiddenException('Only admins can update the community');
+    }
+
+    const community = await this.communityRepository.findOne({
+      where: { id },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
     }
 
     Object.assign(community, updateCommunityDto);
@@ -98,15 +104,21 @@ export class CommunitiesService {
   }
 
   async remove(id: string, userId: string) {
-    const community = await this.findOne(id);
-
-    // Check if user is admin
+    // Check if user is admin/owner
     const member = await this.memberRepository.findOne({
-      where: { communityId: id, userId, role: 'admin' },
+      where: { communityId: id, userId },
     });
 
-    if (!member) {
+    if (!member || !['admin', 'owner'].includes(member.role)) {
       throw new ForbiddenException('Only admins can delete the community');
+    }
+
+    const community = await this.communityRepository.findOne({
+      where: { id },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
     }
 
     await this.communityRepository.remove(community);
@@ -114,14 +126,20 @@ export class CommunitiesService {
   }
 
   async join(communityId: string, userId: string) {
-    const community = await this.findOne(communityId);
+    const community = await this.communityRepository.findOne({
+      where: { id: communityId },
+    });
+
+    if (!community) {
+      throw new NotFoundException('Community not found');
+    }
 
     const existingMember = await this.memberRepository.findOne({
       where: { communityId, userId },
     });
 
     if (existingMember) {
-      throw new Error('Already a member of this community');
+      throw new ForbiddenException('Already a member of this community');
     }
 
     const member = this.memberRepository.create({
@@ -133,7 +151,7 @@ export class CommunitiesService {
     await this.memberRepository.save(member);
 
     // Update member count
-    community.memberCount += 1;
+    community.memberCount = (community.memberCount || 0) + 1;
     await this.communityRepository.save(community);
 
     return member;
@@ -148,16 +166,21 @@ export class CommunitiesService {
       throw new NotFoundException('Not a member of this community');
     }
 
-    if (member.role === 'admin') {
-      throw new ForbiddenException('Admins cannot leave their community');
+    if (member.role === 'owner') {
+      throw new ForbiddenException('Owner cannot leave their community');
     }
 
     await this.memberRepository.remove(member);
 
     // Update member count
-    const community = await this.findOne(communityId);
-    community.memberCount -= 1;
-    await this.communityRepository.save(community);
+    const community = await this.communityRepository.findOne({
+      where: { id: communityId },
+    });
+
+    if (community) {
+      community.memberCount = Math.max(0, (community.memberCount || 0) - 1);
+      await this.communityRepository.save(community);
+    }
 
     return { message: 'Left community successfully' };
   }

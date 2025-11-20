@@ -49,7 +49,7 @@ export class CommunitiesController {
     return this.communitiesService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Request() req,
@@ -68,7 +68,7 @@ export class CommunitiesController {
     return this.communitiesService.join(id, req.user.sub);
   }
 
-  @Delete(':id/leave')
+  @Post(':id/leave')
   async leave(@Param('id') id: string, @Request() req) {
     return this.communitiesService.leave(id, req.user.sub);
   }
