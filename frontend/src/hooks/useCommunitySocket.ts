@@ -7,6 +7,7 @@ interface Message {
   author: any;
   createdAt: string;
   groupId?: string;
+  group?: { id: string };
 }
 
 interface UseCommunitySocketProps {
@@ -29,13 +30,32 @@ export const useCommunitySocket = ({
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const groupIdRef = useRef<string | null>(groupId);
+
+  useEffect(() => {
+    groupIdRef.current = groupId;
+  }, [groupId]);
+
+  useEffect(() => {
+    setTypingUsers(new Set());
+  }, [groupId]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    // Connect to WebSocket
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/communities`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    let socketBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
+
+    if (!socketBaseUrl) {
+      if (apiUrl.includes('localhost')) {
+        socketBaseUrl = 'http://localhost:3001';
+      } else {
+        socketBaseUrl = apiUrl.replace('api-gateway', 'user-service');
+      }
+    }
+
+    const socket = io(`${socketBaseUrl}/communities`, {
       auth: { token },
       transports: ['websocket', 'polling'],
     });
@@ -57,8 +77,13 @@ export const useCommunitySocket = ({
     });
 
     socket.on('message_received', (message: Message) => {
+      const messageGroupId = message.groupId || message.group?.id;
+      const currentGroupId = groupIdRef.current;
+      if (currentGroupId && messageGroupId && messageGroupId !== currentGroupId) {
+        return;
+      }
       console.log('Message received:', message);
-      onMessageReceived?.(message);
+      onMessageReceived?.({ ...message, groupId: messageGroupId || currentGroupId || undefined });
     });
 
     socket.on('user_joined', (data: { userId: string; groupId: string }) => {
@@ -72,12 +97,16 @@ export const useCommunitySocket = ({
     });
 
     socket.on('user_typing', (data: { userId: string; groupId: string }) => {
-      setTypingUsers((prev) => new Set(prev).add(data.userId));
+      setTypingUsers((prev: Set<string>) => {
+        const updated = new Set(prev);
+        updated.add(data.userId);
+        return updated;
+      });
       onUserTyping?.(data);
     });
 
     socket.on('user_stopped_typing', (data: { userId: string; groupId: string }) => {
-      setTypingUsers((prev) => {
+      setTypingUsers((prev: Set<string>) => {
         const newSet = new Set(prev);
         newSet.delete(data.userId);
         return newSet;

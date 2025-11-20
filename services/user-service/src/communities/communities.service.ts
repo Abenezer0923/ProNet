@@ -367,7 +367,9 @@ export class CommunitiesService {
     const message = this.messageRepository.create({
       ...createMessageDto,
       group,
+      groupId: group.id,
       author: { id: userId } as any,
+      authorId: userId,
     });
 
     const savedMessage = await this.messageRepository.save(message);
@@ -383,9 +385,9 @@ export class CommunitiesService {
 
   async getMessages(groupId: string, page = 0, limit = 50) {
     return this.messageRepository.find({
-      where: { group: { id: groupId } },
+      where: { groupId },
       relations: ['author'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'ASC' },
       take: limit,
       skip: page * limit,
     });

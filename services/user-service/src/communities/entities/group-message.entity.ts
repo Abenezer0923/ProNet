@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Group } from './group.entity';
 import { User } from '../../users/entities/user.entity';
@@ -14,16 +15,26 @@ export class GroupMessage {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Group, group => group.messages)
+  @Column()
+  groupId: string;
+
+  @ManyToOne(() => Group, group => group.messages, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'groupId' })
   group: Group;
 
-  @ManyToOne(() => User)
+  @Column()
+  authorId: string;
+
+  @ManyToOne(() => User, { eager: false })
+  @JoinColumn({ name: 'authorId' })
   author: User;
 
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, default: () => "'[]'::jsonb" })
   attachments: object[];
 
   @Column({ nullable: true })

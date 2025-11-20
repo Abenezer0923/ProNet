@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,13 +58,13 @@ export default function CommunityPage() {
   const [newGroupType, setNewGroupType] = useState('chat');
   const [newGroupCategory, setNewGroupCategory] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // WebSocket connection
   const { isConnected, sendMessage: sendSocketMessage, startTyping, stopTyping, typingUsers } = useCommunitySocket({
     groupId: selectedGroup?.id || null,
     onMessageReceived: (message) => {
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev: Message[]) => [...prev, message]);
       scrollToBottom();
     },
   });
@@ -77,7 +77,28 @@ export default function CommunityPage() {
     if (communityId) {
       fetchCommunity();
     }
-  }, [communityId]);
+}, [communityId]);
+
+useEffect(() => {
+  if (!community) {
+    setIsMember(false);
+    setUserRole('');
+    return;
+  }
+
+  if (!user) {
+    setIsMember(false);
+    setUserRole('');
+    return;
+  }
+
+  const member = community.members?.find((m: any) => {
+    return m.user?.id === user.id || m.userId === user.id;
+  });
+
+  setIsMember(!!member);
+  setUserRole(member?.role || '');
+}, [community, user]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -95,21 +116,6 @@ export default function CommunityPage() {
     try {
       const response = await api.get(`/communities/${communityId}`);
       setCommunity(response.data);
-
-      if (user) {
-        console.log('Current user:', user);
-        console.log('Community members:', response.data.members);
-
-        const member = response.data.members?.find((m: any) => {
-          console.log('Checking member:', m.user?.id, 'against user:', user.id);
-          return m.user?.id === user.id || m.userId === user.id;
-        });
-
-        console.log('Found member:', member);
-        setIsMember(!!member);
-        setUserRole(member?.role || '');
-        console.log('Is member:', !!member, 'Role:', member?.role);
-      }
     } catch (error) {
       console.error('Error fetching community:', error);
       router.push('/communities');
@@ -161,7 +167,7 @@ export default function CommunityPage() {
     }
   };
 
-  const handleCreateGroup = async (e: React.FormEvent) => {
+  const handleCreateGroup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await api.post(`/communities/${communityId}/groups`, {
@@ -180,9 +186,14 @@ export default function CommunityPage() {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedGroup) return;
+
+    if (!isMember) {
+      alert('Join this community to participate in group chats.');
+      return;
+    }
 
     console.log('Sending message:', newMessage, 'via', isConnected ? 'WebSocket' : 'HTTP');
 
@@ -198,7 +209,7 @@ export default function CommunityPage() {
           content: newMessage,
         });
         console.log('Message saved via HTTP:', response.data);
-        setMessages([...messages, response.data]);
+        setMessages((prev: Message[]) => [...prev, response.data]);
       }
       setNewMessage('');
       stopTyping();
@@ -214,7 +225,7 @@ export default function CommunityPage() {
     }
   };
 
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTyping = (e: ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
     // Start typing indicator
@@ -252,12 +263,15 @@ export default function CommunityPage() {
     { id: 'members', label: 'Members', icon: '👥' },
   ];
 
-  const groupsByCategory = community.groups?.reduce((acc, group) => {
-    const category = group.category || 'General';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(group);
-    return acc;
-  }, {} as Record<string, Group[]>) || {};
+  const groupsByCategory = (community.groups || []).reduce<Record<string, Group[]>>(
+    (acc: Record<string, Group[]>, group: Group) => {
+      const category = group.category || 'General';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(group);
+      return acc;
+    },
+    {},
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -430,13 +444,13 @@ export default function CommunityPage() {
                   </form>
                 )}
 
-                {Object.entries(groupsByCategory).map(([category, groups]) => (
+                {(Object.entries(groupsByCategory) as [string, Group[]][]).map(([category, groups]) => (
                   <div key={category} className="mb-4">
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                       {category}
                     </h4>
                     <div className="space-y-1">
-                      {groups.map((group) => (
+                      {groups.map((group: Group) => (
                         <button
                           key={group.id}
                           onClick={() => setSelectedGroup(group)}
@@ -505,7 +519,7 @@ export default function CommunityPage() {
                       <p>No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    messages.map((message) => (
+                    messages.map((message: Message) => (
                       <div key={message.id} className="flex gap-3">
                         <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                           {message.author?.firstName?.[0]}{message.author?.lastName?.[0]}
@@ -551,11 +565,12 @@ export default function CommunityPage() {
                       value={newMessage}
                       onChange={handleTyping}
                       placeholder="Type a message..."
-                      className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      disabled={!isMember}
+                      className={`flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!isMember ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
                     />
                     <button
                       type="submit"
-                      disabled={!newMessage.trim()}
+                      disabled={!newMessage.trim() || !isMember}
                       className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Send
@@ -563,7 +578,7 @@ export default function CommunityPage() {
                   </div>
                   {!isMember && (
                     <p className="text-xs text-yellow-600 mt-2 text-center">
-                      ⚠️ You may need to join the community to send messages
+                      ⚠️ Join this community to participate in group chats
                     </p>
                   )}
                 </form>
