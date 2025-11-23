@@ -62,9 +62,10 @@ export default function ArticleEditor({ communityId, initialData }: ArticleEdito
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Cover Image</label>
                 <ImageUpload
-                    value={coverImage}
-                    onChange={setCoverImage}
-                    onRemove={() => setCoverImage('')}
+                    currentImage={coverImage}
+                    onUploadComplete={setCoverImage}
+                    type="cover"
+                    label="Cover Image"
                 />
             </div>
 
