@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from './entities/article.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { Community } from './entities/community.entity';
 import { ArticleClap } from './entities/article-clap.entity';
 import { ArticleComment } from './entities/article-comment.entity';
@@ -115,7 +115,7 @@ export class ArticlesService {
 
         const comment = this.commentsRepository.create({
             article,
-            user: { id: userId } as User,
+            author: { id: userId } as User,
             content,
         });
 
@@ -128,7 +128,7 @@ export class ArticlesService {
     async getComments(id: string): Promise<ArticleComment[]> {
         return this.commentsRepository.find({
             where: { article: { id } },
-            relations: ['user'],
+            relations: ['author'],
             order: { createdAt: 'DESC' },
         });
     }
