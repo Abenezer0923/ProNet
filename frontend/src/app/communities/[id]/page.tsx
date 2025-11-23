@@ -7,7 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { useCommunitySocket } from '@/hooks/useCommunitySocket';
 
-type TabType = 'home' | 'groups' | 'posts' | 'members';
+import ArticleCard from '@/components/articles/ArticleCard';
+
+type TabType = 'home' | 'groups' | 'posts' | 'members' | 'articles';
 
 interface Community {
   id: string;
@@ -57,6 +59,7 @@ export default function CommunityPage() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupType, setNewGroupType] = useState('chat');
   const [newGroupCategory, setNewGroupCategory] = useState('');
+  const [articles, setArticles] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -77,28 +80,28 @@ export default function CommunityPage() {
     if (communityId) {
       fetchCommunity();
     }
-}, [communityId]);
+  }, [communityId]);
 
-useEffect(() => {
-  if (!community) {
-    setIsMember(false);
-    setUserRole('');
-    return;
-  }
+  useEffect(() => {
+    if (!community) {
+      setIsMember(false);
+      setUserRole('');
+      return;
+    }
 
-  if (!user) {
-    setIsMember(false);
-    setUserRole('');
-    return;
-  }
+    if (!user) {
+      setIsMember(false);
+      setUserRole('');
+      return;
+    }
 
-  const member = community.members?.find((m: any) => {
-    return m.user?.id === user.id || m.userId === user.id;
-  });
+    const member = community.members?.find((m: any) => {
+      return m.user?.id === user.id || m.userId === user.id;
+    });
 
-  setIsMember(!!member);
-  setUserRole(member?.role || '');
-}, [community, user]);
+    setIsMember(!!member);
+    setUserRole(member?.role || '');
+  }, [community, user]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -111,6 +114,12 @@ useEffect(() => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (activeTab === 'articles' && communityId) {
+      fetchArticles();
+    }
+  }, [activeTab, communityId]);
 
   const fetchCommunity = async () => {
     try {
@@ -136,6 +145,15 @@ useEffect(() => {
       console.log('Messages set:', reversedMessages.length);
     } catch (error) {
       console.error('Error fetching messages:', error);
+    }
+  };
+
+  const fetchArticles = async () => {
+    try {
+      const response = await api.get(`/communities/${communityId}/articles`);
+      setArticles(response.data);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
     }
   };
 
@@ -260,6 +278,7 @@ useEffect(() => {
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'groups', label: 'Groups', icon: '💬' },
     { id: 'posts', label: 'Posts', icon: '📱' },
+    { id: 'articles', label: 'Articles', icon: '📄' },
     { id: 'members', label: 'Members', icon: '👥' },
   ];
 
@@ -642,6 +661,43 @@ useEffect(() => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'articles' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900">Articles</h2>
+                  {isMember && (
+                    <Link
+                      href={`/communities/${communityId}/articles/new`}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                    >
+                      Write Article
+                    </Link>
+                  )}
+                </div>
+
+                <div className="grid gap-6">
+                  {articles.length > 0 ? (
+                    articles.map((article) => (
+                      <ArticleCard
+                        key={article.id}
+                        article={article}
+                        communityId={communityId}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                      <p className="text-gray-500 text-lg">No articles yet.</p>
+                      {isMember && (
+                        <p className="text-gray-400 mt-2">
+                          Be the first to share your knowledge!
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

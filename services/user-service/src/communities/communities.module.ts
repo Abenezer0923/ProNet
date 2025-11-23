@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
+import { ArticlesController } from './articles.controller';
+import { ArticlesService } from './articles.service';
 import { CommunitiesGateway } from './communities.gateway';
 import { Community } from './entities/community.entity';
 import { CommunityMember } from './entities/community-member.entity';
@@ -32,8 +34,8 @@ import { EventAttendee } from './entities/event-attendee.entity';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [CommunitiesController],
-  providers: [CommunitiesService, CommunitiesGateway],
-  exports: [CommunitiesService],
+  controllers: [CommunitiesController, ArticlesController],
+  providers: [CommunitiesService, CommunitiesGateway, ArticlesService],
+  exports: [CommunitiesService, ArticlesService],
 })
-export class CommunitiesModule {}
+export class CommunitiesModule { }
