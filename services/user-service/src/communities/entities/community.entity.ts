@@ -39,7 +39,7 @@ export class Community {
   @Column()
   createdBy: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'createdBy' })
   creator: User;
 
