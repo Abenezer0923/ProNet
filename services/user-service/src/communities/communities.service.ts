@@ -128,38 +128,47 @@ export class CommunitiesService {
   async join(communityId: string, userId: string) {
     console.log(`User ${userId} attempting to join community ${communityId}`);
 
-    const community = await this.communityRepository.findOne({
-      where: { id: communityId },
-    });
+    try {
+      const community = await this.communityRepository.findOne({
+        where: { id: communityId },
+      });
 
-    if (!community) {
-      console.log('Community not found');
-      throw new NotFoundException('Community not found');
+      if (!community) {
+        console.log('Community not found');
+        throw new NotFoundException('Community not found');
+      }
+
+      const existingMember = await this.memberRepository.findOne({
+        where: { communityId, userId },
+      });
+
+      if (existingMember) {
+        console.log(`User ${userId} is already a member of community ${communityId}`);
+        throw new ForbiddenException('Already a member of this community');
+      }
+
+      const member = this.memberRepository.create({
+        communityId,
+        userId,
+        role: 'member',
+      });
+
+      await this.memberRepository.save(member);
+
+      // Update member count
+      community.memberCount = (community.memberCount || 0) + 1;
+      await this.communityRepository.save(community);
+
+      console.log(`User ${userId} successfully joined community ${communityId}`);
+      return member;
+    } catch (error) {
+      console.error('Error in join community:', error);
+      // Handle unique constraint violation (Postgres code 23505)
+      if (error.code === '23505') {
+        throw new ForbiddenException('Already a member of this community');
+      }
+      throw error;
     }
-
-    const existingMember = await this.memberRepository.findOne({
-      where: { communityId, userId },
-    });
-
-    if (existingMember) {
-      console.log(`User ${userId} is already a member of community ${communityId}`);
-      throw new ForbiddenException('Already a member of this community');
-    }
-
-    const member = this.memberRepository.create({
-      communityId,
-      userId,
-      role: 'member',
-    });
-
-    await this.memberRepository.save(member);
-
-    // Update member count
-    community.memberCount = (community.memberCount || 0) + 1;
-    await this.communityRepository.save(community);
-
-    console.log(`User ${userId} successfully joined community ${communityId}`);
-    return member;
   }
 
   async leave(communityId: string, userId: string) {
