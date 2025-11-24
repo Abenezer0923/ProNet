@@ -1,12 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/Logo';
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/feed');
+    }
+  }, [user, loading, router]);
 
   const faqs = [
     {
