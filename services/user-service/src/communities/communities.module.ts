@@ -15,6 +15,7 @@ import { ArticleClap } from './entities/article-clap.entity';
 import { ArticleComment } from './entities/article-comment.entity';
 import { CommunityEvent } from './entities/community-event.entity';
 import { EventAttendee } from './entities/event-attendee.entity';
+import { MessageReaction } from './entities/message-reaction.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
@@ -29,6 +30,7 @@ import { User } from '../users/entities/user.entity';
       ArticleComment,
       CommunityEvent,
       EventAttendee,
+      MessageReaction,
       User,
     ]),
     JwtModule.register({

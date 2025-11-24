@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Group } from './group.entity';
 import { User } from '../../users/entities/user.entity';
+import { MessageReaction } from './message-reaction.entity';
 
 @Entity('group_messages')
 export class GroupMessage {
@@ -38,13 +40,20 @@ export class GroupMessage {
   attachments: object[];
 
   @Column({ nullable: true })
-  threadId: string;
+  parentMessageId: string;
+
+  @ManyToOne(() => GroupMessage, { nullable: true })
+  @JoinColumn({ name: 'parentMessageId' })
+  parentMessage: GroupMessage;
 
   @Column({ default: false })
   isPinned: boolean;
 
   @Column({ default: false })
   isEdited: boolean;
+
+  @OneToMany(() => MessageReaction, reaction => reaction.message)
+  reactions: MessageReaction[];
 
   @CreateDateColumn()
   createdAt: Date;

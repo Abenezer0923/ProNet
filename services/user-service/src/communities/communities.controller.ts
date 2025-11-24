@@ -170,4 +170,70 @@ export class CommunitiesController {
   ) {
     return this.communitiesService.getMessages(groupId, page, limit);
   }
+
+  // Message Reactions
+  @Post('groups/:groupId/messages/:messageId/react')
+  async addReaction(
+    @Param('messageId') messageId: string,
+    @Body('emoji') emoji: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.addReaction(messageId, req.user.sub, emoji);
+  }
+
+  @Delete('groups/:groupId/messages/:messageId/react')
+  async removeReaction(
+    @Param('messageId') messageId: string,
+    @Body('emoji') emoji: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.removeReaction(messageId, req.user.sub, emoji);
+  }
+
+  // Pinned Messages
+  @Post('groups/:groupId/messages/:messageId/pin')
+  async pinMessage(
+    @Param('messageId') messageId: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.pinMessage(messageId, req.user.sub);
+  }
+
+  @Delete('groups/:groupId/messages/:messageId/pin')
+  async unpinMessage(
+    @Param('messageId') messageId: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.unpinMessage(messageId, req.user.sub);
+  }
+
+  @Get('groups/:groupId/messages/pinned')
+  async getPinnedMessages(@Param('groupId') groupId: string) {
+    return this.communitiesService.getPinnedMessages(groupId);
+  }
+
+  // Message Editing
+  @Put('groups/:groupId/messages/:messageId')
+  async editMessage(
+    @Param('messageId') messageId: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.editMessage(messageId, req.user.sub, content);
+  }
+
+  // Message Threading
+  @Get('groups/:groupId/messages/:messageId/thread')
+  async getThread(@Param('messageId') messageId: string) {
+    return this.communitiesService.getThread(messageId);
+  }
+
+  @Post('groups/:groupId/messages/:messageId/thread')
+  async replyToThread(
+    @Param('messageId') messageId: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.replyToThread(messageId, req.user.sub, content);
+  }
 }

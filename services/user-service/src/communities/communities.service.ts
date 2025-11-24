@@ -14,6 +14,7 @@ import { UpdateCommunityDto } from './dto/update-community.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateGroupMessageDto } from './dto/create-group-message.dto';
 import { User } from '../users/entities/user.entity';
+import { MessageReaction } from './entities/message-reaction.entity';
 
 @Injectable()
 export class CommunitiesService {
@@ -26,6 +27,8 @@ export class CommunitiesService {
     private groupRepository: Repository<Group>,
     @InjectRepository(GroupMessage)
     private messageRepository: Repository<GroupMessage>,
+    @InjectRepository(MessageReaction)
+    private reactionRepository: Repository<MessageReaction>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) { }
@@ -439,10 +442,159 @@ export class CommunitiesService {
   async getMessages(groupId: string, page = 0, limit = 50) {
     return this.messageRepository.find({
       where: { groupId },
-      relations: ['author'],
+      relations: ['author', 'reactions', 'reactions.user'],
       order: { createdAt: 'ASC' },
       take: limit,
       skip: page * limit,
+    });
+  }
+
+  // Message Reactions
+  async addReaction(messageId: string, userId: string, emoji: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    // Check if reaction already exists
+    const existingReaction = await this.reactionRepository.findOne({
+      where: { messageId, userId, emoji },
+    });
+
+    if (existingReaction) {
+      throw new ForbiddenException('Already reacted with this emoji');
+    }
+
+    const reaction = this.reactionRepository.create({
+      messageId,
+      userId,
+      emoji,
+    });
+
+    return await this.reactionRepository.save(reaction);
+  }
+
+  async removeReaction(messageId: string, userId: string, emoji: string) {
+    const reaction = await this.reactionRepository.findOne({
+      where: { messageId, userId, emoji },
+    });
+
+    if (!reaction) {
+      throw new NotFoundException('Reaction not found');
+    }
+
+    await this.reactionRepository.remove(reaction);
+    return { message: 'Reaction removed successfully' };
+  }
+
+  // Pinned Messages
+  async pinMessage(messageId: string, userId: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['group', 'group.community'],
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    // Check if user is admin/moderator
+    const member = await this.memberRepository.findOne({
+      where: { communityId: message.group.community.id, userId },
+    });
+
+    if (!member || !['owner', 'admin', 'moderator'].includes(member.role)) {
+      throw new ForbiddenException('Only admins can pin messages');
+    }
+
+    message.isPinned = true;
+    return await this.messageRepository.save(message);
+  }
+
+  async unpinMessage(messageId: string, userId: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['group', 'group.community'],
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    // Check if user is admin/moderator
+    const member = await this.memberRepository.findOne({
+      where: { communityId: message.group.community.id, userId },
+    });
+
+    if (!member || !['owner', 'admin', 'moderator'].includes(member.role)) {
+      throw new ForbiddenException('Only admins can unpin messages');
+    }
+
+    message.isPinned = false;
+    return await this.messageRepository.save(message);
+  }
+
+  async getPinnedMessages(groupId: string) {
+    return this.messageRepository.find({
+      where: { groupId, isPinned: true },
+      relations: ['author', 'reactions', 'reactions.user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  // Message Editing
+  async editMessage(messageId: string, userId: string, content: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    if (message.authorId !== userId) {
+      throw new ForbiddenException('You can only edit your own messages');
+    }
+
+    message.content = content;
+    message.isEdited = true;
+    return await this.messageRepository.save(message);
+  }
+
+  // Message Threading
+  async getThread(messageId: string) {
+    return this.messageRepository.find({
+      where: { parentMessageId: messageId },
+      relations: ['author', 'reactions', 'reactions.user'],
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  async replyToThread(messageId: string, userId: string, content: string) {
+    const parentMessage = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['group'],
+    });
+
+    if (!parentMessage) {
+      throw new NotFoundException('Parent message not found');
+    }
+
+    const message = this.messageRepository.create({
+      content,
+      groupId: parentMessage.groupId,
+      authorId: userId,
+      parentMessageId: messageId,
+    });
+
+    const savedMessage = await this.messageRepository.save(message);
+
+    return await this.messageRepository.findOne({
+      where: { id: savedMessage.id },
+      relations: ['author', 'parentMessage'],
     });
   }
 
