@@ -368,8 +368,8 @@ export class AuthService {
     user.password = hashedPassword;
     await this.userRepository.save(user);
 
-    // Invalidate all sessions (require OTP on next login)
-    await this.updateLoginSession(user.id, user.email, true);
+    // Invalidate all sessions but allow immediate login without OTP (since they just verified)
+    await this.updateLoginSession(user.id, user.email, false);
 
     return { message: 'Password reset successfully' };
   }
