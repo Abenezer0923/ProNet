@@ -26,6 +26,10 @@ export class CommunitiesController {
 
   @Post()
   async create(@Request() req, @Body() createCommunityDto: CreateCommunityDto) {
+    console.log('Create community request received:', {
+      userId: req.user.sub,
+      dto: createCommunityDto
+    });
     return this.communitiesService.create(req.user.sub, createCommunityDto);
   }
 

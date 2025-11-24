@@ -28,24 +28,32 @@ export class CommunitiesService {
   ) { }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
-    const community = this.communityRepository.create({
-      ...createCommunityDto,
-      createdBy: userId,
-      memberCount: 1,
-    });
+    console.log(`Creating community for user ${userId}`);
+    try {
+      const community = this.communityRepository.create({
+        ...createCommunityDto,
+        createdBy: userId,
+        memberCount: 1,
+      });
 
-    const savedCommunity = await this.communityRepository.save(community);
+      const savedCommunity = await this.communityRepository.save(community);
+      console.log('Community saved:', savedCommunity.id);
 
-    // Add creator as owner
-    const member = this.memberRepository.create({
-      communityId: savedCommunity.id,
-      userId,
-      role: 'owner',
-    });
+      // Add creator as owner
+      const member = this.memberRepository.create({
+        communityId: savedCommunity.id,
+        userId,
+        role: 'owner',
+      });
 
-    await this.memberRepository.save(member);
+      await this.memberRepository.save(member);
+      console.log('Creator added as owner');
 
-    return savedCommunity;
+      return savedCommunity;
+    } catch (error) {
+      console.error('Error creating community:', error);
+      throw error;
+    }
   }
 
   async findAll() {
