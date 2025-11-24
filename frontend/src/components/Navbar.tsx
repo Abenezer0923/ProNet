@@ -31,7 +31,7 @@ export default function Navbar() {
 
     const navItems = [
         { name: 'Feed', href: '/feed', icon: HomeIcon, activeIcon: HomeIconSolid },
-        { name: 'Network', href: '/network', icon: UserGroupIcon, activeIcon: UserGroupIconSolid },
+        { name: 'Community', href: '/communities', icon: UserGroupIcon, activeIcon: UserGroupIconSolid },
         { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon, activeIcon: BriefcaseIconSolid },
         { name: 'Messaging', href: '/messaging', icon: ChatBubbleLeftEllipsisIcon, activeIcon: ChatBubbleLeftEllipsisIconSolid },
         { name: 'Notifications', href: '/notifications', icon: BellIcon, activeIcon: BellIconSolid },
@@ -67,8 +67,8 @@ export default function Navbar() {
                                     key={item.name}
                                     href={item.href}
                                     className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-colors ${isActive
-                                            ? 'text-gray-900 border-b-2 border-gray-900'
-                                            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                        ? 'text-gray-900 border-b-2 border-gray-900'
+                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                                         }`}
                                 >
                                     <Icon className="h-6 w-6 mb-1" />
