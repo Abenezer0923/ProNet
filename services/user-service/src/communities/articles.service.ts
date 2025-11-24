@@ -22,18 +22,14 @@ export class ArticlesService {
     ) { }
 
     async create(communityId: string, userId: string, createArticleDto: CreateArticleDto): Promise<Article> {
-        console.log('ArticlesService.create called', { communityId, userId, dto: createArticleDto });
         try {
             const community = await this.communitiesRepository.findOne({ where: { id: communityId } });
             if (!community) {
-                console.error('Community not found', communityId);
                 throw new NotFoundException('Community not found');
             }
-            console.log('Community found:', community.id);
 
             const slug = this.generateSlug(createArticleDto.title);
             const publishedAt = createArticleDto.status === 'published' ? new Date() : null;
-            console.log('Generated slug:', slug);
 
             const article = this.articlesRepository.create({
                 ...createArticleDto,
@@ -43,11 +39,8 @@ export class ArticlesService {
                 publishedAt,
                 readingTime: this.calculateReadingTime(createArticleDto.content),
             });
-            console.log('Article entity created, saving...', article);
 
-            const savedArticle = await this.articlesRepository.save(article);
-            console.log('Article saved successfully:', savedArticle.id);
-            return savedArticle;
+            return await this.articlesRepository.save(article);
         } catch (error) {
             console.error('Error creating article:', error);
             throw error;
@@ -55,7 +48,14 @@ export class ArticlesService {
     }
 
     async findAll(communityId: string, query: any): Promise<Article[]> {
-        const { status = 'published', limit = 10, page = 1 } = query;
+        let page = query.page ? parseInt(query.page.toString()) : 1;
+        if (isNaN(page) || page < 1) page = 1;
+
+        let limit = query.limit ? parseInt(query.limit.toString()) : 10;
+        if (isNaN(limit) || limit < 1) limit = 10;
+
+        const status = query.status || 'published';
+
         const skip = (page - 1) * limit;
 
         return this.articlesRepository.find({
