@@ -13,9 +13,11 @@ export class EmailService {
       return;
     }
 
-    // Create transporter with Gmail using service shorthand (automatically sets host to smtp.gmail.com and port to 465)
+    // Create transporter with Gmail using explicit SSL (Port 465)
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // Use SSL
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
