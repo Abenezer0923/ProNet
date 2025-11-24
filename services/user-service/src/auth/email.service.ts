@@ -20,6 +20,10 @@ export class EmailService {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      // Fail fast if connection hangs
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
     });
 
     console.log(`📧 Email service initialized with: ${process.env.EMAIL_USER}`);
