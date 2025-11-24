@@ -22,22 +22,29 @@ export class ArticlesService {
     ) { }
 
     async create(communityId: string, userId: string, createArticleDto: CreateArticleDto): Promise<Article> {
-        const community = await this.communitiesRepository.findOne({ where: { id: communityId } });
-        if (!community) {
-            throw new NotFoundException('Community not found');
+        try {
+            const community = await this.communitiesRepository.findOne({ where: { id: communityId } });
+            if (!community) {
+                throw new NotFoundException('Community not found');
+            }
+
+            const slug = this.generateSlug(createArticleDto.title);
+            const publishedAt = createArticleDto.status === 'published' ? new Date() : null;
+
+            const article = this.articlesRepository.create({
+                ...createArticleDto,
+                community,
+                author: { id: userId } as User,
+                slug,
+                publishedAt,
+                readingTime: this.calculateReadingTime(createArticleDto.content),
+            });
+
+            return await this.articlesRepository.save(article);
+        } catch (error) {
+            console.error('Error creating article:', error);
+            throw error;
         }
-
-        const slug = this.generateSlug(createArticleDto.title);
-
-        const article = this.articlesRepository.create({
-            ...createArticleDto,
-            community,
-            author: { id: userId } as User,
-            slug,
-            readingTime: this.calculateReadingTime(createArticleDto.content),
-        });
-
-        return this.articlesRepository.save(article);
     }
 
     async findAll(communityId: string, query: any): Promise<Article[]> {

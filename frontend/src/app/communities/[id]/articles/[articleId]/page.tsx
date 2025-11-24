@@ -22,10 +22,13 @@ interface Article {
     tags: string[];
 }
 
+import CommentsSection from '@/components/articles/CommentsSection';
+
 export default function ArticlePage() {
     const params = useParams();
     const [article, setArticle] = useState<Article | null>(null);
     const [loading, setLoading] = useState(true);
+    const [clapped, setClapped] = useState(false);
 
     useEffect(() => {
         const fetchArticle = async () => {
@@ -49,6 +52,24 @@ export default function ArticlePage() {
             fetchArticle();
         }
     }, [params.articleId]);
+
+    const handleClap = async () => {
+        if (clapped) return; // Prevent multiple claps per session for now (or allow it if backend supports)
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/communities/articles/${params.articleId}/clap`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            setArticle(prev => prev ? { ...prev, clapCount: prev.clapCount + 1 } : null);
+            setClapped(true);
+        } catch (error) {
+            console.error('Error clapping:', error);
+        }
+    };
 
     if (loading) return <div className="p-8 text-center">Loading article...</div>;
     if (!article) return <div className="p-8 text-center">Article not found</div>;
@@ -109,9 +130,12 @@ export default function ArticlePage() {
                         ))}
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-12">
                         <div className="flex items-center gap-6">
-                            <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                            <button
+                                onClick={handleClap}
+                                className={`flex items-center gap-2 transition-colors ${clapped ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+                            >
                                 <span className="text-2xl">👏</span>
                                 <span className="font-medium">{article.clapCount}</span>
                             </button>
@@ -125,6 +149,8 @@ export default function ArticlePage() {
                             {/* Social share buttons could go here */}
                         </div>
                     </div>
+
+                    <CommentsSection articleId={article.id} />
                 </footer>
             </article>
         </div>

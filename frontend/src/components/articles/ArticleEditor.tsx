@@ -49,9 +49,10 @@ export default function ArticleEditor({ communityId, initialData }: ArticleEdito
 
             router.push(`/communities/${communityId}?tab=articles`);
             router.refresh();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating article:', error);
-            alert('Failed to create article');
+            const errorMessage = error.response?.data?.message || 'Failed to create article';
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
