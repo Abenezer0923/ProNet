@@ -30,7 +30,23 @@ export class CommunitiesController {
       userId: req.user.sub,
       dto: createCommunityDto
     });
-    return this.communitiesService.create(req.user.sub, createCommunityDto);
+    try {
+      const result = await this.communitiesService.create(req.user.sub, createCommunityDto);
+      console.log('Community created successfully:', result.id);
+      return result;
+    } catch (error) {
+      console.error('Controller caught error:', error);
+      throw error;
+    }
+  }
+
+  @Get('test-db')
+  async testDatabase(@Request() req) {
+    return {
+      message: 'Database connection test',
+      userId: req.user.sub,
+      timestamp: new Date().toISOString()
+    };
   }
 
   @Get()

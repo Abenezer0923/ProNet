@@ -15,6 +15,7 @@ import { ArticleClap } from './entities/article-clap.entity';
 import { ArticleComment } from './entities/article-comment.entity';
 import { CommunityEvent } from './entities/community-event.entity';
 import { EventAttendee } from './entities/event-attendee.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EventAttendee } from './entities/event-attendee.entity';
       ArticleComment,
       CommunityEvent,
       EventAttendee,
+      User,
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-secret-key',

@@ -13,6 +13,7 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateGroupMessageDto } from './dto/create-group-message.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class CommunitiesService {
@@ -25,11 +26,21 @@ export class CommunitiesService {
     private groupRepository: Repository<Group>,
     @InjectRepository(GroupMessage)
     private messageRepository: Repository<GroupMessage>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) { }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
     console.log(`Creating community for user ${userId}`, createCommunityDto);
     try {
+      // Verify user exists
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        console.error(`User not found: ${userId}`);
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      console.log('User verified:', user.email);
+
       const community = this.communityRepository.create({
         ...createCommunityDto,
         createdBy: userId,
