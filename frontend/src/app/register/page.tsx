@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { Logo } from '@/components/Logo';
+
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
@@ -49,8 +51,7 @@ export default function RegisterPage() {
       <header className="bg-white border-b border-gray-200 py-4 px-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg"></div>
-            <span className="text-xl font-bold text-gray-900">ProNet</span>
+            <Logo size="md" />
           </Link>
           <div className="text-sm text-gray-600">
             Already have an account?{' '}
@@ -93,8 +94,8 @@ export default function RegisterPage() {
                       type="button"
                       onClick={() => handleProfileTypeChange('personal')}
                       className={`relative p-6 border-2 rounded-xl text-left transition-all group hover:border-primary-600 hover:bg-primary-50/30 ${formData.profileType === 'personal'
-                          ? 'border-primary-600 bg-primary-50/30 ring-1 ring-primary-600'
-                          : 'border-gray-200'
+                        ? 'border-primary-600 bg-primary-50/30 ring-1 ring-primary-600'
+                        : 'border-gray-200'
                         }`}
                     >
                       <div className="flex justify-between items-start mb-4">
@@ -119,8 +120,8 @@ export default function RegisterPage() {
                       type="button"
                       onClick={() => handleProfileTypeChange('organizational')}
                       className={`relative p-6 border-2 rounded-xl text-left transition-all group hover:border-primary-600 hover:bg-primary-50/30 ${formData.profileType === 'organizational'
-                          ? 'border-primary-600 bg-primary-50/30 ring-1 ring-primary-600'
-                          : 'border-gray-200'
+                        ? 'border-primary-600 bg-primary-50/30 ring-1 ring-primary-600'
+                        : 'border-gray-200'
                         }`}
                     >
                       <div className="flex justify-between items-start mb-4">
