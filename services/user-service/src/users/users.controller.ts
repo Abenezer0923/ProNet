@@ -25,7 +25,7 @@ import { Public } from '../auth/decorators/public.decorator';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get('profile/:id')
   async getProfile(@Param('id') id: string) {
@@ -112,10 +112,19 @@ export class UsersController {
     @Request() req,
     @Body() updateUsernameDto: UpdateUsernameDto,
   ) {
-    return this.usersService.updateUsername(
-      req.user.sub,
-      updateUsernameDto.username,
-    );
+    console.log('Update username request:', {
+      userId: req.user.sub,
+      newUsername: updateUsernameDto.username
+    });
+    try {
+      return await this.usersService.updateUsername(
+        req.user.sub,
+        updateUsernameDto.username,
+      );
+    } catch (error) {
+      console.error('Error in updateUsername controller:', error);
+      throw error;
+    }
   }
 
   @Public()

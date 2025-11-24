@@ -225,24 +225,38 @@ export class UsersService {
   }
 
   async updateUsername(userId: string, newUsername: string) {
-    const validation = validateUsername(newUsername);
-    if (!validation.valid) {
-      throw new BadRequestException(validation.error);
+    console.log(`Updating username for user ${userId} to ${newUsername}`);
+
+    try {
+      const validation = validateUsername(newUsername);
+      if (!validation.valid) {
+        console.log('Username validation failed:', validation.error);
+        throw new BadRequestException(validation.error);
+      }
+
+      const normalized = normalizeUsername(newUsername);
+      console.log('Checking for existing username:', normalized);
+
+      const existing = await this.userRepository
+        .createQueryBuilder('user')
+        .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
+        .andWhere('user.id != :userId', { userId })
+        .getOne();
+
+      if (existing) {
+        console.log('Username already taken by:', existing.id);
+        throw new ConflictException('Username is already taken');
+      }
+
+      console.log('Updating user record...');
+      await this.userRepository.update(userId, { username: newUsername });
+      console.log('Username updated successfully');
+
+      return { message: 'Username updated successfully', username: newUsername };
+    } catch (error) {
+      console.error('Error in UsersService.updateUsername:', error);
+      throw error;
     }
-
-    const normalized = normalizeUsername(newUsername);
-    const existing = await this.userRepository
-      .createQueryBuilder('user')
-      .where('LOWER(user.username) = LOWER(:username)', { username: normalized })
-      .andWhere('user.id != :userId', { userId })
-      .getOne();
-
-    if (existing) {
-      throw new ConflictException('Username is already taken');
-    }
-
-    await this.userRepository.update(userId, { username: newUsername });
-    return { message: 'Username updated successfully', username: newUsername };
   }
 
   async getUserByUsername(username: string) {
