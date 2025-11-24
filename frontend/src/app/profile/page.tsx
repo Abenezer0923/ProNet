@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [stats, setStats] = useState({ followers: 0, following: 0 });
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [communities, setCommunities] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -24,6 +25,7 @@ export default function ProfilePage() {
     } else if (user) {
       fetchProfile();
       fetchStats();
+      fetchCommunities();
     }
   }, [user, authLoading, router]);
 
@@ -44,6 +46,15 @@ export default function ProfilePage() {
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchCommunities = async () => {
+    try {
+      const response = await api.get(`/communities/creator/${user?.id}`);
+      setCommunities(response.data);
+    } catch (error) {
+      console.error('Error fetching communities:', error);
     }
   };
 
@@ -326,12 +337,9 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-8">
-              {profileType === 'personal' ? (
+              {profile.profileType === 'personal' ? (
                 <PersonalProfile
                   profile={profile}
-                  experiences={experiences}
-                  educations={educations}
-                  skills={skills}
                 />
               ) : (
                 <OrganizationalProfile profile={profile} />
