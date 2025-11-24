@@ -10,6 +10,8 @@ import { EmailService } from './email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { generateUniqueUsername } from '../users/utils/username.util';
 
 @Injectable()
@@ -333,6 +335,47 @@ export class AuthService {
       user: this.sanitizeUser(user),
       token,
     };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      // Don't reveal if user exists
+      return { message: 'If an account exists, an OTP has been sent.' };
+    }
+
+    // Generate and send OTP
+    const otpCode = await this.generateAndSendOtp(email);
+
+    return {
+      message: 'OTP sent successfully',
+      otpCode, // For demo purposes
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, otp, newPassword } = resetPasswordDto;
+
+    // Verify OTP
+    await this.verifyOtp({ email, otp });
+
+    // Find user
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    // Invalidate all sessions (require OTP on next login)
+    await this.updateLoginSession(user.id, user.email, true);
+
+    return { message: 'Password reset successfully' };
   }
 
   private async updateLoginSession(userId: string, email: string | null, requiresOtp: boolean) {
