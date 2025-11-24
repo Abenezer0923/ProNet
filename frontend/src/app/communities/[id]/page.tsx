@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { useCommunitySocket } from '@/hooks/useCommunitySocket';
 import ArticleCard from '@/components/articles/ArticleCard';
+import GroupMessage from '@/components/community/GroupMessage';
+import PinnedMessages from '@/components/community/PinnedMessages';
 import {
   UserGroupIcon,
   ChatBubbleLeftRightIcon,
@@ -48,6 +50,12 @@ interface Message {
   content: string;
   author: any;
   createdAt: string;
+  updatedAt: string;
+  isEdited: boolean;
+  isPinned: boolean;
+  reactions: any[];
+  attachments?: any[];
+  parentMessageId?: string;
 }
 
 export default function CommunityPage() {
@@ -75,8 +83,18 @@ export default function CommunityPage() {
   // WebSocket connection
   const { isConnected, sendMessage: sendSocketMessage, startTyping, stopTyping, typingUsers } = useCommunitySocket({
     groupId: selectedGroup?.id || null,
-    onMessageReceived: (message) => {
-      setMessages((prev: Message[]) => [...prev, message]);
+    onMessageReceived: (message: any) => {
+      // Ensure message has all required fields
+      const fullMessage: Message = {
+        ...message,
+        updatedAt: message.updatedAt || message.createdAt,
+        isEdited: message.isEdited || false,
+        isPinned: message.isPinned || false,
+        reactions: message.reactions || [],
+        attachments: message.attachments || [],
+        parentMessageId: message.parentMessageId || undefined,
+      };
+      setMessages((prev: Message[]) => [...prev, fullMessage]);
       scrollToBottom();
     },
   });
@@ -238,7 +256,17 @@ export default function CommunityPage() {
         const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, {
           content: newMessage,
         });
-        setMessages((prev: Message[]) => [...prev, response.data]);
+        // Ensure response has all required fields
+        const fullMessage: Message = {
+          ...response.data,
+          updatedAt: response.data.updatedAt || response.data.createdAt,
+          isEdited: response.data.isEdited || false,
+          isPinned: response.data.isPinned || false,
+          reactions: response.data.reactions || [],
+          attachments: response.data.attachments || [],
+          parentMessageId: response.data.parentMessageId || undefined,
+        };
+        setMessages((prev: Message[]) => [...prev, fullMessage]);
       }
       setNewMessage('');
       stopTyping();
@@ -266,6 +294,35 @@ export default function CommunityPage() {
       }, 2000);
     } else if (!e.target.value) {
       stopTyping();
+    }
+  };
+
+  const handleEditMessage = async (messageId: string, content: string) => {
+    if (!selectedGroup) return;
+    try {
+      await api.put(`/communities/groups/${selectedGroup.id}/messages/${messageId}`, {
+        content,
+      });
+      await fetchMessages();
+    } catch (error) {
+      console.error('Error editing message:', error);
+      alert('Failed to edit message');
+    }
+  };
+
+  const handlePinMessage = async (messageId: string) => {
+    if (!selectedGroup) return;
+    try {
+      const message = messages.find((m) => m.id === messageId);
+      if (message?.isPinned) {
+        await api.delete(`/communities/groups/${selectedGroup.id}/messages/${messageId}/pin`);
+      } else {
+        await api.post(`/communities/groups/${selectedGroup.id}/messages/${messageId}/pin`);
+      }
+      await fetchMessages();
+    } catch (error) {
+      console.error('Error pinning message:', error);
+      alert('Failed to pin message');
     }
   };
 
@@ -537,6 +594,13 @@ export default function CommunityPage() {
 
             {activeTab === 'groups' && selectedGroup && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-[600px]">
+                {/* Pinned Messages Bar */}
+                <PinnedMessages
+                  groupId={selectedGroup.id}
+                  isAdmin={['owner', 'admin', 'moderator'].includes(userRole)}
+                  onUnpin={fetchMessages}
+                />
+
                 {/* Group Header */}
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
                   <div>
@@ -551,36 +615,25 @@ export default function CommunityPage() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-white">
                   {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                       <ChatBubbleLeftRightIcon className="w-12 h-12 mb-2 opacity-50" />
                       <p>No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    messages.map((message: Message) => {
-                      const isMe = message.author?.id === user?.id;
-                      return (
-                        <div key={message.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold flex-shrink-0 border border-indigo-200">
-                            {message.author?.firstName?.[0]}{message.author?.lastName?.[0]}
-                          </div>
-                          <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="font-semibold text-xs text-gray-700">
-                                {message.author?.firstName} {message.author?.lastName}
-                              </span>
-                              <span className="text-[10px] text-gray-400">
-                                {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                            <div className={`px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'}`}>
-                              {message.content}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
+                    messages.map((message: Message) => (
+                      <GroupMessage
+                        key={message.id}
+                        message={message}
+                        groupId={selectedGroup.id}
+                        currentUserId={user?.id || ''}
+                        isAdmin={['owner', 'admin', 'moderator'].includes(userRole)}
+                        onEdit={handleEditMessage}
+                        onPin={handlePinMessage}
+                        onRefresh={fetchMessages}
+                      />
+                    ))
                   )}
 
                   {/* Typing Indicator */}
