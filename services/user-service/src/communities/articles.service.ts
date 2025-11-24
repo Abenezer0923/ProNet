@@ -22,14 +22,18 @@ export class ArticlesService {
     ) { }
 
     async create(communityId: string, userId: string, createArticleDto: CreateArticleDto): Promise<Article> {
+        console.log('ArticlesService.create called', { communityId, userId, dto: createArticleDto });
         try {
             const community = await this.communitiesRepository.findOne({ where: { id: communityId } });
             if (!community) {
+                console.error('Community not found', communityId);
                 throw new NotFoundException('Community not found');
             }
+            console.log('Community found:', community.id);
 
             const slug = this.generateSlug(createArticleDto.title);
             const publishedAt = createArticleDto.status === 'published' ? new Date() : null;
+            console.log('Generated slug:', slug);
 
             const article = this.articlesRepository.create({
                 ...createArticleDto,
@@ -39,8 +43,11 @@ export class ArticlesService {
                 publishedAt,
                 readingTime: this.calculateReadingTime(createArticleDto.content),
             });
+            console.log('Article entity created, saving...', article);
 
-            return await this.articlesRepository.save(article);
+            const savedArticle = await this.articlesRepository.save(article);
+            console.log('Article saved successfully:', savedArticle.id);
+            return savedArticle;
         } catch (error) {
             console.error('Error creating article:', error);
             throw error;
