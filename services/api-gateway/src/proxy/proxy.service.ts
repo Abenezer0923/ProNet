@@ -63,7 +63,11 @@ export class ProxyService {
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
         timeout: 60000, // 60 second timeout for uploads
+        validateStatus: () => true, // Accept all status codes, handle them ourselves
       });
+
+      // Log response for debugging
+      console.log(`Response status: ${response.status}`);
 
       res.status(response.status).json(response.data);
     } catch (error) {
