@@ -7,9 +7,16 @@ import {
     ShareIcon,
     EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconSolid, UserGroupIcon } from '@heroicons/react/24/solid';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
+
+interface Community {
+    id: string;
+    name: string;
+    avatar?: string;
+}
 
 interface Post {
     id: string;
@@ -23,6 +30,7 @@ interface Post {
         avatar?: string;
         profession?: string;
     };
+    community?: Community;
     createdAt: string;
     likeCount: number;
     commentCount: number;
@@ -99,82 +107,101 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const displayPost = post.isRepost && post.originalPost ? post.originalPost : post;
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 hover:shadow-md transition-shadow">
+        <div className="bg-gradient-to-br from-white via-white to-purple-50/20 rounded-2xl shadow-lg border-2 border-purple-100/50 p-6 mb-6 hover:shadow-xl hover:border-purple-200/70 transition-all duration-300">
+            {/* Community Badge */}
+            {displayPost.community && (
+                <Link
+                    href={`/communities/${displayPost.community.id}`}
+                    className="inline-flex items-center space-x-2 mb-4 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full hover:from-purple-200 hover:to-pink-200 transition-all group"
+                >
+                    <UserGroupIcon className="h-4 w-4 text-purple-600 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-semibold text-purple-900">
+                        {displayPost.community.name}
+                    </span>
+                </Link>
+            )}
+
             {post.isRepost && (
-                <div className="flex items-center text-gray-500 text-sm mb-3 pb-2 border-b border-gray-50">
-                    <ArrowPathRoundedSquareIcon className="h-4 w-4 mr-2" />
-                    <span className="font-medium">{post.author.firstName} reposted this</span>
+                <div className="flex items-center text-gray-600 text-sm mb-4 pb-3 border-b border-purple-100">
+                    <ArrowPathRoundedSquareIcon className="h-5 w-5 mr-2 text-purple-500" />
+                    <span className="font-semibold">{post.author.firstName} reposted this</span>
                 </div>
             )}
 
-            <div className="flex items-start space-x-3">
-                <img
-                    src={displayPost.author.avatar || `https://ui-avatars.com/api/?name=${displayPost.author.firstName}+${displayPost.author.lastName}`}
-                    alt={displayPost.author.firstName}
-                    className="h-12 w-12 rounded-full object-cover border border-gray-200"
-                />
+            <div className="flex items-start space-x-4">
+                <div className="relative">
+                    <img
+                        src={displayPost.author.avatar || `https://ui-avatars.com/api/?name=${displayPost.author.firstName}+${displayPost.author.lastName}`}
+                        alt={displayPost.author.firstName}
+                        className="h-14 w-14 rounded-full object-cover ring-2 ring-purple-100"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white"></div>
+                </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h3 className="font-bold text-gray-900 hover:text-blue-600 cursor-pointer">
+                            <h3 className="font-bold text-gray-900 hover:text-purple-600 cursor-pointer transition-colors">
                                 {displayPost.author.firstName} {displayPost.author.lastName}
                             </h3>
-                            <p className="text-sm text-gray-500 truncate">{displayPost.author.profession || 'Member'}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-sm text-gray-600 font-medium">{displayPost.author.profession || 'Member'}</p>
+                            <p className="text-xs text-gray-400 mt-1 flex items-center">
+                                <span className="mr-1">🕐</span>
                                 {formatDistanceToNow(new Date(displayPost.createdAt), { addSuffix: true })}
                             </p>
                         </div>
-                        <button className="text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-50">
+                        <button className="text-gray-400 hover:text-purple-600 rounded-full p-2 hover:bg-purple-50 transition-all">
                             <EllipsisHorizontalIcon className="h-5 w-5" />
                         </button>
                     </div>
 
-                    <div className="mt-3 text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    <div className="mt-4 text-gray-800 whitespace-pre-wrap leading-relaxed text-base">
                         {displayPost.content}
                     </div>
 
                     {displayPost.images && displayPost.images.length > 0 && (
-                        <div className={`mt-3 grid gap-2 ${displayPost.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        <div className={`mt-4 grid gap-3 ${displayPost.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                             {displayPost.images.map((img, idx) => (
                                 <img
                                     key={idx}
                                     src={img}
                                     alt="Post content"
-                                    className="rounded-lg w-full h-64 object-cover border border-gray-100"
+                                    className="rounded-xl w-full h-72 object-cover border-2 border-purple-100 hover:border-purple-300 transition-all"
                                 />
                             ))}
                         </div>
                     )}
 
                     {displayPost.video && (
-                        <div className="mt-3">
+                        <div className="mt-4">
                             <video
                                 src={displayPost.video}
                                 controls
-                                className="rounded-lg w-full max-h-96 bg-black"
+                                className="rounded-xl w-full max-h-96 bg-black border-2 border-purple-100"
                             />
                         </div>
                     )}
 
-                    <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div className="mt-5 flex items-center justify-between border-t-2 border-purple-50 pt-4">
                         <div className="relative">
                             <button
-                                className={`flex items-center space-x-2 px-2 py-1 rounded-lg transition-colors ${hasLiked ? 'text-blue-600 bg-blue-50' : 'text-gray-500 hover:bg-gray-50'
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all transform hover:scale-105 ${hasLiked
+                                    ? 'text-pink-600 bg-gradient-to-r from-pink-50 to-purple-50'
+                                    : 'text-gray-600 hover:bg-purple-50'
                                     }`}
                                 onMouseEnter={() => setShowReactionPicker(true)}
                                 onClick={() => handleLike()}
                             >
                                 {hasLiked ? (
-                                    <span className="text-lg">{REACTION_TYPES[userReaction as keyof typeof REACTION_TYPES].icon}</span>
+                                    <span className="text-xl animate-bounce">{REACTION_TYPES[userReaction as keyof typeof REACTION_TYPES].icon}</span>
                                 ) : (
-                                    <HeartIcon className="h-5 w-5" />
+                                    <HeartIcon className="h-6 w-6" />
                                 )}
-                                <span className="font-medium">{post.likeCount > 0 ? post.likeCount : 'Like'}</span>
+                                <span className="font-semibold">{post.likeCount > 0 ? post.likeCount : 'Like'}</span>
                             </button>
 
                             {showReactionPicker && (
                                 <div
-                                    className="absolute bottom-full left-0 mb-2 bg-white shadow-xl rounded-full p-2 flex space-x-2 border border-gray-100 animate-in fade-in slide-in-from-bottom-2"
+                                    className="absolute bottom-full left-0 mb-2 bg-white shadow-2xl rounded-2xl p-3 flex space-x-2 border-2 border-purple-100 animate-in fade-in slide-in-from-bottom-2"
                                     onMouseLeave={() => setShowReactionPicker(false)}
                                 >
                                     {Object.entries(REACTION_TYPES).map(([type, { icon, label }]) => (
@@ -184,7 +211,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                                 e.stopPropagation();
                                                 handleLike(type);
                                             }}
-                                            className="hover:scale-125 transition-transform p-1 text-2xl"
+                                            className="hover:scale-125 transition-transform p-2 text-2xl rounded-full hover:bg-purple-50"
                                             title={label}
                                         >
                                             {icon}
@@ -196,33 +223,33 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
 
                         <button
                             onClick={() => setShowComments(!showComments)}
-                            className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors"
+                            className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
                         >
-                            <ChatBubbleLeftIcon className="h-5 w-5" />
-                            <span className="font-medium">{post.commentCount > 0 ? post.commentCount : 'Comment'}</span>
+                            <ChatBubbleLeftIcon className="h-6 w-6" />
+                            <span className="font-semibold">{post.commentCount > 0 ? post.commentCount : 'Comment'}</span>
                         </button>
 
                         <button
                             onClick={handleRepost}
-                            className="flex items-center space-x-2 text-gray-500 hover:text-green-600 hover:bg-green-50 px-2 py-1 rounded-lg transition-colors"
+                            className="flex items-center space-x-2 text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
                         >
-                            <ArrowPathRoundedSquareIcon className="h-5 w-5" />
-                            <span className="font-medium">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
+                            <ArrowPathRoundedSquareIcon className="h-6 w-6" />
+                            <span className="font-semibold">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
                         </button>
 
-                        <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors">
-                            <ShareIcon className="h-5 w-5" />
-                            <span className="font-medium">Share</span>
+                        <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105">
+                            <ShareIcon className="h-6 w-6" />
+                            <span className="font-semibold">Share</span>
                         </button>
                     </div>
 
                     {showComments && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="mt-5 pt-5 border-t-2 border-purple-50">
                             <form onSubmit={handleComment} className="flex space-x-3">
                                 <img
                                     src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                                     alt="Your avatar"
-                                    className="h-8 w-8 rounded-full"
+                                    className="h-10 w-10 rounded-full ring-2 ring-purple-100"
                                 />
                                 <div className="flex-1">
                                     <input
@@ -230,12 +257,11 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                         value={commentContent}
                                         onChange={(e) => setCommentContent(e.target.value)}
                                         placeholder="Add a comment..."
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         disabled={isSubmitting}
                                     />
                                 </div>
                             </form>
-                            {/* Comments list would go here - for now just a placeholder or fetch logic */}
                         </div>
                     )}
                 </div>
