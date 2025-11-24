@@ -322,26 +322,107 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Conditional Profile Content */}
-        {isOrg ? (
-          <OrganizationalProfile profile={profile} />
-        ) : (
-          <PersonalProfile profile={profile} />
-        )}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-8">
+              {profileType === 'personal' ? (
+                <PersonalProfile
+                  profile={profile}
+                  experiences={experiences}
+                  educations={educations}
+                  skills={skills}
+                />
+              ) : (
+                <OrganizationalProfile profile={profile} />
+              )}
 
-        {/* Danger Zone */}
-        <div className="mt-8 bg-white rounded-xl shadow-sm border border-red-100 p-6">
-          <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600 text-sm">
-              Permanently delete your account and all of your content.
-            </p>
-            <button
-              onClick={handleDeleteAccount}
-              className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition font-medium text-sm"
-            >
-              Delete Account
-            </button>
+              {/* Communities Section */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Communities</h2>
+                  <Link
+                    href="/communities/create"
+                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    + Create New
+                  </Link>
+                </div>
+
+                {communities.length > 0 ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {communities.map((community) => (
+                      <Link
+                        key={community.id}
+                        href={`/communities/${community.id}`}
+                        className="block p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 font-bold">
+                            {community.name[0]}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{community.name}</h3>
+                            <p className="text-xs text-gray-500">{community.memberCount} members</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No communities created yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-8">
+              {/* Contact Info */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Contact Info</h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {profile?.email}
+                  </div>
+                  {profile?.website && (
+                    <div className="flex items-center text-gray-600">
+                      <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                        {profile.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-red-100">
+                <h2 className="text-lg font-bold text-red-600 mb-4">Danger Zone</h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <button
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                      api.delete('/users/account').then(() => {
+                        localStorage.removeItem('token');
+                        router.push('/login');
+                      });
+                    }
+                  }}
+                  className="w-full px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition text-sm font-medium"
+                >
+                  Delete Account
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>

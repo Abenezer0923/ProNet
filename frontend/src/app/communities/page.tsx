@@ -72,8 +72,19 @@ export default function CommunitiesPage() {
           ? { ...c, isMember: true, memberCount: (c.memberCount || 0) + 1 }
           : c
       ));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error joining community:', error);
+
+      // If already a member (403), update state anyway
+      if (error.response && error.response.status === 403) {
+        setCommunities(prev => prev.map(c =>
+          c.id === communityId
+            ? { ...c, isMember: true }
+            : c
+        ));
+        return;
+      }
+
       alert('Failed to join community');
     }
   };

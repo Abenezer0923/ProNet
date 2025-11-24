@@ -126,11 +126,14 @@ export class CommunitiesService {
   }
 
   async join(communityId: string, userId: string) {
+    console.log(`User ${userId} attempting to join community ${communityId}`);
+
     const community = await this.communityRepository.findOne({
       where: { id: communityId },
     });
 
     if (!community) {
+      console.log('Community not found');
       throw new NotFoundException('Community not found');
     }
 
@@ -139,6 +142,7 @@ export class CommunitiesService {
     });
 
     if (existingMember) {
+      console.log(`User ${userId} is already a member of community ${communityId}`);
       throw new ForbiddenException('Already a member of this community');
     }
 
@@ -154,6 +158,7 @@ export class CommunitiesService {
     community.memberCount = (community.memberCount || 0) + 1;
     await this.communityRepository.save(community);
 
+    console.log(`User ${userId} successfully joined community ${communityId}`);
     return member;
   }
 
