@@ -52,12 +52,16 @@ export default function CreateCommunityPage() {
     e.preventDefault();
     setLoading(true);
 
+    console.log('Creating community with data:', formData);
+
     try {
       const response = await api.post('/communities', formData);
+      console.log('Community created successfully:', response.data);
       router.push(`/communities/${response.data.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating community:', error);
-      alert('Failed to create community');
+      console.error('Error response:', error.response?.data);
+      alert(`Failed to create community: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }

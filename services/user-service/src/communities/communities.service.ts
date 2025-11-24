@@ -28,7 +28,7 @@ export class CommunitiesService {
   ) { }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
-    console.log(`Creating community for user ${userId}`);
+    console.log(`Creating community for user ${userId}`, createCommunityDto);
     try {
       const community = this.communityRepository.create({
         ...createCommunityDto,
@@ -36,6 +36,7 @@ export class CommunitiesService {
         memberCount: 1,
       });
 
+      console.log('Community entity created, attempting to save...');
       const savedCommunity = await this.communityRepository.save(community);
       console.log('Community saved:', savedCommunity.id);
 
@@ -46,12 +47,24 @@ export class CommunitiesService {
         role: 'owner',
       });
 
+      console.log('Member entity created, attempting to save...');
       await this.memberRepository.save(member);
       console.log('Creator added as owner');
 
       return savedCommunity;
     } catch (error) {
-      console.error('Error creating community:', error);
+      console.error('Error creating community - Full error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error stack:', error.stack);
+
+      // Re-throw with more context
+      if (error.code === '23505') {
+        throw new ForbiddenException('Duplicate entry detected');
+      }
+      if (error.code === '23503') {
+        throw new NotFoundException('Referenced user not found');
+      }
       throw error;
     }
   }
