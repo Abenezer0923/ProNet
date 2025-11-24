@@ -30,6 +30,13 @@ export class PostLike {
   @JoinColumn({ name: 'userId' })
   user: User;
 
+  @Column({
+    type: 'enum',
+    enum: ['LIKE', 'CELEBRATE', 'SUPPORT', 'INSIGHTFUL', 'FUNNY'],
+    default: 'LIKE',
+  })
+  reactionType: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

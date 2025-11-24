@@ -38,11 +38,37 @@ export class Post {
   @JoinColumn({ name: 'communityId' })
   community: Community;
 
+  @Column({ nullable: true })
+  video: string;
+
+  @Column({ default: false })
+  isRepost: boolean;
+
+  @Column({ nullable: true })
+  originalPostId: string;
+
+  @ManyToOne(() => Post, { nullable: true })
+  @JoinColumn({ name: 'originalPostId' })
+  originalPost: Post;
+
+  @Column({
+    type: 'enum',
+    enum: ['public', 'community', 'connections'],
+    default: 'public',
+  })
+  visibility: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  tags: string[];
+
   @Column({ default: 0 })
   likeCount: number;
 
   @Column({ default: 0 })
   commentCount: number;
+
+  @Column({ default: 0 })
+  repostCount: number;
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];

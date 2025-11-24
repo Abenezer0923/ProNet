@@ -18,7 +18,7 @@ export class PostsService {
     @InjectRepository(PostLike)
     private likeRepository: Repository<PostLike>,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async create(userId: string, createPostDto: CreatePostDto) {
     const post = this.postRepository.create({
@@ -29,9 +29,29 @@ export class PostsService {
     return await this.postRepository.save(post);
   }
 
+  async repost(userId: string, originalPostId: string, content?: string) {
+    const originalPost = await this.findOne(originalPostId);
+
+    const repost = this.postRepository.create({
+      content: content || '',
+      authorId: userId,
+      isRepost: true,
+      originalPostId,
+      visibility: 'public', // Default to public for reposts
+    });
+
+    const savedRepost = await this.postRepository.save(repost);
+
+    // Increment repost count on original post
+    originalPost.repostCount += 1;
+    await this.postRepository.save(originalPost);
+
+    return savedRepost;
+  }
+
   async findAll() {
     return await this.postRepository.find({
-      relations: ['author', 'community'],
+      relations: ['author', 'community', 'originalPost', 'originalPost.author'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -39,7 +59,7 @@ export class PostsService {
   async findByCommunity(communityId: string) {
     return await this.postRepository.find({
       where: { communityId },
-      relations: ['author', 'community'],
+      relations: ['author', 'community', 'originalPost', 'originalPost.author'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -47,7 +67,7 @@ export class PostsService {
   async findByUser(userId: string) {
     return await this.postRepository.find({
       where: { authorId: userId },
-      relations: ['author', 'community'],
+      relations: ['author', 'community', 'originalPost', 'originalPost.author'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -55,7 +75,7 @@ export class PostsService {
   async findOne(id: string) {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'community'],
+      relations: ['author', 'community', 'originalPost', 'originalPost.author', 'comments', 'comments.author', 'comments.replies', 'comments.replies.author'],
     });
 
     if (!post) {
@@ -77,7 +97,7 @@ export class PostsService {
   }
 
   // Likes
-  async likePost(postId: string, userId: string) {
+  async likePost(postId: string, userId: string, reactionType: string = 'LIKE') {
     const post = await this.findOne(postId);
 
     const existingLike = await this.likeRepository.findOne({
@@ -85,17 +105,22 @@ export class PostsService {
     });
 
     if (existingLike) {
-      throw new Error('Already liked this post');
+      if (existingLike.reactionType !== reactionType) {
+        // Update reaction type
+        existingLike.reactionType = reactionType;
+        return await this.likeRepository.save(existingLike);
+      }
+      throw new Error('Already reacted to this post');
     }
 
-    const like = this.likeRepository.create({ postId, userId });
+    const like = this.likeRepository.create({ postId, userId, reactionType });
     await this.likeRepository.save(like);
 
     post.likeCount += 1;
     await this.postRepository.save(post);
 
     // Create notification for post author
-    if (post.author) {
+    if (post.author && post.authorId !== userId) {
       await this.notificationsService.createLikeNotification(
         userId,
         post.authorId,
@@ -119,7 +144,7 @@ export class PostsService {
     await this.likeRepository.remove(like);
 
     const post = await this.findOne(postId);
-    post.likeCount -= 1;
+    post.likeCount = Math.max(0, post.likeCount - 1);
     await this.postRepository.save(post);
 
     return { message: 'Post unliked successfully' };
@@ -153,7 +178,7 @@ export class PostsService {
     await this.postRepository.save(post);
 
     // Create notification for post author
-    if (post.author) {
+    if (post.author && post.authorId !== userId) {
       await this.notificationsService.createCommentNotification(
         userId,
         post.authorId,
@@ -166,9 +191,10 @@ export class PostsService {
   }
 
   async getComments(postId: string) {
+    // Fetch only top-level comments (no parentId)
     return await this.commentRepository.find({
-      where: { postId },
-      relations: ['author'],
+      where: { postId, parentId: null } as any,
+      relations: ['author', 'replies', 'replies.author'],
       order: { createdAt: 'ASC' },
     });
   }
@@ -189,7 +215,7 @@ export class PostsService {
     await this.commentRepository.remove(comment);
 
     const post = await this.findOne(comment.postId);
-    post.commentCount -= 1;
+    post.commentCount = Math.max(0, post.commentCount - 1);
     await this.postRepository.save(post);
 
     return { message: 'Comment deleted successfully' };

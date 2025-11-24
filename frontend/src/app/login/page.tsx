@@ -35,7 +35,7 @@ export default function LoginPage() {
       const { user, token } = response.data;
       localStorage.setItem('token', token);
       loginWithToken(user, token);
-      router.push('/dashboard');
+      router.push('/feed');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {

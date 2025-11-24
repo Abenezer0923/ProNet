@@ -17,11 +17,21 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @Post()
   async create(@Request() req, @Body() createPostDto: CreatePostDto) {
+    console.log('Create post request:', { userId: req.user.sub, dto: createPostDto });
     return this.postsService.create(req.user.sub, createPostDto);
+  }
+
+  @Post(':id/repost')
+  async repost(
+    @Param('id') id: string,
+    @Request() req,
+    @Body('content') content?: string,
+  ) {
+    return this.postsService.repost(req.user.sub, id, content);
   }
 
   @Get()
@@ -47,8 +57,12 @@ export class PostsController {
 
   // Likes
   @Post(':id/like')
-  async like(@Param('id') id: string, @Request() req) {
-    return this.postsService.likePost(id, req.user.sub);
+  async like(
+    @Param('id') id: string,
+    @Request() req,
+    @Body('reactionType') reactionType?: string,
+  ) {
+    return this.postsService.likePost(id, req.user.sub, reactionType);
   }
 
   @Delete(':id/unlike')

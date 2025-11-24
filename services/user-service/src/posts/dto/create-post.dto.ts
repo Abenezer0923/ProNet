@@ -12,4 +12,16 @@ export class CreatePostDto {
   @IsString()
   @IsOptional()
   communityId?: string;
+
+  @IsString()
+  @IsOptional()
+  video?: string;
+
+  @IsString()
+  @IsOptional()
+  visibility?: string;
+
+  @IsArray()
+  @IsOptional()
+  tags?: string[];
 }
