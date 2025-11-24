@@ -6,8 +6,17 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { useCommunitySocket } from '@/hooks/useCommunitySocket';
-
 import ArticleCard from '@/components/articles/ArticleCard';
+import {
+  UserGroupIcon,
+  ChatBubbleLeftRightIcon,
+  NewspaperIcon,
+  UsersIcon,
+  HomeIcon,
+  ArrowLeftIcon,
+  PlusIcon,
+  PaperAirplaneIcon
+} from '@heroicons/react/24/outline';
 
 type TabType = 'home' | 'groups' | 'posts' | 'members' | 'articles';
 
@@ -105,7 +114,6 @@ export default function CommunityPage() {
 
   useEffect(() => {
     if (selectedGroup) {
-      console.log('Selected group changed, fetching messages for:', selectedGroup.id);
       setMessages([]); // Clear previous messages
       fetchMessages();
     }
@@ -136,13 +144,10 @@ export default function CommunityPage() {
   const fetchMessages = async () => {
     if (!selectedGroup) return;
     try {
-      console.log('Fetching messages for group:', selectedGroup.id);
       const response = await api.get(`/communities/groups/${selectedGroup.id}/messages`);
-      console.log('Received messages:', response.data.length);
       // Messages come in DESC order, reverse for display (oldest first)
       const reversedMessages = response.data.reverse();
       setMessages(reversedMessages);
-      console.log('Messages set:', reversedMessages.length);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -165,10 +170,12 @@ export default function CommunityPage() {
 
     try {
       await api.post(`/communities/${communityId}/join`);
+      // Optimistic update
       setIsMember(true);
-      fetchCommunity();
+      fetchCommunity(); // Refresh to get updated member count/list
     } catch (error) {
       console.error('Error joining community:', error);
+      alert('Failed to join community. Please try again.');
     }
   };
 
@@ -213,20 +220,14 @@ export default function CommunityPage() {
       return;
     }
 
-    console.log('Sending message:', newMessage, 'via', isConnected ? 'WebSocket' : 'HTTP');
-
     try {
       // Send via WebSocket if connected, otherwise use HTTP
       if (isConnected) {
-        console.log('Sending via WebSocket to group:', selectedGroup.id);
         sendSocketMessage(newMessage);
-        console.log('Message sent via WebSocket');
       } else {
-        console.log('Sending via HTTP to group:', selectedGroup.id);
         const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, {
           content: newMessage,
         });
-        console.log('Message saved via HTTP:', response.data);
         setMessages((prev: Message[]) => [...prev, response.data]);
       }
       setNewMessage('');
@@ -236,7 +237,6 @@ export default function CommunityPage() {
       const errorMessage = error.response?.data?.message || 'Failed to send message';
       alert(errorMessage);
 
-      // If not a member, refresh community data
       if (errorMessage.includes('member')) {
         fetchCommunity();
       }
@@ -246,16 +246,11 @@ export default function CommunityPage() {
   const handleTyping = (e: ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
-    // Start typing indicator
     if (e.target.value && isConnected) {
       startTyping();
-
-      // Clear existing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-
-      // Stop typing after 2 seconds of inactivity
       typingTimeoutRef.current = setTimeout(() => {
         stopTyping();
       }, 2000);
@@ -275,11 +270,11 @@ export default function CommunityPage() {
   if (!community) return null;
 
   const tabs = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'groups', label: 'Groups', icon: '💬' },
-    { id: 'posts', label: 'Posts', icon: '📱' },
-    { id: 'articles', label: 'Articles', icon: '📄' },
-    { id: 'members', label: 'Members', icon: '👥' },
+    { id: 'home', label: 'Home', icon: HomeIcon },
+    { id: 'groups', label: 'Groups', icon: ChatBubbleLeftRightIcon },
+    { id: 'posts', label: 'Posts', icon: NewspaperIcon },
+    { id: 'articles', label: 'Articles', icon: NewspaperIcon },
+    { id: 'members', label: 'Members', icon: UsersIcon },
   ];
 
   const groupsByCategory = (community.groups || []).reduce<Record<string, Group[]>>(
@@ -294,104 +289,111 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/communities" className="flex items-center text-gray-500 hover:text-gray-700 transition">
+                <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                Back to Communities
+              </Link>
+            </div>
+            <div className="flex items-center">
+              <Link href="/dashboard" className="text-xl font-bold text-indigo-600">ProNet</Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Cover Photo */}
       <div className="relative">
         <div
-          className="h-64 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+          className="h-64 bg-gradient-to-r from-indigo-600 to-purple-600"
           style={{
             backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
+        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
         {/* Community Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-16">
-            <div className="flex items-end space-x-5">
-              <div className="relative">
-                <img
-                  src={community.logo || `https://ui-avatars.com/api/?name=${community.name}&size=128&background=4F46E5&color=fff`}
-                  alt={community.name}
-                  className="w-32 h-32 rounded-lg border-4 border-white shadow-xl object-cover"
-                />
-              </div>
+          <div className="relative -mt-20 flex flex-col md:flex-row items-start md:items-end gap-6 pb-6">
+            <div className="relative">
+              <img
+                src={community.logo || `https://ui-avatars.com/api/?name=${community.name}&size=160&background=random`}
+                alt={community.name}
+                className="w-40 h-40 rounded-xl border-4 border-white shadow-lg object-cover bg-white"
+              />
+            </div>
 
-              <div className="flex-1 pb-4">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-gray-900">{community.name}</h1>
-                      <p className="text-gray-600 mt-2">{community.description}</p>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          {community.members?.length || 0} members
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {community.privacy}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-3">
-                      {isMember ? (
-                        <>
-                          <button
-                            onClick={handleLeaveCommunity}
-                            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-semibold transition"
-                          >
-                            Leave
-                          </button>
-                          {['owner', 'admin'].includes(userRole) && (
-                            <Link
-                              href={`/communities/${communityId}/settings`}
-                              className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
-                            >
-                              Settings
-                            </Link>
-                          )}
-                        </>
-                      ) : (
-                        <button
-                          onClick={handleJoinCommunity}
-                          className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
-                        >
-                          Join Community
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            <div className="flex-1 text-white md:text-gray-900 md:mb-4">
+              <h1 className="text-3xl font-bold drop-shadow-md md:drop-shadow-none">{community.name}</h1>
+              <p className="text-white/90 md:text-gray-600 mt-1 text-lg drop-shadow-md md:drop-shadow-none max-w-2xl">
+                {community.description}
+              </p>
+              <div className="flex items-center gap-4 mt-3 text-sm font-medium text-white/90 md:text-gray-500">
+                <span className="flex items-center gap-1 bg-black/20 md:bg-transparent px-2 py-1 rounded-full md:p-0 backdrop-blur-sm md:backdrop-blur-none">
+                  <UsersIcon className="w-4 h-4" />
+                  {community.members?.length || 0} members
+                </span>
+                <span className="flex items-center gap-1 bg-black/20 md:bg-transparent px-2 py-1 rounded-full md:p-0 backdrop-blur-sm md:backdrop-blur-none capitalize">
+                  {community.privacy} Group
+                </span>
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 mt-4 md:mt-0 md:mb-4">
+              {isMember ? (
+                <>
+                  <button
+                    onClick={handleLeaveCommunity}
+                    className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold shadow-sm transition"
+                  >
+                    Leave
+                  </button>
+                  {['owner', 'admin'].includes(userRole) && (
+                    <Link
+                      href={`/communities/${communityId}/settings`}
+                      className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-sm transition"
+                    >
+                      Settings
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={handleJoinCommunity}
+                  className="px-8 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+                >
+                  Join Community
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8" aria-label="Tabs">
+          <nav className="flex space-x-8 overflow-x-auto" aria-label="Tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`
-                  py-4 px-1 border-b-2 font-medium text-sm transition
+                  py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap flex items-center
                   ${activeTab === tab.id
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <tab.icon className="w-5 h-5 mr-2" />
                 {tab.label}
               </button>
             ))}
@@ -401,31 +403,32 @@ export default function CommunityPage() {
 
       {/* Tab Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar - Groups */}
-          {activeTab === 'groups' && (
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm p-4 sticky top-24">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-900">Groups</h3>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar - Groups (Only visible on Groups tab or desktop) */}
+          {(activeTab === 'groups') && (
+            <div className="w-full lg:w-80 flex-shrink-0">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-32">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="font-bold text-gray-900 text-lg">Groups</h3>
                   {['owner', 'admin', 'moderator'].includes(userRole) && (
                     <button
                       onClick={() => setShowCreateGroup(true)}
-                      className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                      className="text-indigo-600 hover:text-indigo-700 p-1 hover:bg-indigo-50 rounded-full transition"
+                      title="Create Group"
                     >
-                      + Add
+                      <PlusIcon className="w-5 h-5" />
                     </button>
                   )}
                 </div>
 
                 {showCreateGroup && (
-                  <form onSubmit={handleCreateGroup} className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <form onSubmit={handleCreateGroup} className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <input
                       type="text"
                       value={newGroupName}
                       onChange={(e) => setNewGroupName(e.target.value)}
                       placeholder="Group name"
-                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       required
                     />
                     <input
@@ -433,12 +436,12 @@ export default function CommunityPage() {
                       value={newGroupCategory}
                       onChange={(e) => setNewGroupCategory(e.target.value)}
                       placeholder="Category (optional)"
-                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                     <select
                       value={newGroupType}
                       onChange={(e) => setNewGroupType(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md mb-2"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     >
                       <option value="chat">Chat</option>
                       <option value="announcement">Announcement</option>
@@ -448,14 +451,14 @@ export default function CommunityPage() {
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        className="flex-1 px-3 py-1 bg-indigo-600 text-white rounded-md text-sm"
+                        className="flex-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
                       >
                         Create
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowCreateGroup(false)}
-                        className="flex-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm"
+                        className="flex-1 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300"
                       >
                         Cancel
                       </button>
@@ -464,8 +467,8 @@ export default function CommunityPage() {
                 )}
 
                 {(Object.entries(groupsByCategory) as [string, Group[]][]).map(([category, groups]) => (
-                  <div key={category} className="mb-4">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <div key={category} className="mb-6 last:mb-0">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">
                       {category}
                     </h4>
                     <div className="space-y-1">
@@ -474,21 +477,19 @@ export default function CommunityPage() {
                           key={group.id}
                           onClick={() => setSelectedGroup(group)}
                           className={`
-                            w-full text-left px-3 py-2 rounded-md text-sm transition
+                            w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center gap-3
                             ${selectedGroup?.id === group.id
-                              ? 'bg-indigo-100 text-indigo-700'
-                              : 'text-gray-700 hover:bg-gray-100'
+                              ? 'bg-indigo-50 text-indigo-700 font-medium'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }
                           `}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">
-                              {group.type === 'announcement' ? '📢' :
-                                group.type === 'meeting' ? '🎥' :
-                                  group.type === 'mentorship' ? '🤝' : '💬'}
-                            </span>
-                            <span className="truncate">{group.name}</span>
-                          </div>
+                          <span className="text-lg opacity-80">
+                            {group.type === 'announcement' ? '📢' :
+                              group.type === 'meeting' ? '🎥' :
+                                group.type === 'mentorship' ? '🤝' : '#'}
+                          </span>
+                          <span className="truncate">{group.name}</span>
                         </button>
                       ))}
                     </div>
@@ -498,73 +499,87 @@ export default function CommunityPage() {
             </div>
           )}
 
-          {/* Main Content */}
-          <div className="flex-1">
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
             {activeTab === 'home' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h2 className="text-2xl font-bold mb-4">Welcome to {community.name}</h2>
-                <p className="text-gray-600 mb-6">{community.description}</p>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-4 bg-indigo-50 rounded-lg">
-                    <div className="text-3xl font-bold text-indigo-600">{community.members?.length || 0}</div>
-                    <div className="text-sm text-gray-600">Members</div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                <div className="prose max-w-none">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About {community.name}</h2>
+                  <p className="text-gray-600 leading-relaxed">{community.description}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-gray-100">
+                  <div className="p-6 bg-indigo-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-indigo-600 mb-1">{community.members?.length || 0}</div>
+                    <div className="text-sm font-medium text-gray-600">Members</div>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <div className="text-3xl font-bold text-purple-600">{community.groups?.length || 0}</div>
-                    <div className="text-sm text-gray-600">Groups</div>
+                  <div className="p-6 bg-purple-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-purple-600 mb-1">{community.groups?.length || 0}</div>
+                    <div className="text-sm font-medium text-gray-600">Groups</div>
                   </div>
-                  <div className="p-4 bg-pink-50 rounded-lg">
-                    <div className="text-3xl font-bold text-pink-600">{community.privacy}</div>
-                    <div className="text-sm text-gray-600">Privacy</div>
+                  <div className="p-6 bg-pink-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-pink-600 mb-1 capitalize">{community.privacy}</div>
+                    <div className="text-sm font-medium text-gray-600">Privacy</div>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'groups' && selectedGroup && (
-              <div className="bg-white rounded-lg shadow-sm flex flex-col h-[calc(100vh-300px)]">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-[600px]">
                 {/* Group Header */}
-                <div className="p-4 border-b">
-                  <h2 className="text-xl font-bold">{selectedGroup.name}</h2>
-                  {selectedGroup.description && (
-                    <p className="text-sm text-gray-600">{selectedGroup.description}</p>
-                  )}
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <span className="text-indigo-500">#</span> {selectedGroup.name}
+                    </h2>
+                    {selectedGroup.description && (
+                      <p className="text-sm text-gray-500 mt-0.5">{selectedGroup.description}</p>
+                    )}
+                  </div>
+                  <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-400'}`} title={isConnected ? 'Connected' : 'Disconnected'} />
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
                   {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                      <ChatBubbleLeftRightIcon className="w-12 h-12 mb-2 opacity-50" />
                       <p>No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    messages.map((message: Message) => (
-                      <div key={message.id} className="flex gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                          {message.author?.firstName?.[0]}{message.author?.lastName?.[0]}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-baseline gap-2">
-                            <span className="font-semibold text-sm">
-                              {message.author?.firstName} {message.author?.lastName}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {new Date(message.createdAt).toLocaleTimeString()}
-                            </span>
+                    messages.map((message: Message) => {
+                      const isMe = message.author?.id === user?.id;
+                      return (
+                        <div key={message.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold flex-shrink-0 border border-indigo-200">
+                            {message.author?.firstName?.[0]}{message.author?.lastName?.[0]}
                           </div>
-                          <p className="text-gray-700 mt-1">{message.content}</p>
+                          <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="font-semibold text-xs text-gray-700">
+                                {message.author?.firstName} {message.author?.lastName}
+                              </span>
+                              <span className="text-[10px] text-gray-400">
+                                {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <div className={`px-4 py-2 rounded-2xl text-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'}`}>
+                              {message.content}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
 
                   {/* Typing Indicator */}
                   {typingUsers.length > 0 && (
-                    <div className="flex gap-3 items-center text-gray-500 text-sm italic">
+                    <div className="flex gap-2 items-center text-gray-400 text-xs ml-12">
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
                       <span>Someone is typing...</span>
                     </div>
@@ -574,56 +589,52 @@ export default function CommunityPage() {
                 </div>
 
                 {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    {/* Connection Status */}
-                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} title={isConnected ? 'Connected' : 'Disconnected'} />
-
+                <div className="p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
+                  <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     <input
                       type="text"
                       value={newMessage}
                       onChange={handleTyping}
-                      placeholder="Type a message..."
+                      placeholder={isMember ? `Message #${selectedGroup.name}` : "Join community to chat"}
                       disabled={!isMember}
-                      className={`flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!isMember ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400"
                     />
                     <button
                       type="submit"
                       disabled={!newMessage.trim() || !isMember}
-                      className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
-                      Send
+                      <PaperAirplaneIcon className="w-5 h-5" />
                     </button>
-                  </div>
-                  {!isMember && (
-                    <p className="text-xs text-yellow-600 mt-2 text-center">
-                      ⚠️ Join this community to participate in group chats
-                    </p>
-                  )}
-                </form>
+                  </form>
+                </div>
               </div>
             )}
 
             {activeTab === 'groups' && !selectedGroup && (
-              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                <p className="text-gray-500">Select a group to start chatting</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center h-[600px] flex flex-col items-center justify-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+                  <ChatBubbleLeftRightIcon className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Group</h3>
+                <p className="text-gray-500 max-w-sm">Choose a group from the sidebar to start chatting with other community members.</p>
               </div>
             )}
 
             {activeTab === 'posts' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4">Community Posts</h2>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold mb-6">Community Posts</h2>
                 {isMember ? (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {/* Create Post */}
-                    <div className="border-b pb-6">
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                       <textarea
                         placeholder="Share something with the community..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       />
                       <div className="flex justify-end mt-3">
-                        <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
                           Post
                         </button>
                       </div>
@@ -631,32 +642,39 @@ export default function CommunityPage() {
 
                     {/* Posts Feed */}
                     <div className="text-center py-12 text-gray-500">
+                      <NewspaperIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                       <p>No posts yet. Be the first to share something!</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    <p>Join the community to see and create posts</p>
+                  <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                    <p className="text-gray-500 font-medium">Join the community to see and create posts</p>
+                    <button onClick={handleJoinCommunity} className="mt-4 text-indigo-600 font-semibold hover:underline">
+                      Join Now
+                    </button>
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'members' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4">Members</h2>
-                <div className="space-y-3">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <UsersIcon className="w-6 h-6 text-gray-400" />
+                  Members
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {community.members?.map((member: any) => (
-                    <div key={member.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-                          {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
+                    <div key={member.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl border border-gray-100 transition">
+                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border border-indigo-200">
+                        {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">
+                          {member.user?.firstName} {member.user?.lastName}
                         </div>
-                        <div>
-                          <div className="font-semibold">
-                            {member.user?.firstName} {member.user?.lastName}
-                          </div>
-                          <div className="text-sm text-gray-500">{member.role}</div>
+                        <div className="text-sm text-gray-500 capitalize px-2 py-0.5 bg-gray-100 rounded-full inline-block mt-1">
+                          {member.role}
                         </div>
                       </div>
                     </div>
@@ -672,7 +690,7 @@ export default function CommunityPage() {
                   {isMember && (
                     <Link
                       href={`/communities/${communityId}/articles/new`}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm font-medium"
                     >
                       Write Article
                     </Link>
@@ -689,8 +707,9 @@ export default function CommunityPage() {
                       />
                     ))
                   ) : (
-                    <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-                      <p className="text-gray-500 text-lg">No articles yet.</p>
+                    <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <NewspaperIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500 text-lg font-medium">No articles yet.</p>
                       {isMember && (
                         <p className="text-gray-400 mt-2">
                           Be the first to share your knowledge!

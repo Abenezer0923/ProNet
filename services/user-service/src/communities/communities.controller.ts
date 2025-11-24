@@ -22,7 +22,7 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 @Controller('communities')
 @UseGuards(JwtAuthGuard)
 export class CommunitiesController {
-  constructor(private readonly communitiesService: CommunitiesService) {}
+  constructor(private readonly communitiesService: CommunitiesService) { }
 
   @Post()
   async create(@Request() req, @Body() createCommunityDto: CreateCommunityDto) {
@@ -37,6 +37,11 @@ export class CommunitiesController {
   @Get('my')
   async getMyCommunities(@Request() req) {
     return this.communitiesService.getMyCommunities(req.user.sub);
+  }
+
+  @Get('creator/:userId')
+  async getCommunitiesByCreator(@Param('userId') userId: string) {
+    return this.communitiesService.getCommunitiesByCreator(userId);
   }
 
   @Get('categories')

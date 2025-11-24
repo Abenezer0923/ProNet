@@ -25,7 +25,7 @@ export class CommunitiesService {
     private groupRepository: Repository<Group>,
     @InjectRepository(GroupMessage)
     private messageRepository: Repository<GroupMessage>,
-  ) {}
+  ) { }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
     const community = this.communityRepository.create({
@@ -221,6 +221,13 @@ export class CommunitiesService {
     }));
   }
 
+  async getCommunitiesByCreator(userId: string) {
+    return await this.communityRepository.find({
+      where: { createdBy: userId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async isMember(communityId: string, userId: string) {
     const member = await this.memberRepository.findOne({
       where: { communityId, userId },
@@ -354,7 +361,7 @@ export class CommunitiesService {
 
   async sendMessage(groupId: string, userId: string, createMessageDto: CreateGroupMessageDto) {
     const group = await this.getGroup(groupId);
-    
+
     // Check if user is member of the community
     const member = await this.memberRepository.findOne({
       where: { communityId: group.community.id, userId },
@@ -395,7 +402,7 @@ export class CommunitiesService {
 
   async deleteGroup(groupId: string, userId: string) {
     const group = await this.getGroup(groupId);
-    
+
     // Check if user is admin/moderator
     const member = await this.memberRepository.findOne({
       where: { communityId: group.community.id, userId },
