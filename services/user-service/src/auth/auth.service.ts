@@ -240,14 +240,14 @@ export class AuthService {
     console.log(`📧 OTP for ${email}: ${otp}`);
     console.log(`⏰ OTP expires at: ${expiresAt}`);
 
-    // Send OTP via email asynchronously (don't wait for it)
-    this.emailService.sendOtpEmail(email, otp)
-      .then(() => {
-        console.log(`✅ OTP email sent successfully to ${email}`);
-      })
-      .catch((error) => {
-        console.error(`⚠️  Failed to send email to ${email}:`, error.message);
-      });
+    // Send OTP via email
+    try {
+      await this.emailService.sendOtpEmail(email, otp);
+      console.log(`✅ OTP email sent successfully to ${email}`);
+    } catch (error) {
+      console.error(`⚠️  Failed to send email to ${email}:`, error.message);
+      // We still return the OTP for demo purposes, but in production we might want to throw
+    }
 
     // Return OTP for demo purposes
     return otp;
