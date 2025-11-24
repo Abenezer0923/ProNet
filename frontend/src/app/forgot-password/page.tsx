@@ -18,9 +18,17 @@ export default function ForgotPasswordPage() {
         setLoading(true);
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, { email });
-            // Redirect to reset password page with email query param
-            router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, { email });
+
+            // For demo/dev: if OTP is returned, pass it to the next page
+            const otpCode = response.data.otpCode;
+            const queryParams = new URLSearchParams({
+                email,
+                ...(otpCode && { otp: otpCode }), // Only add if present
+            });
+
+            // Redirect to reset password page with email and optional OTP
+            router.push(`/reset-password?${queryParams.toString()}`);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to send OTP');
         } finally {

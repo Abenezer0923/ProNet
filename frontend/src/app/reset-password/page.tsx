@@ -20,9 +20,13 @@ function ResetPasswordContent() {
 
     useEffect(() => {
         const emailParam = searchParams.get('email');
-        if (emailParam) {
-            setFormData(prev => ({ ...prev, email: emailParam }));
-        }
+        const otpParam = searchParams.get('otp');
+
+        setFormData(prev => ({
+            ...prev,
+            ...(emailParam && { email: emailParam }),
+            ...(otpParam && { otp: otpParam }),
+        }));
     }, [searchParams]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
