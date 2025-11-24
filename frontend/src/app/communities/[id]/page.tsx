@@ -175,9 +175,11 @@ export default function CommunityPage() {
       fetchCommunity(); // Refresh to get updated member count/list
     } catch (error: any) {
       console.error('Error joining community:', error);
+      console.log('Error response status:', error.response?.status);
 
       // If already a member (403), update state anyway
       if (error.response && error.response.status === 403) {
+        console.log('User already a member (403), updating UI state...');
         setIsMember(true);
         fetchCommunity();
         return;
