@@ -27,9 +27,20 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     try {
-      const { email, password, firstName, lastName, profession } = registerDto;
+      const { email, password, firstName, lastName, profession, profileType = 'personal', organizationName } = registerDto;
 
-      console.log('Registration attempt for:', email);
+      console.log('Registration attempt for:', email, 'Type:', profileType);
+
+      // Validate required fields based on profile type
+      if (profileType === 'personal') {
+        if (!firstName || !lastName) {
+          throw new BadRequestException('First name and last name are required for personal profiles');
+        }
+      } else if (profileType === 'organizational') {
+        if (!organizationName) {
+          throw new BadRequestException('Organization name is required for organizational profiles');
+        }
+      }
 
       // Check if user exists
       const existingUser = await this.userRepository.findOne({ where: { email } });
@@ -41,16 +52,20 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Generate unique username
-      const username = await this.generateAvailableUsername(firstName, lastName);
+      const baseName = profileType === 'organizational' ? organizationName : firstName;
+      const secondaryName = profileType === 'organizational' ? 'org' : lastName;
+      const username = await this.generateAvailableUsername(baseName, secondaryName);
 
       // Create user
       const user = this.userRepository.create({
         email,
         username,
         password: hashedPassword,
-        firstName,
-        lastName,
-        profession,
+        firstName: profileType === 'personal' ? firstName : null,
+        lastName: profileType === 'personal' ? lastName : null,
+        organizationName: profileType === 'organizational' ? organizationName : null,
+        profileType,
+        profession: profileType === 'personal' ? profession : null,
       });
 
       console.log('Saving user to database...');
@@ -141,7 +156,7 @@ export class AuthService {
         console.log('Creating new user from Google profile');
         // Generate unique username
         const username = await this.generateAvailableUsername(firstName, lastName);
-        
+
         // Create new user from Google profile
         user = this.userRepository.create({
           email,
@@ -150,6 +165,7 @@ export class AuthService {
           lastName,
           profilePicture: picture,
           password: '', // No password for OAuth users
+          profileType: 'personal',
         });
         await this.userRepository.save(user);
         isNewUser = true;

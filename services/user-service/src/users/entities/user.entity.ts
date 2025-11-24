@@ -24,10 +24,20 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: ['personal', 'organizational'],
+    default: 'personal',
+  })
+  profileType: string;
+
+  @Column({ nullable: true })
+  organizationName: string;
+
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
   @Column({ nullable: true })
