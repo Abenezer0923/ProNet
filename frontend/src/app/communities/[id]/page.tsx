@@ -173,8 +173,16 @@ export default function CommunityPage() {
       // Optimistic update
       setIsMember(true);
       fetchCommunity(); // Refresh to get updated member count/list
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error joining community:', error);
+
+      // If already a member (403), update state anyway
+      if (error.response && error.response.status === 403) {
+        setIsMember(true);
+        fetchCommunity();
+        return;
+      }
+
       alert('Failed to join community. Please try again.');
     }
   };
