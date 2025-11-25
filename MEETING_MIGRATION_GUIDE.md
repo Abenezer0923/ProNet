@@ -86,7 +86,14 @@ If you still observe frequent disconnects, verify:
 3. No proxy timeouts (<30s) prematurely closing idle connections.
 
 ### Minimal Toolbar Configuration
-We now use:
-`['microphone','camera','desktop','chat','raisehand','tileview','hangup','fullscreen','settings']`
-Add buttons back as needed; consult Jitsi docs to avoid deprecated entries.
+We now use a simplified toolbar to reduce complexity and errors:
+`['microphone', 'camera', 'hangup', 'tileview', 'fullscreen']`
+
+We also disabled `speaker-selection` and other noisy features in `configOverwrite` to fix console errors.
+
+### Google Meet Comparison
+The user considered Google Meet as an alternative.
+- **Pros**: Familiar interface, reliable infrastructure.
+- **Cons**: Cannot be embedded (must open in new tab), API requires OAuth/Calendar integration (complex), no free embedded SDK.
+- **Decision**: Stick with Jitsi for seamless in-app experience, but simplify the UI to reduce complexity.
 

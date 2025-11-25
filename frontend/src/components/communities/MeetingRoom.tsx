@@ -86,21 +86,34 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 configOverwrite: {
                     startWithAudioMuted: true,
                     startWithVideoMuted: true,
-                        // Skip the prejoin lobby to land users straight in the room
+                    // Skip the prejoin lobby to land users straight in the room
                     prejoinPageEnabled: false,
-                        // Silence third-party analytics and remote config fetches (Amplitude, etc.)
-                        disableThirdPartyRequests: true,
-                        analytics: { disabled: true },
-                        // Avoid mobile deep-link prompts and other cross-surface nudges
-                        disableDeepLinking: true,
-                        // Stop gravatar lookups to prevent 404 spam when no avatar exists
-                        enableGravatar: false,
+                    // Silence third-party analytics and remote config fetches (Amplitude, etc.)
+                    disableThirdPartyRequests: true,
+                    analytics: { disabled: true },
+                    // Avoid mobile deep-link prompts and other cross-surface nudges
+                    disableDeepLinking: true,
+                    // Stop gravatar lookups to prevent 404 spam when no avatar exists
+                    enableGravatar: false,
+                    // Disable speaker stats to reduce noise
+                    disableSpeakerStats: true,
+                    // Disable other noisy features
+                    enableNoisyMicDetection: false,
+                    enableNoAudioDetection: false,
                 },
                 interfaceConfigOverwrite: {
                     // Trimmed toolbar to reduce unsupported feature warnings & simplify UI
+                    // Removed 'chat' (use app chat), 'settings' (source of speaker-selection error), 'desktop'
                     TOOLBAR_BUTTONS: [
-                        'microphone','camera','desktop','chat','raisehand','tileview','hangup','fullscreen','settings'
+                        'microphone', 'camera', 'hangup', 'tileview', 'fullscreen'
                     ],
+                    // Hide branding and extra UI
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    SHOW_BRAND_WATERMARK: false,
+                    SHOW_POWERED_BY: false,
+                    DEFAULT_REMOTE_DISPLAY_NAME: 'Fellow Community Member',
+                    DEFAULT_LOCAL_DISPLAY_NAME: 'Me',
                 },
             };
 
