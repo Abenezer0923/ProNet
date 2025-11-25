@@ -18,7 +18,11 @@ import {
   HomeIcon,
   ArrowLeftIcon,
   PlusIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  MegaphoneIcon,
+  VideoCameraIcon,
+  AcademicCapIcon,
+  HashtagIcon
 } from '@heroicons/react/24/outline';
 
 type TabType = 'home' | 'groups' | 'posts' | 'members' | 'articles';
@@ -540,26 +544,53 @@ export default function CommunityPage() {
                       {category}
                     </h4>
                     <div className="space-y-1">
-                      {groups.map((group: Group) => (
-                        <button
-                          key={group.id}
-                          onClick={() => setSelectedGroup(group)}
-                          className={`
-                            w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center gap-3
-                            ${selectedGroup?.id === group.id
-                              ? 'bg-indigo-50 text-indigo-700 font-medium'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                            }
-                          `}
-                        >
-                          <span className="text-lg opacity-80">
-                            {group.type === 'announcement' ? '📢' :
-                              group.type === 'meeting' ? '🎥' :
-                                group.type === 'mentorship' ? '🤝' : '#'}
-                          </span>
-                          <span className="truncate">{group.name}</span>
-                        </button>
-                      ))}
+                      {groups.map((group: Group) => {
+                        // Get icon and color based on group type
+                        const getGroupIcon = () => {
+                          switch (group.type) {
+                            case 'announcement':
+                              return <MegaphoneIcon className="w-5 h-5" />;
+                            case 'meeting':
+                              return <VideoCameraIcon className="w-5 h-5" />;
+                            case 'mentorship':
+                              return <AcademicCapIcon className="w-5 h-5" />;
+                            default:
+                              return <HashtagIcon className="w-5 h-5" />;
+                          }
+                        };
+
+                        const getGroupColor = () => {
+                          switch (group.type) {
+                            case 'announcement':
+                              return 'text-orange-600 bg-orange-50';
+                            case 'meeting':
+                              return 'text-purple-600 bg-purple-50';
+                            case 'mentorship':
+                              return 'text-green-600 bg-green-50';
+                            default:
+                              return 'text-indigo-600 bg-indigo-50';
+                          }
+                        };
+
+                        return (
+                          <button
+                            key={group.id}
+                            onClick={() => setSelectedGroup(group)}
+                            className={`
+                              w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center gap-3
+                              ${selectedGroup?.id === group.id
+                                ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              }
+                            `}
+                          >
+                            <span className={`p-1.5 rounded-lg ${selectedGroup?.id === group.id ? 'bg-indigo-100 text-indigo-700' : getGroupColor()}`}>
+                              {getGroupIcon()}
+                            </span>
+                            <span className="truncate">{group.name}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
