@@ -452,13 +452,18 @@ export class CommunitiesService {
         return [];
       }
 
-      return await this.messageRepository.find({
+      console.log(`Fetching messages for group ${groupId}, page ${pageNum}, limit ${limitNum}`);
+
+      const messages = await this.messageRepository.find({
         where: { groupId },
         relations: ['author', 'reactions', 'reactions.user'],
         order: { createdAt: 'ASC' },
         take: limitNum,
         skip: pageNum * limitNum,
       });
+
+      console.log(`Found ${messages.length} messages for group ${groupId}`);
+      return messages;
     } catch (error) {
       console.error(`Error fetching messages for group ${groupId}:`, error);
       // Return empty array instead of crashing if it's a UUID error

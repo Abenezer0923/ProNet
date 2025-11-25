@@ -31,10 +31,25 @@ export const useCommunitySocket = ({
   const [isConnected, setIsConnected] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const groupIdRef = useRef<string | null>(groupId);
+  
+  // Refs for callbacks to avoid re-connecting when they change
+  const onMessageReceivedRef = useRef(onMessageReceived);
+  const onUserJoinedRef = useRef(onUserJoined);
+  const onUserLeftRef = useRef(onUserLeft);
+  const onUserTypingRef = useRef(onUserTyping);
+  const onUserStoppedTypingRef = useRef(onUserStoppedTyping);
 
   useEffect(() => {
     groupIdRef.current = groupId;
   }, [groupId]);
+
+  useEffect(() => {
+    onMessageReceivedRef.current = onMessageReceived;
+    onUserJoinedRef.current = onUserJoined;
+    onUserLeftRef.current = onUserLeft;
+    onUserTypingRef.current = onUserTyping;
+    onUserStoppedTypingRef.current = onUserStoppedTyping;
+  }, [onMessageReceived, onUserJoined, onUserLeft, onUserTyping, onUserStoppedTyping]);
 
   useEffect(() => {
     setTypingUsers(new Set());
@@ -83,17 +98,17 @@ export const useCommunitySocket = ({
         return;
       }
       console.log('Message received:', message);
-      onMessageReceived?.({ ...message, groupId: messageGroupId || currentGroupId || undefined });
+      onMessageReceivedRef.current?.({ ...message, groupId: messageGroupId || currentGroupId || undefined });
     });
 
     socket.on('user_joined', (data: { userId: string; groupId: string }) => {
       console.log('User joined:', data);
-      onUserJoined?.(data);
+      onUserJoinedRef.current?.(data);
     });
 
     socket.on('user_left', (data: { userId: string; groupId: string }) => {
       console.log('User left:', data);
-      onUserLeft?.(data);
+      onUserLeftRef.current?.(data);
     });
 
     socket.on('user_typing', (data: { userId: string; groupId: string }) => {
@@ -102,7 +117,7 @@ export const useCommunitySocket = ({
         updated.add(data.userId);
         return updated;
       });
-      onUserTyping?.(data);
+      onUserTypingRef.current?.(data);
     });
 
     socket.on('user_stopped_typing', (data: { userId: string; groupId: string }) => {
@@ -111,13 +126,13 @@ export const useCommunitySocket = ({
         newSet.delete(data.userId);
         return newSet;
       });
-      onUserStoppedTyping?.(data);
+      onUserStoppedTypingRef.current?.(data);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [onMessageReceived, onUserJoined, onUserLeft, onUserTyping, onUserStoppedTyping]);
+  }, []); // Empty dependency array - connect only once!
 
   // Join group when groupId changes
   useEffect(() => {
