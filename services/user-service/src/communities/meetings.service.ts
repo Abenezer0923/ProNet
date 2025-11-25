@@ -51,30 +51,17 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Generate a unique room name for Daily.co
+        // Generate a unique room name for Whereby
         const roomName = `ProNet-${groupId}-${uuidv4()}`;
 
-        console.log(`Creating Daily.co meeting room: ${roomName}`);
+        console.log(`Creating Whereby meeting room: ${roomName}`);
 
-        // Create room via Daily.co API
-        let dailyRoomUrl = '';
-        let dailyRoomName = roomName;
+        // Whereby offers free embeddable rooms without API key
+        // Format: https://subdomain.whereby.com/room-name
+        // We'll use a simple room name that works with Whereby's free tier
+        const wherebyRoomUrl = `https://whereby.com/${roomName}`;
 
-        try {
-            const Daily = require('@daily-co/daily-js');
-
-            // For demo without API key, use Daily's prebuilt UI with a temporary room
-            // Format: https://your-domain.daily.co/room-name
-            // For free tier, we can use the demo domain
-            dailyRoomUrl = `https://pronet.daily.co/${roomName}`;
-            dailyRoomName = roomName;
-
-            console.log(`Daily.co room created: ${dailyRoomUrl}`);
-        } catch (error) {
-            console.error('Error creating Daily.co room:', error);
-            // Fallback to direct URL if API fails
-            dailyRoomUrl = `https://pronet.daily.co/${roomName}`;
-        }
+        console.log(`Whereby room URL: ${wherebyRoomUrl}`);
 
         // Create meeting room in database
         const meetingRoom = this.meetingRoomRepository.create({
@@ -83,8 +70,8 @@ export class MeetingsService {
             hostId: userId,
             title: dto.title,
             description: dto.description,
-            dailyRoomUrl,
-            dailyRoomName,
+            dailyRoomUrl: wherebyRoomUrl,
+            dailyRoomName: roomName,
             scheduledStartTime: dto.scheduledStartTime ? new Date(dto.scheduledStartTime) : null,
             scheduledEndTime: dto.scheduledEndTime ? new Date(dto.scheduledEndTime) : null,
             maxParticipants: dto.maxParticipants || 100,
