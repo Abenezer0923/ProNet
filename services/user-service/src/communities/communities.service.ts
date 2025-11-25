@@ -444,8 +444,11 @@ export class CommunitiesService {
   async getMessages(groupId: string, page: number | string = 0, limit: number | string = 50) {
     try {
       // Parse parameters to ensure they're numbers
-      const pageNum = typeof page === 'string' ? parseInt(page, 10) || 0 : page;
-      const limitNum = typeof limit === 'string' ? parseInt(limit, 10) || 50 : limit;
+      let pageNum = typeof page === 'string' ? parseInt(page, 10) : Number(page);
+      if (isNaN(pageNum)) pageNum = 0;
+
+      let limitNum = typeof limit === 'string' ? parseInt(limit, 10) : Number(limit);
+      if (isNaN(limitNum)) limitNum = 50;
 
       if (!groupId) {
         console.warn('getMessages called with empty groupId');
