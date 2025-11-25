@@ -15,6 +15,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateGroupMessageDto } from './dto/create-group-message.dto';
 import { User } from '../users/entities/user.entity';
 import { MessageReaction } from './entities/message-reaction.entity';
+import { MeetingsService } from './meetings.service';
 
 @Injectable()
 export class CommunitiesService {
@@ -31,6 +32,7 @@ export class CommunitiesService {
     private reactionRepository: Repository<MessageReaction>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private meetingsService: MeetingsService,
   ) { }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
@@ -612,5 +614,79 @@ export class CommunitiesService {
 
     await this.groupRepository.remove(group);
     return { message: 'Group deleted successfully' };
+  }
+
+  // ==================== MEETING METHODS (Delegated to MeetingsService) ====================
+
+  async createMeetingRoom(groupId: string, userId: string, dto: any) {
+    return this.meetingsService.createMeetingRoom(groupId, userId, dto);
+  }
+
+  async getMeetingRooms(groupId: string) {
+    return this.meetingsService.getMeetingRooms(groupId);
+  }
+
+  async getMeetingRoom(meetingId: string) {
+    return this.meetingsService.getMeetingRoom(meetingId);
+  }
+
+  async joinMeeting(meetingId: string, userId: string) {
+    return this.meetingsService.joinMeeting(meetingId, userId);
+  }
+
+  async endMeeting(meetingId: string, userId: string) {
+    return this.meetingsService.endMeeting(meetingId, userId);
+  }
+
+  async startRecording(meetingId: string, userId: string) {
+    return this.meetingsService.startRecording(meetingId, userId);
+  }
+
+  async stopRecording(meetingId: string, userId: string) {
+    return this.meetingsService.stopRecording(meetingId, userId);
+  }
+
+  async createBreakoutRooms(meetingId: string, userId: string, dto: any) {
+    return this.meetingsService.createBreakoutRooms(meetingId, userId, dto);
+  }
+
+  async getBreakoutRooms(meetingId: string) {
+    return this.meetingsService.getBreakoutRooms(meetingId);
+  }
+
+  async closeBreakoutRooms(meetingId: string, userId: string) {
+    return this.meetingsService.closeBreakoutRooms(meetingId, userId);
+  }
+
+  async createPoll(meetingId: string, userId: string, dto: any) {
+    return this.meetingsService.createPoll(meetingId, userId, dto);
+  }
+
+  async votePoll(pollId: string, userId: string, optionId: string) {
+    return this.meetingsService.votePoll(pollId, userId, optionId);
+  }
+
+  async getPollResults(pollId: string) {
+    return this.meetingsService.getPollResults(pollId);
+  }
+
+  async closePoll(pollId: string, userId: string) {
+    return this.meetingsService.closePoll(pollId, userId);
+  }
+
+  async submitQuestion(meetingId: string, userId: string, dto: any) {
+    return this.meetingsService.submitQuestion(meetingId, userId, dto);
+  }
+
+  async getQuestions(meetingId: string) {
+    return this.meetingsService.getQuestions(meetingId);
+  }
+
+  async upvoteQuestion(questionId: string, userId: string) {
+    return this.meetingsService.upvoteQuestion(questionId, userId);
+  }
+
+  async answerQuestion(questionId: string, userId: string, dto: any) {
+    return this.meetingsService.answerQuestion(questionId, userId, dto);
   }
 }

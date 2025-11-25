@@ -236,4 +236,138 @@ export class CommunitiesController {
   ) {
     return this.communitiesService.replyToThread(messageId, req.user.sub, content);
   }
+
+  // ==================== MEETING ENDPOINTS ====================
+
+  // Create meeting room
+  @Post('groups/:groupId/meetings')
+  async createMeetingRoom(
+    @Param('groupId') groupId: string,
+    @Body() createMeetingRoomDto: any,
+    @Request() req,
+  ) {
+    return this.communitiesService.createMeetingRoom(groupId, req.user.sub, createMeetingRoomDto);
+  }
+
+  // Get meeting rooms for a group
+  @Get('groups/:groupId/meetings')
+  async getMeetingRooms(@Param('groupId') groupId: string) {
+    return this.communitiesService.getMeetingRooms(groupId);
+  }
+
+  // Get meeting room details
+  @Get('meetings/:meetingId')
+  async getMeetingRoom(@Param('meetingId') meetingId: string) {
+    return this.communitiesService.getMeetingRoom(meetingId);
+  }
+
+  // Join meeting (get access token)
+  @Post('meetings/:meetingId/join')
+  async joinMeeting(@Param('meetingId') meetingId: string, @Request() req) {
+    return this.communitiesService.joinMeeting(meetingId, req.user.sub);
+  }
+
+  // End meeting
+  @Post('meetings/:meetingId/end')
+  async endMeeting(@Param('meetingId') meetingId: string, @Request() req) {
+    return this.communitiesService.endMeeting(meetingId, req.user.sub);
+  }
+
+  // Start recording
+  @Post('meetings/:meetingId/recording/start')
+  async startRecording(@Param('meetingId') meetingId: string, @Request() req) {
+    return this.communitiesService.startRecording(meetingId, req.user.sub);
+  }
+
+  // Stop recording
+  @Post('meetings/:meetingId/recording/stop')
+  async stopRecording(@Param('meetingId') meetingId: string, @Request() req) {
+    return this.communitiesService.stopRecording(meetingId, req.user.sub);
+  }
+
+  // Create breakout rooms
+  @Post('meetings/:meetingId/breakout-rooms')
+  async createBreakoutRooms(
+    @Param('meetingId') meetingId: string,
+    @Body() createBreakoutRoomsDto: any,
+    @Request() req,
+  ) {
+    return this.communitiesService.createBreakoutRooms(meetingId, req.user.sub, createBreakoutRoomsDto);
+  }
+
+  // Get breakout rooms
+  @Get('meetings/:meetingId/breakout-rooms')
+  async getBreakoutRooms(@Param('meetingId') meetingId: string) {
+    return this.communitiesService.getBreakoutRooms(meetingId);
+  }
+
+  // Close breakout rooms
+  @Post('meetings/:meetingId/breakout-rooms/close')
+  async closeBreakoutRooms(@Param('meetingId') meetingId: string, @Request() req) {
+    return this.communitiesService.closeBreakoutRooms(meetingId, req.user.sub);
+  }
+
+  // Create poll
+  @Post('meetings/:meetingId/polls')
+  async createPoll(
+    @Param('meetingId') meetingId: string,
+    @Body() createPollDto: any,
+    @Request() req,
+  ) {
+    return this.communitiesService.createPoll(meetingId, req.user.sub, createPollDto);
+  }
+
+  // Vote on poll
+  @Post('meetings/polls/:pollId/vote')
+  async votePoll(
+    @Param('pollId') pollId: string,
+    @Body('optionId') optionId: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.votePoll(pollId, req.user.sub, optionId);
+  }
+
+  // Get poll results
+  @Get('meetings/polls/:pollId/results')
+  async getPollResults(@Param('pollId') pollId: string) {
+    return this.communitiesService.getPollResults(pollId);
+  }
+
+  // Close poll
+  @Post('meetings/polls/:pollId/close')
+  async closePoll(@Param('pollId') pollId: string, @Request() req) {
+    return this.communitiesService.closePoll(pollId, req.user.sub);
+  }
+
+  // Submit Q&A question
+  @Post('meetings/:meetingId/qa')
+  async submitQuestion(
+    @Param('meetingId') meetingId: string,
+    @Body() createQADto: any,
+    @Request() req,
+  ) {
+    return this.communitiesService.submitQuestion(meetingId, req.user.sub, createQADto);
+  }
+
+  // Get Q&A questions
+  @Get('meetings/:meetingId/qa')
+  async getQuestions(@Param('meetingId') meetingId: string) {
+    return this.communitiesService.getQuestions(meetingId);
+  }
+
+  // Upvote question
+  @Post('meetings/qa/:questionId/upvote')
+  async upvoteQuestion(@Param('questionId') questionId: string, @Request() req) {
+    return this.communitiesService.upvoteQuestion(questionId, req.user.sub);
+  }
+
+  // Answer question
+  @Post('meetings/qa/:questionId/answer')
+  async answerQuestion(
+    @Param('questionId') questionId: string,
+    @Body() answerQADto: any,
+    @Request() req,
+  ) {
+    return this.communitiesService.answerQuestion(questionId, req.user.sub, answerQADto);
+  }
 }

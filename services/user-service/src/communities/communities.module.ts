@@ -16,6 +16,14 @@ import { ArticleComment } from './entities/article-comment.entity';
 import { CommunityEvent } from './entities/community-event.entity';
 import { EventAttendee } from './entities/event-attendee.entity';
 import { MessageReaction } from './entities/message-reaction.entity';
+import { MeetingRoom } from './entities/meeting-room.entity';
+import { MeetingParticipant } from './entities/meeting-participant.entity';
+import { BreakoutRoom } from './entities/breakout-room.entity';
+import { MeetingPoll } from './entities/meeting-poll.entity';
+import { MeetingPollVote } from './entities/meeting-poll-vote.entity';
+import { MeetingQA } from './entities/meeting-qa.entity';
+import { MeetingQAUpvote } from './entities/meeting-qa-upvote.entity';
+import { MeetingsService } from './meetings.service';
 import { User } from '../users/entities/user.entity';
 
 @Module({
@@ -31,6 +39,13 @@ import { User } from '../users/entities/user.entity';
       CommunityEvent,
       EventAttendee,
       MessageReaction,
+      MeetingRoom,
+      MeetingParticipant,
+      BreakoutRoom,
+      MeetingPoll,
+      MeetingPollVote,
+      MeetingQA,
+      MeetingQAUpvote,
       User,
     ]),
     JwtModule.register({
@@ -39,7 +54,7 @@ import { User } from '../users/entities/user.entity';
     }),
   ],
   controllers: [CommunitiesController, ArticlesController],
-  providers: [CommunitiesService, CommunitiesGateway, ArticlesService],
-  exports: [CommunitiesService, ArticlesService],
+  providers: [CommunitiesService, CommunitiesGateway, ArticlesService, MeetingsService],
+  exports: [CommunitiesService, ArticlesService, MeetingsService],
 })
 export class CommunitiesModule { }
