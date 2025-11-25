@@ -56,7 +56,10 @@ export const useCommunitySocket = ({
   }, [groupId]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    // Prevent duplicate connection in React StrictMode re-mounts (dev only)
+    if (socketRef.current) return;
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -72,7 +75,7 @@ export const useCommunitySocket = ({
 
     const socket = io(`${socketBaseUrl}/communities`, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'], // prefer websocket only to reduce fallback churn
     });
 
     socketRef.current = socket;
@@ -82,8 +85,8 @@ export const useCommunitySocket = ({
       setIsConnected(true);
     });
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from community socket');
+    socket.on('disconnect', (reason) => {
+      console.log('Disconnected from community socket', reason);
       setIsConnected(false);
     });
 
@@ -97,17 +100,14 @@ export const useCommunitySocket = ({
       if (currentGroupId && messageGroupId && messageGroupId !== currentGroupId) {
         return;
       }
-      console.log('Message received:', message);
       onMessageReceivedRef.current?.({ ...message, groupId: messageGroupId || currentGroupId || undefined });
     });
 
     socket.on('user_joined', (data: { userId: string; groupId: string }) => {
-      console.log('User joined:', data);
       onUserJoinedRef.current?.(data);
     });
 
     socket.on('user_left', (data: { userId: string; groupId: string }) => {
-      console.log('User left:', data);
       onUserLeftRef.current?.(data);
     });
 
@@ -130,23 +130,25 @@ export const useCommunitySocket = ({
     });
 
     return () => {
-      socket.disconnect();
+      // Only disconnect if we are doing a real unmount, not a StrictMode simulation; keep simple
+      try { socket.disconnect(); } catch { /* ignore */ }
     };
-  }, []); // Empty dependency array - connect only once!
+  }, []); // connect only once
 
   // Join group when groupId changes
+  const joinedGroupRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!socketRef.current || !groupId || !isConnected) return;
+    if (joinedGroupRef.current === groupId) return; // already joined
 
-    console.log('Joining group:', groupId);
+    // Leave previous group if different
+    if (joinedGroupRef.current && joinedGroupRef.current !== groupId) {
+      socketRef.current.emit('leave_group', { groupId: joinedGroupRef.current });
+    }
+
+    joinedGroupRef.current = groupId;
     socketRef.current.emit('join_group', { groupId });
-
-    return () => {
-      if (socketRef.current && groupId) {
-        console.log('Leaving group:', groupId);
-        socketRef.current.emit('leave_group', { groupId });
-      }
-    };
   }, [groupId, isConnected]);
 
   const sendMessage = (content: string, attachments?: any[]) => {
