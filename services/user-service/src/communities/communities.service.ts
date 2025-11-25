@@ -442,17 +442,32 @@ export class CommunitiesService {
   }
 
   async getMessages(groupId: string, page: number | string = 0, limit: number | string = 50) {
-    // Parse parameters to ensure they're numbers
-    const pageNum = typeof page === 'string' ? parseInt(page, 10) || 0 : page;
-    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) || 50 : limit;
+    try {
+      // Parse parameters to ensure they're numbers
+      const pageNum = typeof page === 'string' ? parseInt(page, 10) || 0 : page;
+      const limitNum = typeof limit === 'string' ? parseInt(limit, 10) || 50 : limit;
 
-    return this.messageRepository.find({
-      where: { groupId },
-      relations: ['author', 'reactions', 'reactions.user'],
-      order: { createdAt: 'ASC' },
-      take: limitNum,
-      skip: pageNum * limitNum,
-    });
+      if (!groupId) {
+        console.warn('getMessages called with empty groupId');
+        return [];
+      }
+
+      return await this.messageRepository.find({
+        where: { groupId },
+        relations: ['author', 'reactions', 'reactions.user'],
+        order: { createdAt: 'ASC' },
+        take: limitNum,
+        skip: pageNum * limitNum,
+      });
+    } catch (error) {
+      console.error(`Error fetching messages for group ${groupId}:`, error);
+      // Return empty array instead of crashing if it's a UUID error
+      if (error.code === '22P02') { // Postgres invalid text representation
+        console.warn(`Invalid UUID format for groupId: ${groupId}`);
+        return [];
+      }
+      throw error;
+    }
   }
 
   // Message Reactions

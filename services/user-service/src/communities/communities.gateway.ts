@@ -204,9 +204,6 @@ export class CommunitiesGateway
       // Broadcast to all users in the group (including sender)
       this.server.to(`group:${groupId}`).emit('message_received', message);
 
-      // Also emit to sender to ensure they receive it
-      client.emit('message_received', message);
-
       console.log(`📡 Message broadcast to group ${groupId} by user ${userId}`);
     } catch (error) {
       console.error('❌ Error sending message:', error);

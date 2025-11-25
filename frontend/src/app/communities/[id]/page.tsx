@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, FormEvent, ChangeEvent } from 'react';
+import { useEffect, useState, useRef, FormEvent, ChangeEvent, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -85,28 +85,31 @@ export default function CommunityPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const handleMessageReceived = useCallback((message: any) => {
+    // Ensure message has all required fields
+    const fullMessage: Message = {
+      ...message,
+      updatedAt: message.updatedAt || message.createdAt,
+      isEdited: message.isEdited || false,
+      isPinned: message.isPinned || false,
+      reactions: message.reactions || [],
+      attachments: message.attachments || [],
+      parentMessageId: message.parentMessageId || undefined,
+    };
+    setMessages((prev: Message[]) => [...prev, fullMessage]);
+    // Use setTimeout to ensure DOM is updated before scrolling
+    setTimeout(scrollToBottom, 100);
+  }, [scrollToBottom]);
+
   // WebSocket connection
   const { isConnected, sendMessage: sendSocketMessage, startTyping, stopTyping, typingUsers } = useCommunitySocket({
     groupId: selectedGroup?.id || null,
-    onMessageReceived: (message: any) => {
-      // Ensure message has all required fields
-      const fullMessage: Message = {
-        ...message,
-        updatedAt: message.updatedAt || message.createdAt,
-        isEdited: message.isEdited || false,
-        isPinned: message.isPinned || false,
-        reactions: message.reactions || [],
-        attachments: message.attachments || [],
-        parentMessageId: message.parentMessageId || undefined,
-      };
-      setMessages((prev: Message[]) => [...prev, fullMessage]);
-      scrollToBottom();
-    },
+    onMessageReceived: handleMessageReceived,
   });
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   useEffect(() => {
     if (communityId) {
