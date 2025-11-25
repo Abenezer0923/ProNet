@@ -168,9 +168,8 @@ export default function CommunityPage() {
     if (!selectedGroup) return;
     try {
       const response = await api.get(`/communities/groups/${selectedGroup.id}/messages`);
-      // Messages come in DESC order, reverse for display (oldest first)
-      const reversedMessages = response.data.reverse();
-      setMessages(reversedMessages);
+      // Messages come in ASC order (oldest first) from backend
+      setMessages(response.data);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
