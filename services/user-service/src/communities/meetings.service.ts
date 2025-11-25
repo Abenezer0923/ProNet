@@ -103,7 +103,12 @@ export class MeetingsService {
         }
 
         // Create Daily.co room
-        const roomName = `pronet-${groupId}-${uuidv4()}`;
+        // Room name must be <= 64 chars. UUID is 36 chars.
+        // pronet-${uuidv4()} is 7 + 36 = 43 chars, which is safe.
+        const roomName = `pronet-${uuidv4()}`;
+        
+        console.log(`Creating Daily.co room with name: ${roomName}`);
+        
         const dailyRoom = await this.callDailyApi('/rooms', 'POST', {
             name: roomName,
             privacy: 'private',

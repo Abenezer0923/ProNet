@@ -38,9 +38,10 @@ export default function StartMeetingButton({ groupId, groupName }: StartMeetingB
 
             // Join the meeting immediately
             router.push(`/meetings/${meeting.id}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create meeting:', error);
-            alert('Failed to start meeting');
+            const errorMessage = error.response?.data?.message || 'Failed to start meeting';
+            alert(errorMessage);
         } finally {
             setIsLoading(false);
         }
