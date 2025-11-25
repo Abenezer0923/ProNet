@@ -217,6 +217,10 @@ export class MeetingsService {
                 // Explicitly set the relation to ensure foreign key is populated
                 participant.meetingRoom = meeting;
                 
+                // Also set the ID directly if possible, though create() should handle it
+                // TypeORM sometimes needs both or prefers one depending on configuration
+                // We'll rely on the relation being set correctly now.
+                
                 await this.participantRepository.save(participant);
             }
 

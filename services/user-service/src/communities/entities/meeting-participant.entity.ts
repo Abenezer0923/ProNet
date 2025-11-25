@@ -18,7 +18,7 @@ export class MeetingParticipant {
     @JoinColumn({ name: 'meeting_room_id' })
     meetingRoom: MeetingRoom;
 
-    @Column({ name: 'meeting_room_id' })
+    @Column({ name: 'meeting_room_id', nullable: true })
     meetingRoomId: string;
 
     @ManyToOne(() => User)
