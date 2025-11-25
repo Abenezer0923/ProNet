@@ -42,51 +42,21 @@ import { MeetingQAUpvote } from './communities/entities/meeting-qa-upvote.entity
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT) || 5432,
-      username: process.env.DATABASE_USER || 'postgres',
-      password: process.env.DATABASE_PASSWORD || 'postgres',
-      database: process.env.DATABASE_NAME || 'profession_db',
-      entities: [
-        User,
-        UserSkill,
-        Connection,
-        Experience,
-        Education,
-        Community,
-        CommunityMember,
-        Group,
-        GroupMessage,
-        MessageReaction,
-        Article,
-        ArticleClap,
-        ArticleComment,
-        CommunityEvent,
-        EventAttendee,
-        MeetingRoom,
-        MeetingParticipant,
-        BreakoutRoom,
-        MeetingPoll,
-        MeetingPollVote,
-        MeetingQA,
-        MeetingQAUpvote,
-        Post,
-        Comment,
-        PostLike,
-        Conversation,
-        Message,
-        Notification,
-        Otp,
-        LoginSession,
-      ],
-      synchronize: true, // Set to false in production
-      logging: true, // Enable SQL logging
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : false,
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST || 'localhost',
+        port: parseInt(process.env.DATABASE_PORT || '5432'),
+        username: process.env.DATABASE_USER || 'postgres',
+        password: process.env.DATABASE_PASSWORD || 'postgres',
+        database: process.env.DATABASE_NAME || 'profession_db',
+        // Reduce module token serialization by avoiding a large static `entities` array.
+        // Let feature modules declare their entities and load automatically.
+        autoLoadEntities: true,
+        synchronize: true, // Set to false in production
+        logging: (process.env.TYPEORM_LOGGING || 'true') === 'true',
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      }),
     }),
     AuthModule,
     UsersModule,
