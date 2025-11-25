@@ -125,6 +125,11 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                     startWithVideoMuted: true,
                     // Skip the prejoin lobby to land users straight in the room
                     prejoinPageEnabled: false,
+                    // Disable lobby/moderation features
+                    enableLobbyChat: false,
+                    disableLobby: true,
+                    // Make everyone a moderator to bypass lobby
+                    startAudioOnly: false,
                     // Silence third-party analytics and remote config fetches (Amplitude, etc.)
                     disableThirdPartyRequests: true,
                     analytics: { disabled: true },
@@ -137,6 +142,11 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                     // Disable other noisy features
                     enableNoisyMicDetection: false,
                     enableNoAudioDetection: false,
+                    // Disable moderation features
+                    disableModeratorIndicator: true,
+                    // Auto-join without waiting
+                    autoKnockLobby: false,
+                    enableInsecureRoomNameWarning: false,
                 },
                 interfaceConfigOverwrite: {
                     // Trimmed toolbar to reduce unsupported feature warnings & simplify UI
