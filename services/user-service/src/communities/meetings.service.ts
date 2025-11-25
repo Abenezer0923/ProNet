@@ -116,7 +116,7 @@ export class MeetingsService {
                 max_participants: dto.maxParticipants || 100,
                 enable_screenshare: dto.enableScreenShare !== false,
                 enable_chat: dto.enableChat !== false,
-                enable_recording: dto.enableRecording ? 'cloud' : 'off',
+                ...(dto.enableRecording ? { enable_recording: 'cloud' } : {}),
                 start_video_off: !dto.settings?.videoOnEntry,
                 start_audio_off: dto.settings?.muteOnEntry,
             },
