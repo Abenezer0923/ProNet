@@ -45,6 +45,33 @@ export class MeetingsService {
 
     // Daily.co API helper
     private async callDailyApi(endpoint: string, method: 'GET' | 'POST' | 'DELETE' = 'GET', data?: any) {
+        // Mock response if API key is not set (for development)
+        if (!this.dailyApiKey) {
+            console.warn('DAILY_API_KEY not set. Using mock response for Daily.co API.');
+            
+            if (endpoint === '/rooms' && method === 'POST') {
+                return {
+                    id: 'mock-room-id-' + Date.now(),
+                    name: data.name,
+                    api_created: true,
+                    privacy: 'private',
+                    url: `https://your-domain.daily.co/${data.name}`,
+                    created_at: new Date().toISOString(),
+                    config: {}
+                };
+            }
+            
+            if (endpoint === '/meeting-tokens' && method === 'POST') {
+                return { token: 'mock-meeting-token-' + Date.now() };
+            }
+            
+            if (method === 'DELETE') {
+                return { deleted: true };
+            }
+            
+            return {};
+        }
+
         try {
             const response = await axios({
                 method,
@@ -58,7 +85,9 @@ export class MeetingsService {
             return response.data;
         } catch (error) {
             console.error('Daily.co API error:', error.response?.data || error.message);
-            throw new BadRequestException('Failed to communicate with video service');
+            // Return more specific error message
+            const errorMessage = error.response?.data?.info || 'Failed to communicate with video service';
+            throw new BadRequestException(errorMessage);
         }
     }
 
