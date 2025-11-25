@@ -31,16 +31,41 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
     useEffect(() => {
         let cancelled = false;
         const fetchAndPrepare = async () => {
-            if (!user) return; // wait for auth
+            if (!user) {
+                console.log('Waiting for user authentication...');
+                return;
+            }
+
+            console.log('Fetching meeting data for:', meetingId);
+
             try {
                 const response = await meetingsApi.joinMeeting(meetingId);
+                console.log('Meeting API response:', response);
+
                 const { meeting: meetingData } = response.data;
+
                 if (cancelled) return;
+
+                console.log('Meeting data received:', meetingData);
+
                 setMeeting(meetingData);
-                setRoomName(meetingData.dailyRoomName);
-            } catch (err) {
+
+                // Check for room name in different possible fields
+                const extractedRoomName = meetingData.dailyRoomName ||
+                    meetingData.roomName ||
+                    meetingData.jitsiRoomName;
+
+                console.log('Extracted room name:', extractedRoomName);
+
+                if (!extractedRoomName) {
+                    console.error('No room name found in meeting data:', meetingData);
+                    throw new Error('Meeting room name not found');
+                }
+
+                setRoomName(extractedRoomName);
+            } catch (err: any) {
                 console.error('Failed to join meeting:', err);
-                alert('Failed to join meeting');
+                alert('Failed to join meeting: ' + (err.message || 'Unknown error'));
                 router.back();
             }
         };
@@ -59,18 +84,30 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
 
     // Initialize Jitsi when prerequisites ready
     useEffect(() => {
-        if (!roomName || !user) return;
-        if (!jitsiContainerRef.current) return; // wait for container ref
+        if (!roomName || !user) {
+            console.log('Waiting for prerequisites:', { roomName: !!roomName, user: !!user });
+            return;
+        }
+
+        if (!jitsiContainerRef.current) {
+            console.log('Waiting for Jitsi container ref...');
+            return;
+        }
+
         if (!window.JitsiMeetExternalAPI) {
+            console.log('Jitsi API not loaded yet, waiting...');
             // Retry after script hopefully loads
             const timeout = setTimeout(() => {
                 // Trigger effect again
                 if (window.JitsiMeetExternalAPI && jitsiContainerRef.current && !jitsiApiRef.current) {
+                    console.log('Jitsi API now available, retrying initialization...');
                     setRoomName(r => r); // noop to re-run
                 }
-            }, 300);
+            }, 500);
             return () => clearTimeout(timeout);
         }
+
+        console.log('Initializing Jitsi with room:', roomName);
 
         try {
             const domain = 'meet.jit.si';
@@ -117,17 +154,28 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 },
             };
 
+            console.log('Creating Jitsi API instance...');
             const api = new window.JitsiMeetExternalAPI(domain, options);
             jitsiApiRef.current = api;
+            console.log('Jitsi API instance created successfully');
 
             api.addEventListeners({
-                videoConferenceJoined: () => setInitializing(false),
-                readyToClose: () => router.back(),
-                videoConferenceLeft: () => router.back(),
+                videoConferenceJoined: () => {
+                    console.log('Video conference joined');
+                    setInitializing(false);
+                },
+                readyToClose: () => {
+                    console.log('Meeting ended - ready to close');
+                    router.back();
+                },
+                videoConferenceLeft: () => {
+                    console.log('Left video conference');
+                    router.back();
+                },
             });
-        } catch (e) {
+        } catch (e: any) {
             console.error('Jitsi init error:', e);
-            alert('Video initialization failed');
+            alert('Video initialization failed: ' + e.message);
             router.back();
         }
     }, [roomName, user, router]);
