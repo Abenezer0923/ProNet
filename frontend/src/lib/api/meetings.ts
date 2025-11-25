@@ -1,4 +1,4 @@
-import api from './client';
+import { api } from '../api';
 
 export interface CreateMeetingDto {
     title: string;
