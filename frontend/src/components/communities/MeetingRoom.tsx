@@ -86,7 +86,15 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 configOverwrite: {
                     startWithAudioMuted: true,
                     startWithVideoMuted: true,
+                        // Skip the prejoin lobby to land users straight in the room
                     prejoinPageEnabled: false,
+                        // Silence third-party analytics and remote config fetches (Amplitude, etc.)
+                        disableThirdPartyRequests: true,
+                        analytics: { disabled: true },
+                        // Avoid mobile deep-link prompts and other cross-surface nudges
+                        disableDeepLinking: true,
+                        // Stop gravatar lookups to prevent 404 spam when no avatar exists
+                        enableGravatar: false,
                 },
                 interfaceConfigOverwrite: {
                     // Trimmed toolbar to reduce unsupported feature warnings & simplify UI

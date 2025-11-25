@@ -53,6 +53,15 @@ You may see benign warnings such as:
 - Missing sound IDs like `RECORDING_OFF_SOUND` (public meet.jit.si doesn’t bundle every asset)
 We trimmed the toolbar to essentials to reduce noise. These warnings are safe to ignore.
 
+To further reduce console noise on the public instance we set these safe overrides in the iframe options:
+
+- `configOverwrite.disableThirdPartyRequests = true`
+- `configOverwrite.analytics.disabled = true`
+- `configOverwrite.disableDeepLinking = true`
+- `configOverwrite.enableGravatar = false`
+
+This prevents Amplitude/analytics requests (which ad blockers often block) and stops Gravatar lookups that tend to return 404s when users have no avatar.
+
 ### Ad/Tracking Blocker Errors (Amplitude)
 Errors like `Failed to fetch remote configuration` or `net::ERR_BLOCKED_BY_CLIENT` for Amplitude/analytics occur when browser extensions block requests. They do not affect meeting functionality.
 
