@@ -159,10 +159,13 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
             jitsiApiRef.current = api;
             console.log('Jitsi API instance created successfully');
 
+            // Remove loading overlay immediately to allow user interaction with Jitsi UI
+            // The public Jitsi server may show its own join screen despite prejoinPageEnabled: false
+            setInitializing(false);
+
             api.addEventListeners({
                 videoConferenceJoined: () => {
                     console.log('Video conference joined');
-                    setInitializing(false);
                 },
                 readyToClose: () => {
                     console.log('Meeting ended - ready to close');
