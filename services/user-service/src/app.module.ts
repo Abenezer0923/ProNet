@@ -31,6 +31,14 @@ import { Message } from './chat/entities/message.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { Otp } from './auth/entities/otp.entity';
 import { LoginSession } from './auth/entities/login-session.entity';
+import { MessageReaction } from './communities/entities/message-reaction.entity';
+import { MeetingRoom } from './communities/entities/meeting-room.entity';
+import { MeetingParticipant } from './communities/entities/meeting-participant.entity';
+import { BreakoutRoom } from './communities/entities/breakout-room.entity';
+import { MeetingPoll } from './communities/entities/meeting-poll.entity';
+import { MeetingPollVote } from './communities/entities/meeting-poll-vote.entity';
+import { MeetingQA } from './communities/entities/meeting-qa.entity';
+import { MeetingQAUpvote } from './communities/entities/meeting-qa-upvote.entity';
 
 @Module({
   imports: [
@@ -51,11 +59,19 @@ import { LoginSession } from './auth/entities/login-session.entity';
         CommunityMember,
         Group,
         GroupMessage,
+        MessageReaction,
         Article,
         ArticleClap,
         ArticleComment,
         CommunityEvent,
         EventAttendee,
+        MeetingRoom,
+        MeetingParticipant,
+        BreakoutRoom,
+        MeetingPoll,
+        MeetingPollVote,
+        MeetingQA,
+        MeetingQAUpvote,
         Post,
         Comment,
         PostLike,
@@ -83,4 +99,4 @@ import { LoginSession } from './auth/entities/login-session.entity';
   ],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
