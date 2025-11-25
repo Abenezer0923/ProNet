@@ -113,7 +113,7 @@ export class MeetingsService {
             name: roomName,
             privacy: 'private',
             properties: {
-                max_participants: dto.maxParticipants || 100,
+                // max_participants: dto.maxParticipants || 100, // Removed to use plan default
                 enable_screenshare: dto.enableScreenShare !== false,
                 enable_chat: dto.enableChat !== false,
                 ...(dto.enableRecording ? { enable_recording: 'cloud' } : {}),
