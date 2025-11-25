@@ -20,8 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 })
 @Injectable()
 export class CommunitiesGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -32,12 +31,12 @@ export class CommunitiesGateway
   constructor(
     private communitiesService: CommunitiesService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth.token || client.handshake.headers.authorization?.split(' ')[1];
-      
+
       if (!token) {
         client.disconnect();
         return;
@@ -63,7 +62,7 @@ export class CommunitiesGateway
 
   handleDisconnect(client: Socket) {
     const userId = this.socketUsers.get(client.id);
-    
+
     if (userId) {
       const userSocketSet = this.userSockets.get(userId);
       if (userSocketSet) {
@@ -88,24 +87,43 @@ export class CommunitiesGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { groupId: string },
   ) {
+    console.log('=== JOIN_GROUP EVENT RECEIVED ===');
+    console.log('Socket ID:', client.id);
+    console.log('User ID:', client.data.userId);
+    console.log('Data:', data);
+
     try {
       const userId = client.data.userId;
       const { groupId } = data;
 
+      if (!groupId) {
+        console.error('No groupId provided in join_group event');
+        client.emit('error', { message: 'Group ID is required' });
+        return;
+      }
+
+      console.log(`Attempting to join group ${groupId} for user ${userId}`);
+
       // Verify user is a member of the community
       const group = await this.communitiesService.getGroup(groupId);
+      console.log('Group found:', group.id, group.name);
+
       const isMember = await this.communitiesService.isMember(
         group.community.id,
         userId,
       );
 
+      console.log('Is member:', isMember);
+
       if (!isMember) {
+        console.error(`User ${userId} is not a member of community ${group.community.id}`);
         client.emit('error', { message: 'Not a member of this community' });
         return;
       }
 
       // Join the group room
       client.join(`group:${groupId}`);
+      console.log(`✅ User ${userId} successfully joined room: group:${groupId}`);
 
       // Track group membership
       if (!this.groupMembers.has(groupId)) {
@@ -119,9 +137,10 @@ export class CommunitiesGateway
         groupId,
       });
 
-      console.log(`User ${userId} joined group ${groupId}`);
+      console.log(`User ${userId} joined group ${groupId} - Total in room: ${this.groupMembers.get(groupId).size}`);
     } catch (error) {
       console.error('Error joining group:', error);
+      console.error('Error stack:', error.stack);
       client.emit('error', { message: 'Failed to join group' });
     }
   }
@@ -156,11 +175,22 @@ export class CommunitiesGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { groupId: string; content: string; attachments?: any[] },
   ) {
+    console.log('=== SEND_MESSAGE EVENT RECEIVED ===');
+    console.log('Socket ID:', client.id);
+    console.log('User ID:', client.data.userId);
+    console.log('Data:', data);
+
     try {
       const userId = client.data.userId;
       const { groupId, content, attachments } = data;
 
-      console.log(`Saving message to database: group=${groupId}, user=${userId}, content=${content}`);
+      if (!groupId || !content) {
+        console.error('Missing groupId or content in send_message event');
+        client.emit('error', { message: 'Group ID and content are required' });
+        return;
+      }
+
+      console.log(`💬 Saving message to database: group=${groupId}, user=${userId}, content="${content}"`);
 
       // Save message to database
       const message = await this.communitiesService.sendMessage(
@@ -169,7 +199,7 @@ export class CommunitiesGateway
         { content, attachments },
       );
 
-      console.log(`Message saved with ID: ${message.id}`);
+      console.log(`✅ Message saved with ID: ${message.id}`);
 
       // Broadcast to all users in the group (including sender)
       this.server.to(`group:${groupId}`).emit('message_received', message);
@@ -177,9 +207,10 @@ export class CommunitiesGateway
       // Also emit to sender to ensure they receive it
       client.emit('message_received', message);
 
-      console.log(`Message broadcast to group ${groupId} by user ${userId}`);
+      console.log(`📡 Message broadcast to group ${groupId} by user ${userId}`);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
+      console.error('Error stack:', error.stack);
       client.emit('error', { message: 'Failed to send message' });
     }
   }
