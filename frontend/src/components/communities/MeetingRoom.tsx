@@ -111,6 +111,10 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
 
         try {
             const domain = 'meet.jit.si';
+
+            // Check if current user is the meeting host
+            const isHost = meeting?.hostId === user.id;
+
             const options = {
                 roomName,
                 parentNode: jitsiContainerRef.current,
@@ -119,6 +123,8 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 userInfo: {
                     displayName: `${user.firstName} ${user.lastName}`,
                     email: user.email,
+                    // Add moderator role for host to bypass lobby
+                    ...(isHost && { moderator: true }),
                 },
                 configOverwrite: {
                     startWithAudioMuted: true,
