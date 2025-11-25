@@ -441,13 +441,17 @@ export class CommunitiesService {
     return completeMessage;
   }
 
-  async getMessages(groupId: string, page = 0, limit = 50) {
+  async getMessages(groupId: string, page: number | string = 0, limit: number | string = 50) {
+    // Parse parameters to ensure they're numbers
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) || 0 : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) || 50 : limit;
+
     return this.messageRepository.find({
       where: { groupId },
       relations: ['author', 'reactions', 'reactions.user'],
       order: { createdAt: 'ASC' },
-      take: limit,
-      skip: page * limit,
+      take: limitNum,
+      skip: pageNum * limitNum,
     });
   }
 
