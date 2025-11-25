@@ -10,6 +10,7 @@ import { MeetingPollVote } from './entities/meeting-poll-vote.entity';
 import { MeetingQA } from './entities/meeting-qa.entity';
 import { MeetingQAUpvote } from './entities/meeting-qa-upvote.entity';
 import { Group } from './entities/group.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateMeetingRoomDto } from './dto/create-meeting-room.dto';
 import { CreateBreakoutRoomsDto } from './dto/create-breakout-rooms.dto';
 import { CreatePollDto } from './dto/create-poll.dto';
@@ -39,6 +40,8 @@ export class MeetingsService {
         private qaUpvoteRepository: Repository<MeetingQAUpvote>,
         @InjectRepository(Group)
         private groupRepository: Repository<Group>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
     ) {
         this.dailyApiKey = process.env.DAILY_API_KEY || '';
     }
@@ -169,52 +172,66 @@ export class MeetingsService {
 
     // Join a meeting (get access token)
     async joinMeeting(meetingId: string, userId: string) {
-        const meeting = await this.getMeetingRoom(meetingId);
+        console.log(`User ${userId} joining meeting ${meetingId}`);
+        try {
+            const meeting = await this.getMeetingRoom(meetingId);
 
-        // Check if meeting is active or scheduled
-        if (meeting.status === 'ended' || meeting.status === 'cancelled') {
-            throw new BadRequestException('Meeting has ended or been cancelled');
-        }
+            // Check if meeting is active or scheduled
+            if (meeting.status === 'ended' || meeting.status === 'cancelled') {
+                throw new BadRequestException('Meeting has ended or been cancelled');
+            }
 
-        // Create meeting token from Daily.co
-        const token = await this.callDailyApi('/meeting-tokens', 'POST', {
-            properties: {
-                room_name: meeting.dailyRoomName,
-                user_name: userId,
-                enable_screenshare: meeting.enableScreenShare,
-                enable_recording: meeting.enableRecording,
-            },
-        });
+            const user = await this.userRepository.findOne({ where: { id: userId } });
+            const userName = user ? `${user.firstName} ${user.lastName}` : userId;
 
-        // Track participant
-        const existingParticipant = await this.participantRepository.findOne({
-            where: { meetingRoomId: meetingId, userId, leftAt: null },
-        });
+            console.log(`Requesting token for room: ${meeting.dailyRoomName} as user: ${userName}`);
 
-        if (!existingParticipant) {
-            const participant = this.participantRepository.create({
-                meetingRoomId: meetingId,
-                userId,
-                role: userId === meeting.hostId ? 'host' : 'participant',
-                canShareScreen: meeting.enableScreenShare,
-                canRecord: userId === meeting.hostId,
-                joinedAt: new Date(),
+            // Create meeting token from Daily.co
+            const token = await this.callDailyApi('/meeting-tokens', 'POST', {
+                properties: {
+                    room_name: meeting.dailyRoomName,
+                    user_name: userName,
+                    enable_screenshare: meeting.enableScreenShare,
+                    ...(meeting.enableRecording ? { enable_recording: true } : {}),
+                },
             });
-            await this.participantRepository.save(participant);
-        }
 
-        // Update meeting status to active if it's the first join
-        if (meeting.status === 'scheduled') {
-            meeting.status = 'active';
-            meeting.actualStartTime = new Date();
-            await this.meetingRoomRepository.save(meeting);
-        }
+            console.log('Token received from Daily.co');
 
-        return {
-            token: token.token,
-            roomUrl: meeting.dailyRoomUrl,
-            meeting,
-        };
+            // Track participant
+            const existingParticipant = await this.participantRepository.findOne({
+                where: { meetingRoomId: meetingId, userId, leftAt: null },
+            });
+
+            if (!existingParticipant) {
+                console.log('Creating new participant record');
+                const participant = this.participantRepository.create({
+                    meetingRoomId: meetingId,
+                    userId,
+                    role: userId === meeting.hostId ? 'host' : 'participant',
+                    canShareScreen: meeting.enableScreenShare,
+                    canRecord: userId === meeting.hostId,
+                    joinedAt: new Date(),
+                });
+                await this.participantRepository.save(participant);
+            }
+
+            // Update meeting status to active if it's the first join
+            if (meeting.status === 'scheduled') {
+                meeting.status = 'active';
+                meeting.actualStartTime = new Date();
+                await this.meetingRoomRepository.save(meeting);
+            }
+
+            return {
+                token: token.token,
+                roomUrl: meeting.dailyRoomUrl,
+                meeting,
+            };
+        } catch (error) {
+            console.error('Error joining meeting:', error);
+            throw error;
+        }
     }
 
     // End a meeting
