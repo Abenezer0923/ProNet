@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import axios from 'axios';
 import { MeetingRoom } from './entities/meeting-room.entity';
 import { MeetingParticipant } from './entities/meeting-participant.entity';
 import { BreakoutRoom } from './entities/breakout-room.entity';
@@ -20,9 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class MeetingsService {
-    private readonly dailyApiKey: string;
-    private readonly dailyApiUrl = 'https://api.daily.co/v1';
-
     constructor(
         @InjectRepository(MeetingRoom)
         private meetingRoomRepository: Repository<MeetingRoom>,
@@ -42,57 +38,7 @@ export class MeetingsService {
         private groupRepository: Repository<Group>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
-    ) {
-        this.dailyApiKey = process.env.DAILY_API_KEY || '';
-    }
-
-    // Daily.co API helper
-    private async callDailyApi(endpoint: string, method: 'GET' | 'POST' | 'DELETE' = 'GET', data?: any) {
-        // Mock response if API key is not set (for development)
-        if (!this.dailyApiKey) {
-            console.warn('DAILY_API_KEY not set. Using mock response for Daily.co API.');
-            
-            if (endpoint === '/rooms' && method === 'POST') {
-                return {
-                    id: 'mock-room-id-' + Date.now(),
-                    name: data.name,
-                    api_created: true,
-                    privacy: 'private',
-                    url: `https://your-domain.daily.co/${data.name}`,
-                    created_at: new Date().toISOString(),
-                    config: {}
-                };
-            }
-            
-            if (endpoint === '/meeting-tokens' && method === 'POST') {
-                return { token: 'mock-meeting-token-' + Date.now() };
-            }
-            
-            if (method === 'DELETE') {
-                return { deleted: true };
-            }
-            
-            return {};
-        }
-
-        try {
-            const response = await axios({
-                method,
-                url: `${this.dailyApiUrl}${endpoint}`,
-                headers: {
-                    'Authorization': `Bearer ${this.dailyApiKey}`,
-                    'Content-Type': 'application/json',
-                },
-                data,
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Daily.co API error:', error.response?.data || error.message);
-            // Return more specific error message
-            const errorMessage = error.response?.data?.info || 'Failed to communicate with video service';
-            throw new BadRequestException(errorMessage);
-        }
-    }
+    ) { }
 
     // Create a new meeting room
     async createMeetingRoom(groupId: string, userId: string, dto: CreateMeetingRoomDto) {
@@ -105,25 +51,12 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Create Daily.co room
-        // Room name must be <= 64 chars. UUID is 36 chars.
-        // pronet-${uuidv4()} is 7 + 36 = 43 chars, which is safe.
-        const roomName = `pronet-${uuidv4()}`;
+        // Generate a unique room name for Jitsi
+        // Jitsi room names should be unique to avoid collisions on the public server
+        const roomName = `ProNet-${groupId}-${uuidv4()}`;
+        const roomUrl = `https://meet.jit.si/${roomName}`;
         
-        console.log(`Creating Daily.co room with name: ${roomName}`);
-        
-        const dailyRoom = await this.callDailyApi('/rooms', 'POST', {
-            name: roomName,
-            privacy: 'private',
-            properties: {
-                // max_participants: dto.maxParticipants || 100, // Removed to use plan default
-                enable_screenshare: dto.enableScreenShare !== false,
-                enable_chat: dto.enableChat !== false,
-                ...(dto.enableRecording ? { enable_recording: 'cloud' } : {}),
-                start_video_off: !dto.settings?.videoOnEntry,
-                start_audio_off: dto.settings?.muteOnEntry,
-            },
-        });
+        console.log(`Creating Jitsi meeting room: ${roomName}`);
 
         // Create meeting room in database
         const meetingRoom = this.meetingRoomRepository.create({
@@ -132,8 +65,8 @@ export class MeetingsService {
             hostId: userId,
             title: dto.title,
             description: dto.description,
-            dailyRoomUrl: dailyRoom.url,
-            dailyRoomName: dailyRoom.name,
+            dailyRoomUrl: roomUrl, // Reusing this field for Jitsi URL
+            dailyRoomName: roomName, // Reusing this field for Jitsi room name
             scheduledStartTime: dto.scheduledStartTime ? new Date(dto.scheduledStartTime) : null,
             scheduledEndTime: dto.scheduledEndTime ? new Date(dto.scheduledEndTime) : null,
             maxParticipants: dto.maxParticipants || 100,
@@ -184,19 +117,7 @@ export class MeetingsService {
             const user = await this.userRepository.findOne({ where: { id: userId } });
             const userName = user ? `${user.firstName} ${user.lastName}` : userId;
 
-            console.log(`Requesting token for room: ${meeting.dailyRoomName} as user: ${userName}`);
-
-            // Create meeting token from Daily.co
-            const token = await this.callDailyApi('/meeting-tokens', 'POST', {
-                properties: {
-                    room_name: meeting.dailyRoomName,
-                    user_name: userName,
-                    enable_screenshare: meeting.enableScreenShare,
-                    ...(meeting.enableRecording ? { enable_recording: true } : {}),
-                },
-            });
-
-            console.log('Token received from Daily.co');
+            console.log(`Joining Jitsi room: ${meeting.dailyRoomName} as user: ${userName}`);
 
             // Track participant
             const existingParticipant = await this.participantRepository.findOne({
@@ -217,10 +138,6 @@ export class MeetingsService {
                 // Explicitly set the relation to ensure foreign key is populated
                 participant.meetingRoom = meeting;
                 
-                // Also set the ID directly if possible, though create() should handle it
-                // TypeORM sometimes needs both or prefers one depending on configuration
-                // We'll rely on the relation being set correctly now.
-                
                 await this.participantRepository.save(participant);
             }
 
@@ -232,7 +149,7 @@ export class MeetingsService {
             }
 
             return {
-                token: token.token,
+                token: null, // No token needed for Jitsi
                 roomUrl: meeting.dailyRoomUrl,
                 meeting,
             };
@@ -263,13 +180,8 @@ export class MeetingsService {
         meeting.actualEndTime = new Date();
         await this.meetingRoomRepository.save(meeting);
 
-        // Delete Daily.co room
-        try {
-            await this.callDailyApi(`/rooms/${meeting.dailyRoomName}`, 'DELETE');
-        } catch (error) {
-            console.error('Failed to delete Daily.co room:', error);
-        }
-
+        // Jitsi rooms are ephemeral, no need to delete via API
+        
         return meeting;
     }
 
@@ -321,23 +233,13 @@ export class MeetingsService {
 
         for (let i = 0; i < dto.numberOfRooms; i++) {
             const roomName = `pronet-breakout-${meetingId}-${i + 1}-${uuidv4()}`;
-
-            // Create Daily.co room for breakout
-            const dailyRoom = await this.callDailyApi('/rooms', 'POST', {
-                name: roomName,
-                privacy: 'private',
-                properties: {
-                    max_participants: 10,
-                    enable_screenshare: true,
-                    enable_chat: true,
-                },
-            });
+            const roomUrl = `https://meet.jit.si/${roomName}`;
 
             const breakoutRoom = this.breakoutRoomRepository.create({
                 meetingRoomId: meetingId,
                 name: dto.roomAssignments?.[i]?.roomName || `Breakout Room ${i + 1}`,
-                dailyRoomUrl: dailyRoom.url,
-                dailyRoomName: dailyRoom.name,
+                dailyRoomUrl: roomUrl,
+                dailyRoomName: roomName,
                 participantIds: dto.roomAssignments?.[i]?.participantIds || [],
                 durationMinutes: dto.durationMinutes,
                 startedAt: new Date(),
@@ -371,13 +273,6 @@ export class MeetingsService {
             room.status = 'closed';
             room.endedAt = new Date();
             await this.breakoutRoomRepository.save(room);
-
-            // Delete Daily.co room
-            try {
-                await this.callDailyApi(`/rooms/${room.dailyRoomName}`, 'DELETE');
-            } catch (error) {
-                console.error('Failed to delete breakout room:', error);
-            }
         }
 
         return { message: 'Breakout rooms closed' };

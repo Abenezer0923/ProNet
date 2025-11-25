@@ -120,9 +120,9 @@
 - ⏳ Progress tracking
 
 #### Group Meetings
-- ✅ Video conferencing (up to 100 participants)
+- ✅ Video conferencing (Jitsi Meet integration)
 - ✅ Screen sharing
-- ✅ Recording capabilities
+- ✅ Recording capabilities (via Jitsi)
 - ✅ Breakout rooms
 - ✅ Polls and Q&A
 
