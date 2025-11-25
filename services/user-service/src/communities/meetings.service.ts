@@ -213,6 +213,10 @@ export class MeetingsService {
                     canRecord: userId === meeting.hostId,
                     joinedAt: new Date(),
                 });
+                
+                // Explicitly set the relation to ensure foreign key is populated
+                participant.meetingRoom = meeting;
+                
                 await this.participantRepository.save(participant);
             }
 
