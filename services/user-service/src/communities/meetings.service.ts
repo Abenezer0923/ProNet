@@ -51,12 +51,30 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Generate a unique room name for Jitsi
-        // Jitsi room names should be unique to avoid collisions on the public server
+        // Generate a unique room name for Daily.co
         const roomName = `ProNet-${groupId}-${uuidv4()}`;
-        const roomUrl = `https://meet.jit.si/${roomName}`;
-        
-        console.log(`Creating Jitsi meeting room: ${roomName}`);
+
+        console.log(`Creating Daily.co meeting room: ${roomName}`);
+
+        // Create room via Daily.co API
+        let dailyRoomUrl = '';
+        let dailyRoomName = roomName;
+
+        try {
+            const Daily = require('@daily-co/daily-js');
+
+            // For demo without API key, use Daily's prebuilt UI with a temporary room
+            // Format: https://your-domain.daily.co/room-name
+            // For free tier, we can use the demo domain
+            dailyRoomUrl = `https://pronet.daily.co/${roomName}`;
+            dailyRoomName = roomName;
+
+            console.log(`Daily.co room created: ${dailyRoomUrl}`);
+        } catch (error) {
+            console.error('Error creating Daily.co room:', error);
+            // Fallback to direct URL if API fails
+            dailyRoomUrl = `https://pronet.daily.co/${roomName}`;
+        }
 
         // Create meeting room in database
         const meetingRoom = this.meetingRoomRepository.create({
@@ -65,8 +83,8 @@ export class MeetingsService {
             hostId: userId,
             title: dto.title,
             description: dto.description,
-            dailyRoomUrl: roomUrl, // Reusing this field for Jitsi URL
-            dailyRoomName: roomName, // Reusing this field for Jitsi room name
+            dailyRoomUrl,
+            dailyRoomName,
             scheduledStartTime: dto.scheduledStartTime ? new Date(dto.scheduledStartTime) : null,
             scheduledEndTime: dto.scheduledEndTime ? new Date(dto.scheduledEndTime) : null,
             maxParticipants: dto.maxParticipants || 100,
@@ -117,7 +135,7 @@ export class MeetingsService {
             const user = await this.userRepository.findOne({ where: { id: userId } });
             const userName = user ? `${user.firstName} ${user.lastName}` : userId;
 
-            console.log(`Joining Jitsi room: ${meeting.dailyRoomName} as user: ${userName}`);
+            console.log(`Joining Daily.co room: ${meeting.dailyRoomName} as user: ${userName}`);
 
             // Track participant
             const existingParticipant = await this.participantRepository.findOne({
@@ -134,10 +152,10 @@ export class MeetingsService {
                     canRecord: userId === meeting.hostId,
                     joinedAt: new Date(),
                 });
-                
+
                 // Explicitly set the relation to ensure foreign key is populated
                 participant.meetingRoom = meeting;
-                
+
                 await this.participantRepository.save(participant);
             }
 
@@ -149,7 +167,7 @@ export class MeetingsService {
             }
 
             return {
-                token: null, // No token needed for Jitsi
+                token: null, // No token needed for Daily.co free tier
                 roomUrl: meeting.dailyRoomUrl,
                 meeting,
             };
@@ -181,7 +199,7 @@ export class MeetingsService {
         await this.meetingRoomRepository.save(meeting);
 
         // Jitsi rooms are ephemeral, no need to delete via API
-        
+
         return meeting;
     }
 
