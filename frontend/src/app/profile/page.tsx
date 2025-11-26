@@ -175,12 +175,6 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/profile/edit"
-                className="hidden sm:block px-4 py-2 text-primary-700 border border-primary-700 rounded-full hover:bg-primary-50 font-semibold transition-smooth text-sm"
-              >
-                Edit Profile
-              </Link>
               <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200">
                 {isOrg ? displayName[0] : profile.firstName[0]}
               </div>
@@ -231,7 +225,7 @@ export default function ProfilePage() {
 
           {/* Profile Info */}
           <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-5 -mt-16 sm:-mt-20 relative mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-5 mt-4 sm:-mt-16 lg:-mt-20 relative mb-4">
               {/* Profile Picture */}
               <div className="relative group mx-auto sm:mx-0">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white relative">
@@ -280,7 +274,7 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-gray-500">
                   {profile.location && (
                     <span className="flex items-center">
-                      <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -288,10 +282,11 @@ export default function ProfilePage() {
                     </span>
                   )}
                   <span className="flex items-center">
-                    <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span className="font-semibold text-gray-700 mr-1">{stats.followers + stats.following}</span> connections
+                    <span className="font-semibold text-gray-700 mr-3">{stats.followers} Followers</span>
+                    <span className="font-semibold text-gray-700">{stats.following} Following</span>
                   </span>
                   {isOrg && (
                     <span className="flex items-center text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full text-xs font-semibold">
@@ -303,9 +298,16 @@ export default function ProfilePage() {
 
               {/* Action Buttons */}
               <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-2">
-                <button className="px-6 py-2 bg-primary-700 text-white rounded-full font-semibold hover:bg-primary-800 transition-smooth shadow-sm hover:shadow">
-                  {isOrg ? 'Visit Website' : 'Open to work'}
-                </button>
+                {isOrg && profile.website && (
+                  <a
+                    href={profile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-primary-700 text-white rounded-full font-semibold hover:bg-primary-800 transition-smooth shadow-sm hover:shadow"
+                  >
+                    Visit Website
+                  </a>
+                )}
                 <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition">
                   More
                 </button>
@@ -410,25 +412,34 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Danger Zone */}
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-red-100">
-                <h2 className="text-lg font-bold text-red-600 mb-4">Danger Zone</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Once you delete your account, there is no going back. Please be certain.
-                </p>
-                <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                      api.delete('/users/account').then(() => {
-                        localStorage.removeItem('token');
-                        router.push('/login');
-                      });
-                    }
-                  }}
-                  className="w-full px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition text-sm font-medium"
-                >
-                  Delete Account
-                </button>
+              {/* Settings */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Settings</h2>
+                <div className="space-y-3">
+                  <Link
+                    href="/profile/edit"
+                    className="w-full inline-flex items-center justify-between px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                  >
+                    <span className="flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l-6 6v3h3l6-6" />
+                      </svg>
+                      Edit Profile
+                    </span>
+                    <span className="text-gray-400">›</span>
+                  </Link>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="w-full inline-flex items-center justify-between px-4 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition"
+                  >
+                    <span className="flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7l1-2h8l1 2z" />
+                      </svg>
+                      Delete Account
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
