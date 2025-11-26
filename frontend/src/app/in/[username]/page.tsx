@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-
-type TabType = 'about' | 'experience' | 'education' | 'skills' | 'communities';
+import { Logo } from '@/components/Logo';
+import { PersonalProfile } from '@/components/profile/PersonalProfile';
+import { OrganizationalProfile } from '@/components/profile/OrganizationalProfile';
 
 export default function PublicProfilePage() {
   const router = useRouter();
@@ -18,8 +19,8 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ followers: 0, following: 0 });
   const [isOwnProfile, setIsOwnProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('about');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [communities, setCommunities] = useState<any[]>([]);
 
   useEffect(() => {
     if (username) {
@@ -37,7 +38,11 @@ export default function PublicProfilePage() {
                       response.data.username === currentUser.username;
         setIsOwnProfile(isOwn);
         
-        if (!isOwn) {
+        if (isOwn) {
+          // Redirect to /profile if viewing own profile
+          router.push('/profile');
+          return;
+        } else {
           checkFollowStatus(response.data.id);
         }
       }
@@ -47,6 +52,13 @@ export default function PublicProfilePage() {
         setStats(statsResponse.data);
       } catch (error) {
         console.error('Error fetching stats:', error);
+      }
+
+      try {
+        const communitiesResponse = await api.get(`/communities/creator/${response.data.id}`);
+        setCommunities(communitiesResponse.data);
+      } catch (error) {
+        console.error('Error fetching communities:', error);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -96,390 +108,239 @@ export default function PublicProfilePage() {
 
   if (!profile) return null;
 
-  const tabs = [
-    { id: 'about', label: 'About', icon: '📝' },
-    { id: 'experience', label: 'Experience', icon: '💼' },
-    { id: 'education', label: 'Education', icon: '🎓' },
-    { id: 'skills', label: 'Skills', icon: '🎯' },
-    { id: 'communities', label: 'Communities', icon: '👥' },
-  ];
+  const isOrg = profile.profileType === 'organizational';
+  const displayName = isOrg ? profile.organizationName : `${profile.firstName} ${profile.lastName}`;
+  const displaySubtitle = isOrg ? 'Organization' : profile.profession;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Cover Photo */}
-      <div className="relative">
-        <div 
-          className="h-96 bg-gradient-to-r from-primary-700 via-primary-600 to-amber-600"
-          style={{
-            backgroundImage: profile.coverPhoto ? `url(${profile.coverPhoto})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        
-        {/* Profile Header Container */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-32">
-            {/* Profile Photo */}
-            <div className="flex items-end space-x-5">
-              <div className="relative">
-                <img
-                  src={profile.profilePicture || `https://ui-avatars.com/api/?name=${profile.firstName}+${profile.lastName}&size=200&background=5e372b&color=fff`}
-                  alt={`${profile.firstName} ${profile.lastName}`}
-                  className="w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover"
-                />
+      {/* Navigation Bar */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-8">
+              <Link href="/dashboard" className="flex items-center space-x-2">
+                <Logo size="sm" />
+              </Link>
+              <div className="hidden md:flex space-x-1">
+                <Link href="/dashboard" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Home</Link>
+                <Link href="/connections" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">My Network</Link>
+                <Link href="/communities" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Communities</Link>
+                <Link href="/chat" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Messaging</Link>
               </div>
-              
+            </div>
+            <div className="flex items-center space-x-4">
+              {currentUser && (
+                <Link href="/profile" className="flex flex-col items-center group">
+                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200 group-hover:ring-2 group-hover:ring-primary-200 transition">
+                    {currentUser.firstName?.[0] || 'U'}
+                  </div>
+                  <span className="hidden md:block text-[11px] text-gray-500 mt-1 group-hover:text-primary-800">Me</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Profile Header Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          {/* Cover Photo */}
+          <div className="h-48 sm:h-64 bg-gradient-to-r from-primary-700 via-primary-600 to-amber-600 relative">
+            {profile.coverPhoto && (
+              <img
+                src={profile.coverPhoto}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+
+          {/* Profile Info */}
+          <div className="px-6 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-5 mt-4 sm:-mt-16 lg:-mt-20 relative mb-4">
+              {/* Profile Picture */}
+              <div className="relative mx-auto sm:mx-0">
+                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                  {profile.profilePicture || profile.avatar ? (
+                    <img
+                      src={profile.profilePicture || profile.avatar}
+                      alt={displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary-100 to-amber-100 flex items-center justify-center text-primary-700 text-4xl font-bold">
+                      {isOrg ? displayName[0] : `${profile.firstName[0]}${profile.lastName[0]}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Name and Title */}
-              <div className="flex-1 pb-4">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-gray-900">
-                        {profile.firstName} {profile.lastName}
-                      </h1>
-                      {profile.profession && (
-                        <p className="text-lg text-gray-600 mt-1">{profile.profession}</p>
-                      )}
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                        {profile.location && (
-                          <span className="flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {profile.location}
-                          </span>
-                        )}
-                        {profile.website && (
-                          <a 
-                            href={profile.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-primary-700 hover:text-primary-800"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                            {profile.website.replace(/^https?:\/\//, '')}
-                          </a>
-                        )}
-                      </div>
-                      
-                      {/* Stats */}
-                      <div className="flex items-center gap-4 mt-4 text-sm">
-                        <Link href="#" className="text-gray-700 hover:text-primary-800 font-medium">
-                          <span className="font-semibold text-gray-900">{stats.followers}</span> followers
-                        </Link>
-                        <Link href="#" className="text-gray-700 hover:text-primary-800 font-medium">
-                          <span className="font-semibold text-gray-900">{stats.following}</span> following
-                        </Link>
-                      </div>
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-3">
-                      {currentUser && !isOwnProfile ? (
-                        <>
-                          <button
-                            onClick={handleFollow}
-                            className={`px-6 py-2 rounded-full font-semibold transition ${
-                              isFollowing
-                                ? 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
-                                : 'bg-primary-700 text-white hover:bg-primary-800'
-                            }`}
-                          >
-                            {isFollowing ? 'Following' : 'Follow'}
-                          </button>
-                          <Link
-                            href={`/chat?user=${profile.id}`}
-                            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-semibold transition"
-                          >
-                            Message
-                          </Link>
-                        </>
-                      ) : (
-                        <Link
-                          href="/login"
-                          className="px-6 py-2 bg-primary-700 text-white rounded-full hover:bg-primary-800 font-semibold transition"
-                        >
-                          Follow
-                        </Link>
-                      )}
-                      <button className="p-2 border-2 border-gray-300 rounded-full hover:bg-gray-50 transition">
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+              <div className="mt-4 sm:mt-0 flex-1 text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                  {displayName}
+                </h1>
+                {displaySubtitle && (
+                  <p className="text-lg text-gray-600 mt-1 font-medium">{displaySubtitle}</p>
+                )}
 
-      {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8" aria-label="Tabs">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`
-                  py-4 px-1 border-b-2 font-medium text-sm transition
-                  ${activeTab === tab.id
-                    ? 'border-primary-700 text-primary-700'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
-              >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'about' && <AboutTab profile={profile} />}
-        {activeTab === 'experience' && <ExperienceTab experiences={profile.experiences || []} />}
-        {activeTab === 'education' && <EducationTab educations={profile.educations || []} />}
-        {activeTab === 'skills' && <SkillsTab skills={profile.skills || []} />}
-        {activeTab === 'communities' && <CommunitiesTab userId={profile.id} />}
-      </div>
-    </div>
-  );
-}
-
-// About Tab Component
-function AboutTab({ profile }: { profile: any }) {
-  return (
-    <div className="space-y-6">
-      {/* Bio Section */}
-      {profile.bio && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
-        </div>
-      )}
-
-      {/* Contact Information */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
-        <div className="space-y-3">
-          {profile.email && profile.showEmail && (
-            <div className="flex items-center gap-3 text-gray-700">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>{profile.email}</span>
-            </div>
-          )}
-          {profile.website && (
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-              </svg>
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:text-primary-800">
-                {profile.website}
-              </a>
-            </div>
-          )}
-          {profile.location && (
-            <div className="flex items-center gap-3 text-gray-700">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>{profile.location}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Profile Stats */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Profile Stats</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Profile views</p>
-            <p className="text-2xl font-bold text-gray-900">{profile.profileViews || 0}</p>
-            <p className="text-xs text-gray-400">last 90 days</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Member since</p>
-            <p className="text-lg font-semibold text-gray-900">
-              {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Experience Tab Component
-function ExperienceTab({ experiences }: { experiences: any[] }) {
-  if (!experiences || experiences.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 0h5l-1 12a2 2 0 01-2 2H6a2 2 0 01-2-2L3 6h5m8 0H8" />
-        </svg>
-        <p className="text-gray-500">No experience added yet</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm divide-y divide-gray-200">
-      {experiences.map((exp) => (
-        <div key={exp.id} className="p-6">
-          <div className="flex gap-4">
-            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 0h5l-1 12a2 2 0 01-2 2H6a2 2 0 01-2-2L3 6h5m8 0H8" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
-              <p className="text-gray-600">{exp.company} · {exp.employmentType || 'Full-time'}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
-                {exp.currentlyWorking ? ' Present' : ' ' + new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-              </p>
-              {exp.location && (
-                <p className="text-sm text-gray-500">{exp.location}</p>
-              )}
-              {exp.description && (
-                <p className="text-gray-700 mt-3">{exp.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Education Tab Component
-function EducationTab({ educations }: { educations: any[] }) {
-  if (!educations || educations.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-        </svg>
-        <p className="text-gray-500">No education added yet</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm divide-y divide-gray-200">
-      {educations.map((edu) => (
-        <div key={edu.id} className="p-6">
-          <div className="flex gap-4">
-            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">{edu.school}</h3>
-              <p className="text-gray-600">
-                {edu.degree}
-                {edu.fieldOfStudy && `, ${edu.fieldOfStudy}`}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date(edu.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
-                {edu.currentlyStudying ? ' Present' : ' ' + new Date(edu.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-              </p>
-              {edu.grade && (
-                <p className="text-sm text-gray-500">Grade: {edu.grade}</p>
-              )}
-              {edu.activities && (
-                <p className="text-sm text-gray-700 mt-2">
-                  <span className="font-medium">Activities:</span> {edu.activities}
-                </p>
-              )}
-              {edu.description && (
-                <p className="text-gray-700 mt-3">{edu.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Skills Tab Component
-function SkillsTab({ skills }: { skills: any[] }) {
-  if (!skills || skills.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-        </svg>
-        <p className="text-gray-500">No skills added yet</p>
-      </div>
-    );
-  }
-
-  const getProficiencyStars = (level: string) => {
-    const levels = { beginner: 1, intermediate: 2, expert: 3 };
-    return levels[level.toLowerCase() as keyof typeof levels] || 2;
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Skills & Endorsements</h2>
-      <div className="grid gap-4">
-        {skills.map((skill) => (
-          <div key={skill.id} className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{skill.skillName}</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex gap-1">
-                    {[...Array(3)].map((_, i) => (
-                      <svg
-                        key={i}
-                        className={`w-4 h-4 ${i < getProficiencyStars(skill.proficiencyLevel) ? 'text-yellow-400' : 'text-gray-300'}`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-gray-500">
+                  {profile.location && (
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600 capitalize">{skill.proficiencyLevel}</span>
+                      {profile.location}
+                    </span>
+                  )}
+                  <span className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span className="font-semibold text-gray-700 mr-3">{stats.followers} Followers</span>
+                    <span className="font-semibold text-gray-700">{stats.following} Following</span>
+                  </span>
+                  {isOrg && (
+                    <span className="flex items-center text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full text-xs font-semibold">
+                      Organization
+                    </span>
+                  )}
                 </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-2">
+                {currentUser ? (
+                  <>
+                    <button
+                      onClick={handleFollow}
+                      className={`px-6 py-2 rounded-full font-semibold transition shadow-sm hover:shadow ${
+                        isFollowing
+                          ? 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          : 'bg-primary-700 text-white hover:bg-primary-800'
+                      }`}
+                    >
+                      {isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                    <Link
+                      href={`/chat?user=${profile.id}`}
+                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition"
+                    >
+                      Message
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="px-6 py-2 bg-primary-700 text-white rounded-full hover:bg-primary-800 font-semibold transition shadow-sm hover:shadow"
+                  >
+                    Follow
+                  </Link>
+                )}
+                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition">
+                  More
+                </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+        </div>
 
-// Communities Tab Component
-function CommunitiesTab({ userId }: { userId: string }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-      <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-      <p className="text-gray-500">Communities feature coming soon</p>
+        {/* About Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
+          {profile.bio ? (
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
+          ) : (
+            <p className="text-gray-500 italic">No bio added yet.</p>
+          )}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Activity/Feed Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Activity</h2>
+              <div className="text-center py-12 text-gray-500">
+                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-lg font-medium mb-2">No recent activity</p>
+                <p className="text-sm">Posts and activity will be displayed here</p>
+              </div>
+            </div>
+
+            {profile.profileType === 'personal' ? (
+              <PersonalProfile profile={profile} />
+            ) : (
+              <OrganizationalProfile profile={profile} />
+            )}
+
+            {/* Communities Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Communities</h2>
+              {communities.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {communities.map((community) => (
+                    <Link
+                      key={community.id}
+                      href={`/communities/${community.id}`}
+                      className="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-700 font-bold">
+                          {community.name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{community.name}</h3>
+                          <p className="text-xs text-gray-500">{community.memberCount} members</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No communities yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Contact Info */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Contact Info</h2>
+              <div className="space-y-3 text-sm">
+                {profile.email && (
+                  <div className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {profile.email}
+                  </div>
+                )}
+                {profile.website && (
+                  <div className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:underline">
+                      {profile.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
