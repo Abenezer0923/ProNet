@@ -51,16 +51,11 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Generate a unique room name for Jitsi
-        const roomName = `ProNet-${groupId}-${uuidv4()}`;
+        // Generate a unique call ID for Stream
+        // Stream call IDs can contain letters, numbers, and underscores
+        const callId = `ProNet_${groupId}_${uuidv4().replace(/-/g, '_')}`;
 
-        console.log(`Creating Jitsi meeting room: ${roomName}`);
-
-        // Jitsi allows any room name without pre-creation
-        // Using iframe embed which is simpler and works without API
-        const jitsiRoomUrl = `https://meet.jit.si/${roomName}`;
-
-        console.log(`Jitsi room URL: ${jitsiRoomUrl}`);
+        console.log(`Creating Stream meeting: ${callId}`);
 
         // Create meeting room in database
         const meetingRoom = this.meetingRoomRepository.create({
@@ -69,8 +64,8 @@ export class MeetingsService {
             hostId: userId,
             title: dto.title,
             description: dto.description,
-            dailyRoomUrl: jitsiRoomUrl,
-            dailyRoomName: roomName,
+            dailyRoomUrl: callId, // Storing call ID here
+            dailyRoomName: callId,
             scheduledStartTime: dto.scheduledStartTime ? new Date(dto.scheduledStartTime) : null,
             scheduledEndTime: dto.scheduledEndTime ? new Date(dto.scheduledEndTime) : null,
             maxParticipants: dto.maxParticipants || 100,
@@ -119,9 +114,25 @@ export class MeetingsService {
             }
 
             const user = await this.userRepository.findOne({ where: { id: userId } });
-            const userName = user ? `${user.firstName} ${user.lastName}` : userId;
+            if (!user) throw new NotFoundException('User not found');
 
-            console.log(`Joining Jitsi room: ${meeting.dailyRoomName} as user: ${userName}`);
+            // Initialize Stream Client
+            const apiKey = process.env.STREAM_API_KEY;
+            const secret = process.env.STREAM_SECRET_KEY;
+
+            if (!apiKey || !secret) {
+                console.error('Stream API keys missing in environment variables');
+                throw new Error('Video service configuration error');
+            }
+
+            const { StreamClient } = require('@stream-io/node-sdk');
+            const client = new StreamClient(apiKey, secret);
+
+            // Generate token for the user
+            // Token is valid for 1 hour by default
+            const token = client.createToken(userId);
+
+            console.log(`Generated Stream token for user: ${userId}`);
 
             // Track participant
             const existingParticipant = await this.participantRepository.findOne({
@@ -151,8 +162,14 @@ export class MeetingsService {
             }
 
             return {
-                token: null, // No token needed for Jitsi
-                roomUrl: meeting.dailyRoomUrl,
+                token, // Return the Stream token
+                roomUrl: meeting.dailyRoomName, // We'll use the room name as the call ID
+                apiKey, // Send API key to frontend
+                user: {
+                    id: userId,
+                    name: `${user.firstName} ${user.lastName}`,
+                    image: user.profilePicture,
+                },
                 meeting,
             };
         } catch (error) {
