@@ -175,11 +175,11 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/settings" className="flex flex-col items-center group">
+              <Link href="/profile" className="flex flex-col items-center group">
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200 group-hover:ring-2 group-hover:ring-primary-200 transition">
                   {isOrg ? displayName[0] : profile.firstName[0]}
                 </div>
-                <span className="hidden md:block text-[11px] text-gray-500 mt-1 group-hover:text-primary-800">Account</span>
+                <span className="hidden md:block text-[11px] text-gray-500 mt-1 group-hover:text-primary-800">Me</span>
               </Link>
             </div>
           </div>
@@ -338,101 +338,132 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-8">
-              {profile.profileType === 'personal' ? (
-                <PersonalProfile
-                  profile={profile}
-                />
-              ) : (
-                <OrganizationalProfile profile={profile} />
-              )}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Activity/Feed Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Activity</h2>
+                <Link href="/profile/edit" className="text-sm text-primary-700 hover:text-primary-800 font-medium">
+                  Create a post
+                </Link>
+              </div>
+              <div className="text-center py-12 text-gray-500">
+                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-lg font-medium mb-2">You haven't posted yet</p>
+                <p className="text-sm">Posts you share will be displayed here</p>
+              </div>
+            </div>
 
-              {/* Communities Section */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">Communities</h2>
-                  <Link
-                    href="/communities/create"
-                    className="text-sm text-primary-700 hover:text-primary-800 font-medium"
-                  >
-                    + Create New
-                  </Link>
-                </div>
+            {profile.profileType === 'personal' ? (
+              <PersonalProfile profile={profile} />
+            ) : (
+              <OrganizationalProfile profile={profile} />
+            )}
 
-                {communities.length > 0 ? (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {communities.map((community) => (
-                      <Link
-                        key={community.id}
-                        href={`/communities/${community.id}`}
-                        className="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-700 font-bold">
-                            {community.name[0]}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{community.name}</h3>
-                            <p className="text-xs text-gray-500">{community.memberCount} members</p>
-                          </div>
+            {/* Communities Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Communities</h2>
+                <Link
+                  href="/communities/create"
+                  className="text-sm text-primary-700 hover:text-primary-800 font-medium"
+                >
+                  + Create New
+                </Link>
+              </div>
+
+              {communities.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {communities.map((community) => (
+                    <Link
+                      key={community.id}
+                      href={`/communities/${community.id}`}
+                      className="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-700 font-bold">
+                          {community.name[0]}
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No communities created yet.</p>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{community.name}</h3>
+                          <p className="text-xs text-gray-500">{community.memberCount} members</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No communities created yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Profile Link */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Profile</h2>
+              <Link
+                href="/profile/edit"
+                className="w-full inline-flex items-center justify-between px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+              >
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Profile
+                </span>
+                <span className="text-gray-400">›</span>
+              </Link>
+            </div>
+
+            {/* Contact Info */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Contact Info</h2>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center text-gray-600">
+                  <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {profile?.email}
+                </div>
+                {profile?.website && (
+                  <div className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:underline">
+                      {profile.website}
+                    </a>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right Column - Sidebar */}
-            <div className="space-y-8">
-              {/* Contact Info */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Contact Info</h2>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {/* Settings */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Settings</h2>
+              <div className="space-y-3">
+                <Link
+                  href="/settings"
+                  className="w-full inline-flex items-center justify-between px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                >
+                  <span className="flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    {profile?.email}
-                  </div>
-                  {profile?.website && (
-                    <div className="flex items-center text-gray-600">
-                      <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:underline">
-                        {profile.website}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Settings */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Settings</h2>
-                <div className="space-y-3">
-                  <Link
-                    href="/settings"
-                    className="w-full inline-flex items-center justify-between px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700"
-                  >
-                    <span className="flex items-center">
-                      <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Settings & Privacy
-                    </span>
-                    <span className="text-gray-400">›</span>
-                  </Link>
-                </div>
+                    Settings & Privacy
+                  </span>
+                  <span className="text-gray-400">›</span>
+                </Link>
               </div>
             </div>
           </div>

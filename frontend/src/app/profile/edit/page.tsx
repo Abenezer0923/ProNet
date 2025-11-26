@@ -156,17 +156,11 @@ export default function EditProfilePage() {
           return;
         }
         await api.patch('/users/username', { username });
-        alert('Profile updated successfully! Redirecting...');
-        window.location.href = `/in/${username}`;
-      } else {
-        alert('Profile updated successfully!');
-        // Redirect to username-based profile if available
-        if (user?.username) {
-          router.push(`/in/${user.username}`);
-        } else {
-          router.push('/profile');
-        }
       }
+      
+      alert('Profile updated successfully!');
+      // Always redirect to /profile to maintain consistent UI
+      router.push('/profile');
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile');
@@ -296,7 +290,7 @@ export default function EditProfilePage() {
               <span className="text-xl font-bold text-gray-900">ProNet</span>
             </Link>
             <Link
-              href={user?.username ? `/in/${user.username}` : '/profile'}
+              href="/profile"
               className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Cancel
@@ -661,7 +655,7 @@ export default function EditProfilePage() {
           {/* Submit */}
           <div className="flex justify-end space-x-4">
             <Link
-              href={user?.username ? `/in/${user.username}` : '/profile'}
+              href="/profile"
               className="px-6 py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Cancel
