@@ -175,9 +175,12 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200">
-                {isOrg ? displayName[0] : profile.firstName[0]}
-              </div>
+              <Link href="/settings" className="flex flex-col items-center group">
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200 group-hover:ring-2 group-hover:ring-primary-200 transition">
+                  {isOrg ? displayName[0] : profile.firstName[0]}
+                </div>
+                <span className="hidden md:block text-[11px] text-gray-500 mt-1 group-hover:text-primary-800">Account</span>
+              </Link>
             </div>
           </div>
         </div>
