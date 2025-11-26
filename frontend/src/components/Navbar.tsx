@@ -66,9 +66,9 @@ export default function Navbar() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-colors ${isActive
-                                        ? 'text-gray-900 border-b-2 border-gray-900'
-                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                    className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-smooth ${isActive
+                                        ? 'text-primary-900 border-b-2 border-primary-700'
+                                        : 'text-gray-500 hover:text-primary-800 hover:bg-primary-50'
                                         }`}
                                 >
                                     <Icon className="h-6 w-6 mb-1" />

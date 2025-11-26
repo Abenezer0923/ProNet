@@ -43,16 +43,16 @@ export default function Home() {
               <Logo />
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-900 transition-colors">Features</a>
-              <a href="#communities" className="text-sm font-medium text-slate-600 hover:text-blue-900 transition-colors">Communities</a>
-              <a href="#about" className="text-sm font-medium text-slate-600 hover:text-blue-900 transition-colors">About</a>
+              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">Features</a>
+              <a href="#communities" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">Communities</a>
+              <a href="#about" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">About</a>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-blue-900 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-primary-900 px-4 py-2 rounded-lg hover:bg-primary-50 transition-smooth">
               Sign in
             </Link>
-            <Link href="/register" className="text-sm font-semibold text-white bg-blue-900 px-5 py-2.5 rounded-lg hover:bg-blue-800 transition-colors shadow-sm hover:shadow-md">
+            <Link href="/register" className="text-sm font-semibold text-white bg-primary-800 px-5 py-2.5 rounded-lg hover:bg-primary-900 transition-smooth shadow-md hover:shadow-lg">
               Get Started
             </Link>
           </div>
@@ -64,28 +64,28 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-xs font-semibold uppercase tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 border border-primary-200 text-primary-800 text-xs font-semibold uppercase tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
                 New: Article Publishing
               </div>
-              <h1 className="text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
                 Connect. <br />
                 Collaborate. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-teal-600">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-800 to-amber-600">
                   Grow Together.
                 </span>
               </h1>
-              <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
+              <p className="text-lg sm:text-xl text-slate-600 max-w-lg leading-relaxed">
                 The professional network designed for meaningful interactions. Join specialized communities, share your expertise, and accelerate your career.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/register" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition-all shadow-lg hover:shadow-blue-900/20 hover:-translate-y-0.5">
+                <Link href="/register" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-white bg-primary-800 rounded-xl hover:bg-primary-900 transition-smooth shadow-lg hover:shadow-primary-900/20 hover:-translate-y-0.5">
                   Join for Free
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </Link>
-                <a href="#features" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all">
+                <a href="#features" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-smooth">
                   Learn More
                 </a>
               </div>
@@ -101,7 +101,7 @@ export default function Home() {
               </div>
             </div>
             <div className="relative lg:h-[600px] w-full flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-100/50 to-teal-100/50 rounded-full blur-3xl opacity-60 transform translate-x-10"></div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary-100/50 to-amber-100/50 rounded-full blur-3xl opacity-60 transform translate-x-10"></div>
               <Image
                 src="/hero-illustration.png"
                 alt="Professional Networking"
@@ -133,7 +133,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 ),
-                color: "bg-blue-600"
+                color: "bg-primary-700"
               },
               {
                 title: "Knowledge Sharing",
@@ -143,7 +143,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                   </svg>
                 ),
-                color: "bg-teal-500"
+                color: "bg-amber-600"
               },
               {
                 title: "Global Connections",
@@ -153,10 +153,10 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 ),
-                color: "bg-indigo-600"
+                color: "bg-primary-600"
               }
             ].map((feature, i) => (
-              <div key={i} className="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300">
+              <div key={i} className="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-200 hover:bg-white hover:shadow-xl transition-smooth">
                 <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
                   {feature.icon}
                 </div>
@@ -171,7 +171,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-blue-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-primary-900 to-primary-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
@@ -181,8 +181,8 @@ export default function Home() {
               { label: "Articles Published", value: "50k+" },
             ].map((stat, i) => (
               <div key={i}>
-                <div className="text-4xl md:text-5xl font-bold mb-2 text-teal-400">{stat.value}</div>
-                <div className="text-blue-200 font-medium">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-bold mb-2 text-amber-300">{stat.value}</div>
+                <div className="text-primary-200 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -224,18 +224,18 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-24 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-blue-900 to-indigo-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+          <div className="bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
 
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 relative z-10">
               Ready to accelerate your career?
             </h2>
-            <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto relative z-10">
+            <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto relative z-10">
               Join thousands of professionals who are already building the future of work on ProNet.
             </p>
             <div className="relative z-10">
-              <Link href="/register" className="inline-flex items-center px-8 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg">
+              <Link href="/register" className="inline-flex items-center px-8 py-4 bg-white text-primary-900 font-bold rounded-xl hover:bg-primary-50 transition-smooth shadow-lg">
                 Get Started Now
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />

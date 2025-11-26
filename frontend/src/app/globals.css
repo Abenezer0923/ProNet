@@ -18,6 +18,15 @@
     }
   }
   
+  @keyframes skeleton {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
   .animate-blob {
     animation: blob 7s infinite;
   }
@@ -28,5 +37,21 @@
   
   .animation-delay-4000 {
     animation-delay: 4s;
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #f5f0e8 0%,
+      #e8dcc8 50%,
+      #f5f0e8 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton 1.5s ease-in-out infinite;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

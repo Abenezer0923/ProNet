@@ -101,9 +101,9 @@ export default function CommunitiesPage() {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-amber-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600 font-medium">Loading communities...</p>
         </div>
       </div>
@@ -111,29 +111,29 @@ export default function CommunitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-amber-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/dashboard" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-800 to-primary-700 rounded-xl flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 P
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary-800 to-amber-700 bg-clip-text text-transparent">
                 ProNet
               </span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link
                 href="/communities/my"
-                className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
+                className="text-gray-600 hover:text-primary-800 font-medium transition-smooth"
               >
                 My Communities
               </Link>
               <Link
                 href="/communities/create"
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 font-medium"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
               >
                 <PlusIcon className="w-5 h-5" />
                 Create Community
@@ -144,20 +144,20 @@ export default function CommunitiesPage() {
       </header>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-amber-700 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTM0aDEydjEySDF2LTEyem0yNCAwaDEydjEySDM2em0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTM0aDEydjEySDF2LTEyem0yNCAwaDEydjEySDM2em0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
               <SparklesIcon className="w-5 h-5" />
               <span className="text-sm font-medium">Discover Amazing Communities</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
               Connect, Learn & Grow Together
             </h1>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-lg sm:text-xl text-white/90 mb-8 leading-relaxed">
               Join vibrant communities of professionals, share knowledge, and build meaningful connections
             </p>
 
@@ -171,13 +171,13 @@ export default function CommunitiesPage() {
                     placeholder="Search communities..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 pr-4 py-3 w-full rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                    className="pl-12 pr-4 py-3 w-full rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
                   />
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-6 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 text-gray-900 font-medium cursor-pointer"
+                  className="px-6 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 bg-gray-50 text-gray-900 font-medium cursor-pointer"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -216,7 +216,7 @@ export default function CommunitiesPage() {
             <p className="text-gray-500 mb-8 text-lg">Try adjusting your search or create a new community.</p>
             <Link
               href="/communities/create"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 font-medium text-lg"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-lg"
             >
               <PlusIcon className="w-6 h-6" />
               Create Community
@@ -238,10 +238,10 @@ export default function CommunitiesPage() {
                 <Link
                   key={community.id}
                   href={`/communities/${community.id}`}
-                  className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
+                  className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-smooth flex flex-col h-full"
                 >
                   {/* Cover Image with Gradient Overlay */}
-                  <div className="relative h-32 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+                  <div className="relative h-32 bg-gradient-to-br from-primary-700 via-primary-600 to-amber-600 overflow-hidden">
                     {community.coverImage && (
                       <img
                         src={community.coverImage}
@@ -249,7 +249,7 @@ export default function CommunitiesPage() {
                         className="w-full h-full object-cover"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-purple-600/80 group-hover:from-indigo-600/90 group-hover:to-purple-600/90 transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-800/80 to-primary-700/80 group-hover:from-primary-800/90 group-hover:to-primary-700/90 transition-smooth"></div>
 
                     {/* Category Badge */}
                     <div className="absolute top-3 right-3">
@@ -273,7 +273,7 @@ export default function CommunitiesPage() {
                   <div className="p-6 flex flex-col flex-1">
                     {/* Logo */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className="w-16 h-16 -mt-12 bg-white rounded-2xl shadow-lg flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 text-white group-hover:scale-110 transition-transform duration-300 border-4 border-white">
+                      <div className="w-16 h-16 -mt-12 bg-white rounded-2xl shadow-lg flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-primary-800 to-primary-700 text-white group-hover:scale-110 transition-transform duration-300 border-4 border-white">
                         {community.logo ? (
                           <img src={community.logo} alt={community.name} className="w-full h-full object-cover rounded-2xl" />
                         ) : (
@@ -282,7 +282,7 @@ export default function CommunitiesPage() {
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-800 transition-smooth line-clamp-1">
                       {community.name}
                     </h3>
 
@@ -293,14 +293,14 @@ export default function CommunitiesPage() {
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                       <div className="flex items-center text-sm text-gray-500 font-medium">
-                        <UsersIcon className="w-4 h-4 mr-1.5 text-indigo-500" />
+                        <UsersIcon className="w-4 h-4 mr-1.5 text-primary-600" />
                         {community.memberCount} {community.memberCount === 1 ? 'member' : 'members'}
                       </div>
 
                       {!community.isMember && (
                         <button
                           onClick={(e) => handleJoin(e, community.id)}
-                          className="text-sm font-semibold text-indigo-600 hover:text-white hover:bg-indigo-600 px-4 py-2 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
+                          className="text-sm font-semibold text-primary-700 hover:text-white hover:bg-primary-700 px-4 py-2 rounded-lg transition-smooth border border-primary-300 hover:border-primary-700"
                         >
                           Join
                         </button>
@@ -309,7 +309,7 @@ export default function CommunitiesPage() {
                   </div>
 
                   {/* Hover Glow Effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 transition-all duration-300 pointer-events-none"></div>
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-600/0 to-amber-600/0 group-hover:from-primary-600/5 group-hover:to-amber-600/5 transition-smooth pointer-events-none"></div>
                 </Link>
               ))}
             </div>

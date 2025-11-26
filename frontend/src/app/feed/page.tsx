@@ -42,8 +42,8 @@ export default function FeedPage() {
 
     if (authLoading || !user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
             </div>
         );
     }
@@ -71,11 +71,11 @@ export default function FeedPage() {
                                 <div className="w-full border-t border-gray-100 pt-4 mt-2">
                                     <div className="flex justify-between text-sm mb-2">
                                         <span className="text-gray-500">Profile views</span>
-                                        <span className="font-medium text-blue-600">128</span>
+                                        <span className="font-medium text-primary-700">128</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Connections</span>
-                                        <span className="font-medium text-blue-600">45</span>
+                                        <span className="font-medium text-primary-700">45</span>
                                     </div>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@ export default function FeedPage() {
                                     <div>
                                         <p className="text-sm font-medium text-gray-900">Tech Enthusiasts</p>
                                         <p className="text-xs text-gray-500">Community • 12k members</p>
-                                        <button className="text-blue-600 text-xs font-medium mt-1 hover:underline">
+                                        <button className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth">
                                             + Join
                                         </button>
                                     </div>
@@ -141,7 +141,7 @@ export default function FeedPage() {
                                     <div>
                                         <p className="text-sm font-medium text-gray-900">Sarah Johnson</p>
                                         <p className="text-xs text-gray-500">Product Designer</p>
-                                        <button className="text-blue-600 text-xs font-medium mt-1 hover:underline">
+                                        <button className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth">
                                             + Connect
                                         </button>
                                     </div>

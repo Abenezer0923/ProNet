@@ -146,7 +146,7 @@ export default function ProfilePage() {
   if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
       </div>
     );
   }
@@ -168,20 +168,20 @@ export default function ProfilePage() {
                 <Logo size="sm" />
               </Link>
               <div className="hidden md:flex space-x-1">
-                <Link href="/dashboard" className="px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md font-medium transition">Home</Link>
-                <Link href="/connections" className="px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md font-medium transition">My Network</Link>
-                <Link href="/communities" className="px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md font-medium transition">Communities</Link>
-                <Link href="/chat" className="px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md font-medium transition">Messaging</Link>
+                <Link href="/dashboard" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Home</Link>
+                <Link href="/connections" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">My Network</Link>
+                <Link href="/communities" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Communities</Link>
+                <Link href="/chat" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Messaging</Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link
                 href="/profile/edit"
-                className="hidden sm:block px-4 py-2 text-indigo-600 border border-indigo-600 rounded-full hover:bg-indigo-50 font-semibold transition text-sm"
+                className="hidden sm:block px-4 py-2 text-primary-700 border border-primary-700 rounded-full hover:bg-primary-50 font-semibold transition-smooth text-sm"
               >
                 Edit Profile
               </Link>
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">
+              <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200">
                 {isOrg ? displayName[0] : profile.firstName[0]}
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function ProfilePage() {
         {/* Profile Header Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
           {/* Cover Photo */}
-          <div className="h-48 sm:h-64 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative group">
+          <div className="h-48 sm:h-64 bg-gradient-to-r from-primary-700 via-primary-600 to-amber-600 relative group">
             {profile.coverPhoto && (
               <img
                 src={profile.coverPhoto}
@@ -209,7 +209,7 @@ export default function ProfilePage() {
               <label htmlFor="cover-upload" className="cursor-pointer">
                 <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2 shadow-lg hover:bg-white transition transform hover:scale-105">
                   {uploadingCover ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-700"></div>
                   ) : (
                     <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -242,7 +242,7 @@ export default function ProfilePage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 text-4xl font-bold">
+                    <div className="w-full h-full bg-gradient-to-br from-primary-100 to-amber-100 flex items-center justify-center text-primary-700 text-4xl font-bold">
                       {isOrg ? displayName[0] : `${profile.firstName[0]}${profile.lastName[0]}`}
                     </div>
                   )}
@@ -294,7 +294,7 @@ export default function ProfilePage() {
                     <span className="font-semibold text-gray-700 mr-1">{stats.followers + stats.following}</span> connections
                   </span>
                   {isOrg && (
-                    <span className="flex items-center text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full text-xs font-semibold">
+                    <span className="flex items-center text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full text-xs font-semibold">
                       Organization
                     </span>
                   )}
@@ -303,7 +303,7 @@ export default function ProfilePage() {
 
               {/* Action Buttons */}
               <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-2">
-                <button className="px-6 py-2 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition shadow-sm hover:shadow">
+                <button className="px-6 py-2 bg-primary-700 text-white rounded-full font-semibold hover:bg-primary-800 transition-smooth shadow-sm hover:shadow">
                   {isOrg ? 'Visit Website' : 'Open to work'}
                 </button>
                 <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition">
@@ -318,7 +318,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">About</h2>
-            <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+            <Link href="/profile/edit" className="text-gray-400 hover:text-primary-800 transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
@@ -351,7 +351,7 @@ export default function ProfilePage() {
                   <h2 className="text-xl font-bold text-gray-900">Communities</h2>
                   <Link
                     href="/communities/create"
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                    className="text-sm text-primary-700 hover:text-primary-800 font-medium"
                   >
                     + Create New
                   </Link>
@@ -363,10 +363,10 @@ export default function ProfilePage() {
                       <Link
                         key={community.id}
                         href={`/communities/${community.id}`}
-                        className="block p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition"
+                        className="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 font-bold">
+                          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-700 font-bold">
                             {community.name[0]}
                           </div>
                           <div>
@@ -402,7 +402,7 @@ export default function ProfilePage() {
                       <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
-                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:underline">
                         {profile.website}
                       </a>
                     </div>

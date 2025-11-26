@@ -9,8 +9,8 @@ export const Logo = ({ className = "", size = "md" }: { className?: string, size
 
     return (
         <div className={`flex items-center gap-2 ${className}`}>
-            <div className={`${sizes[size]} bg-primary-900 rounded-lg flex items-center justify-center transform rotate-3`}>
-                <div className="w-full h-full border-2 border-primary-300 rounded-lg transform -rotate-6 flex items-center justify-center bg-primary-900">
+            <div className={`${sizes[size]} bg-primary-800 rounded-lg flex items-center justify-center transform rotate-3 transition-transform hover:rotate-6 hover:scale-105`}>
+                <div className="w-full h-full border-2 border-primary-300 rounded-lg transform -rotate-6 flex items-center justify-center bg-primary-800">
                     <span className={`font-bold text-white ${size === 'sm' ? 'text-lg' : size === 'md' ? 'text-xl' : 'text-2xl'}`}>
                         P
                     </span>
