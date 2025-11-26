@@ -10,17 +10,26 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: '#fbf7f4',
+          100: '#f5ebe6',
+          200: '#ebd5c8',
+          300: '#dfbda8',
+          400: '#d0a083',
+          500: '#c0805d',
+          600: '#a66546',
+          700: '#8a5038',
+          800: '#724231',
+          900: '#5e372b',
         },
+      },
+      keyframes: {
+        progress: {
+          '0%': { transform: 'scaleX(0)' },
+          '100%': { transform: 'scaleX(1)' },
+        }
+      },
+      animation: {
+        progress: 'progress 1.5s ease-in-out infinite',
       },
     },
   },
