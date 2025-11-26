@@ -10,21 +10,22 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#faf8f5',
-          100: '#f5f0e8',
-          200: '#e8dcc8',
-          300: '#d4c0a0',
-          400: '#b89968',
-          500: '#9c7a3c',
-          600: '#8a6534',
-          700: '#6d4f28',
-          800: '#5a4020',
-          900: '#4a351a',
+          50: '#fffbf7',
+          100: '#fdf3e6',
+          200: '#f9e1c5',
+          300: '#f4ca99',
+          400: '#eda862',
+          500: '#e68a35', // Brighter, more golden brown base
+          600: '#ca6e24',
+          700: '#a8531d',
+          800: '#89421c',
+          900: '#6f3719',
+          950: '#3e1c0b',
         },
         accent: {
-          orange: '#d97706',
-          green: '#059669',
-          red: '#dc2626',
+          orange: '#f59e0b', // Brighter amber
+          green: '#10b981', // Emerald green
+          red: '#ef4444',   // Brighter red
         },
       },
       keyframes: {
