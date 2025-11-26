@@ -653,6 +653,10 @@ export class CommunitiesService {
     return this.meetingsService.getMeetingRooms(groupId);
   }
 
+  async getActiveMeetings(groupId: string) {
+    return this.meetingsService.getActiveMeetings(groupId);
+  }
+
   async getMeetingRoom(meetingId: string) {
     return this.meetingsService.getMeetingRoom(meetingId);
   }

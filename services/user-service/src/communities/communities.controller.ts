@@ -255,6 +255,12 @@ export class CommunitiesController {
     return this.communitiesService.getMeetingRooms(groupId);
   }
 
+  // Get active meetings for a group (for live notifications)
+  @Get('groups/:groupId/meetings/active')
+  async getActiveMeetings(@Param('groupId') groupId: string) {
+    return this.communitiesService.getActiveMeetings(groupId);
+  }
+
   // Get meeting room details
   @Get('meetings/:meetingId')
   async getMeetingRoom(@Param('meetingId') meetingId: string) {

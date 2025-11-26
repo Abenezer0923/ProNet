@@ -10,6 +10,7 @@ import { MeetingQA } from './entities/meeting-qa.entity';
 import { MeetingQAUpvote } from './entities/meeting-qa-upvote.entity';
 import { Group } from './entities/group.entity';
 import { User } from '../users/entities/user.entity';
+import { CommunityMember } from './entities/community-member.entity';
 import { CreateMeetingRoomDto } from './dto/create-meeting-room.dto';
 import { CreateBreakoutRoomsDto } from './dto/create-breakout-rooms.dto';
 import { CreatePollDto } from './dto/create-poll.dto';
@@ -38,7 +39,31 @@ export class MeetingsService {
         private groupRepository: Repository<Group>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(CommunityMember)
+        private communityMemberRepository: Repository<CommunityMember>,
     ) { }
+
+    // Helper method to check if user is a member of the group's community
+    private async checkGroupMembership(groupId: string, userId: string): Promise<boolean> {
+        const group = await this.groupRepository.findOne({
+            where: { id: groupId },
+            relations: ['community'],
+        });
+
+        if (!group) {
+            return false;
+        }
+
+        const membership = await this.communityMemberRepository.findOne({
+            where: {
+                communityId: group.community.id,
+                userId,
+            },
+        });
+
+        return !!membership;
+    }
+
 
     // Create a new meeting room
     async createMeetingRoom(groupId: string, userId: string, dto: CreateMeetingRoomDto) {
@@ -49,6 +74,12 @@ export class MeetingsService {
 
         if (!group) {
             throw new NotFoundException('Group not found');
+        }
+
+        // Check if user is a member of the community
+        const isMember = await this.checkGroupMembership(groupId, userId);
+        if (!isMember) {
+            throw new ForbiddenException('Only community members can create meetings');
         }
 
         // Generate a unique call ID for Stream (max 64 characters)
@@ -88,6 +119,18 @@ export class MeetingsService {
         });
     }
 
+    // Get active meetings for a group (for live notifications)
+    async getActiveMeetings(groupId: string) {
+        return await this.meetingRoomRepository.find({
+            where: {
+                groupId,
+                status: 'active',
+            },
+            relations: ['host', 'participants', 'participants.user'],
+            order: { actualStartTime: 'DESC' },
+        });
+    }
+
     // Get meeting room details
     async getMeetingRoom(meetingId: string) {
         const meeting = await this.meetingRoomRepository.findOne({
@@ -111,6 +154,12 @@ export class MeetingsService {
             // Check if meeting is active or scheduled
             if (meeting.status === 'ended' || meeting.status === 'cancelled') {
                 throw new BadRequestException('Meeting has ended or been cancelled');
+            }
+
+            // Check if user is a member of the group's community
+            const isMember = await this.checkGroupMembership(meeting.groupId, userId);
+            if (!isMember) {
+                throw new ForbiddenException('Only community members can join this meeting');
             }
 
             const user = await this.userRepository.findOne({ where: { id: userId } });
