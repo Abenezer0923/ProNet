@@ -89,7 +89,7 @@ export default function PublicProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
       </div>
     );
   }
@@ -109,7 +109,7 @@ export default function PublicProfilePage() {
       {/* Cover Photo */}
       <div className="relative">
         <div 
-          className="h-96 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+          className="h-96 bg-gradient-to-r from-primary-700 via-primary-600 to-amber-600"
           style={{
             backgroundImage: profile.coverPhoto ? `url(${profile.coverPhoto})` : undefined,
             backgroundSize: 'cover',
@@ -124,7 +124,7 @@ export default function PublicProfilePage() {
             <div className="flex items-end space-x-5">
               <div className="relative">
                 <img
-                  src={profile.profilePicture || `https://ui-avatars.com/api/?name=${profile.firstName}+${profile.lastName}&size=200&background=4F46E5&color=fff`}
+                  src={profile.profilePicture || `https://ui-avatars.com/api/?name=${profile.firstName}+${profile.lastName}&size=200&background=5e372b&color=fff`}
                   alt={`${profile.firstName} ${profile.lastName}`}
                   className="w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover"
                 />
@@ -156,7 +156,7 @@ export default function PublicProfilePage() {
                             href={profile.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                            className="flex items-center gap-1 text-primary-700 hover:text-primary-800"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -168,10 +168,10 @@ export default function PublicProfilePage() {
                       
                       {/* Stats */}
                       <div className="flex items-center gap-4 mt-4 text-sm">
-                        <Link href="#" className="text-gray-700 hover:text-indigo-600 font-medium">
+                        <Link href="#" className="text-gray-700 hover:text-primary-800 font-medium">
                           <span className="font-semibold text-gray-900">{stats.followers}</span> followers
                         </Link>
-                        <Link href="#" className="text-gray-700 hover:text-indigo-600 font-medium">
+                        <Link href="#" className="text-gray-700 hover:text-primary-800 font-medium">
                           <span className="font-semibold text-gray-900">{stats.following}</span> following
                         </Link>
                       </div>
@@ -179,21 +179,14 @@ export default function PublicProfilePage() {
                     
                     {/* Action Buttons */}
                     <div className="flex items-center gap-3">
-                      {isOwnProfile ? (
-                        <Link
-                          href="/profile/edit"
-                          className="px-6 py-2 border-2 border-indigo-600 text-indigo-600 rounded-full hover:bg-indigo-50 font-semibold transition"
-                        >
-                          Edit Profile
-                        </Link>
-                      ) : currentUser ? (
+                      {currentUser && !isOwnProfile ? (
                         <>
                           <button
                             onClick={handleFollow}
                             className={`px-6 py-2 rounded-full font-semibold transition ${
                               isFollowing
                                 ? 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                : 'bg-primary-700 text-white hover:bg-primary-800'
                             }`}
                           >
                             {isFollowing ? 'Following' : 'Follow'}
@@ -208,7 +201,7 @@ export default function PublicProfilePage() {
                       ) : (
                         <Link
                           href="/login"
-                          className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-semibold transition"
+                          className="px-6 py-2 bg-primary-700 text-white rounded-full hover:bg-primary-800 font-semibold transition"
                         >
                           Follow
                         </Link>
