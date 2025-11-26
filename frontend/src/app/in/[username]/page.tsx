@@ -231,7 +231,7 @@ export default function PublicProfilePage() {
                 className={`
                   py-4 px-1 border-b-2 font-medium text-sm transition
                   ${activeTab === tab.id
-                    ? 'border-indigo-600 text-indigo-600'
+                    ? 'border-primary-700 text-primary-700'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
@@ -285,7 +285,7 @@ function AboutTab({ profile }: { profile: any }) {
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700">
+              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary-700 hover:text-primary-800">
                 {profile.website}
               </a>
             </div>
@@ -444,7 +444,7 @@ function SkillsTab({ skills }: { skills: any[] }) {
       <h2 className="text-xl font-bold text-gray-900 mb-6">Skills & Endorsements</h2>
       <div className="grid gap-4">
         {skills.map((skill) => (
-          <div key={skill.id} className="border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition">
+          <div key={skill.id} className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">{skill.skillName}</h3>
