@@ -51,9 +51,9 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Generate a unique call ID for Stream
-        // Stream call IDs can contain letters, numbers, and underscores
-        const callId = `ProNet_${groupId}_${uuidv4().replace(/-/g, '_')}`;
+        // Generate a unique call ID for Stream (max 64 characters)
+        // Using a shorter format to stay within Stream's limit
+        const callId = `pronet_${uuidv4().replace(/-/g, '').substring(0, 32)}`;
 
         console.log(`Creating Stream meeting: ${callId}`);
 
