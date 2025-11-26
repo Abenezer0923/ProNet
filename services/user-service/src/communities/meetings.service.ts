@@ -51,17 +51,16 @@ export class MeetingsService {
             throw new NotFoundException('Group not found');
         }
 
-        // Generate a unique room name for Whereby
+        // Generate a unique room name for Jitsi
         const roomName = `ProNet-${groupId}-${uuidv4()}`;
 
-        console.log(`Creating Whereby meeting room: ${roomName}`);
+        console.log(`Creating Jitsi meeting room: ${roomName}`);
 
-        // Whereby offers free embeddable rooms without API key
-        // Format: https://subdomain.whereby.com/room-name
-        // We'll use a simple room name that works with Whereby's free tier
-        const wherebyRoomUrl = `https://whereby.com/${roomName}`;
+        // Jitsi allows any room name without pre-creation
+        // Using iframe embed which is simpler and works without API
+        const jitsiRoomUrl = `https://meet.jit.si/${roomName}`;
 
-        console.log(`Whereby room URL: ${wherebyRoomUrl}`);
+        console.log(`Jitsi room URL: ${jitsiRoomUrl}`);
 
         // Create meeting room in database
         const meetingRoom = this.meetingRoomRepository.create({
@@ -70,7 +69,7 @@ export class MeetingsService {
             hostId: userId,
             title: dto.title,
             description: dto.description,
-            dailyRoomUrl: wherebyRoomUrl,
+            dailyRoomUrl: jitsiRoomUrl,
             dailyRoomName: roomName,
             scheduledStartTime: dto.scheduledStartTime ? new Date(dto.scheduledStartTime) : null,
             scheduledEndTime: dto.scheduledEndTime ? new Date(dto.scheduledEndTime) : null,

@@ -24,10 +24,12 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 const response = await meetingsApi.joinMeeting(meetingId);
                 const { roomUrl: url } = response.data;
 
-                console.log('Whereby room URL:', url);
+                console.log('Jitsi room URL:', url);
 
-                // Add embed parameters to Whereby URL
-                const embedUrl = `${url}?embed&displayName=${encodeURIComponent(`${user.firstName} ${user.lastName}`)}`;
+                // Jitsi iframe embed with user name
+                const displayName = `${user.firstName} ${user.lastName}`;
+                const embedUrl = `${url}#userInfo.displayName="${encodeURIComponent(displayName)}"&config.prejoinPageEnabled=false`;
+
                 setRoomUrl(embedUrl);
                 setLoading(false);
 
@@ -63,6 +65,7 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
                 src={roomUrl}
                 allow="camera; microphone; fullscreen; speaker; display-capture"
                 className="w-full h-full border-0"
+                title="Meeting Room"
             />
         </div>
     );
