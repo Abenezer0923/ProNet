@@ -63,8 +63,8 @@ export default function MeetingRoom({ meetingId }: MeetingRoomProps) {
         <div className="flex flex-col h-screen bg-gray-900">
             {/* Info Banner */}
             <div className="bg-blue-600 text-white px-4 py-2 text-sm text-center">
-                <strong>Note:</strong> The meeting host needs to join first to admit participants.
-                This is a limitation of Jitsi's free tier.
+                <strong>Action Required:</strong> The host must click the <strong>"Log-in"</strong> button below to start the meeting.
+                This is a new security requirement from Jitsi.
             </div>
 
             {/* Meeting iframe */}
