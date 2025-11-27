@@ -7,6 +7,7 @@ import { PostLike } from './entities/post-like.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { Community } from '../communities/entities/community.entity';
 
 @Injectable()
 export class PostsService {
@@ -17,13 +18,15 @@ export class PostsService {
     private commentRepository: Repository<Comment>,
     @InjectRepository(PostLike)
     private likeRepository: Repository<PostLike>,
+    @InjectRepository(Community)
+    private communityRepository: Repository<Community>,
     private notificationsService: NotificationsService,
   ) { }
 
   async create(userId: string, createPostDto: CreatePostDto) {
     // If posting to a community, verify user is the owner
     if (createPostDto.communityId) {
-      const community = await this.postRepository.manager.findOne('communities', {
+      const community = await this.communityRepository.findOne({
         where: { id: createPostDto.communityId },
         select: ['id', 'createdBy'],
       });
@@ -32,7 +35,7 @@ export class PostsService {
         throw new NotFoundException('Community not found');
       }
 
-      if ((community as any).createdBy !== userId) {
+      if (community.createdBy !== userId) {
         throw new Error('Only community owners can create posts in their community');
       }
     }
