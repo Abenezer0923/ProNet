@@ -122,7 +122,7 @@ export default function PublicProfilePage() {
                 <Link href="/dashboard" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Home</Link>
                 <Link href="/connections" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">My Network</Link>
                 <Link href="/communities" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Communities</Link>
-                <Link href="/chat" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Messaging</Link>
+                <Link href="/messaging" className="px-3 py-2 text-gray-700 hover:text-primary-800 hover:bg-primary-50 rounded-md font-medium transition-smooth">Messaging</Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -223,7 +223,7 @@ export default function PublicProfilePage() {
                       {isFollowing ? 'Following' : 'Follow'}
                     </button>
                     <Link
-                      href={`/chat?userId=${profile.id}`}
+                      href={`/messaging?userId=${profile.id}`}
                       className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition"
                     >
                       Message

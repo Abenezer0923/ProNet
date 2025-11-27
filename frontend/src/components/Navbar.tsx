@@ -33,7 +33,7 @@ export default function Navbar() {
         { name: 'Feed', href: '/feed', icon: HomeIcon, activeIcon: HomeIconSolid },
         { name: 'Community', href: '/communities', icon: UserGroupIcon, activeIcon: UserGroupIconSolid },
         { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon, activeIcon: BriefcaseIconSolid },
-        { name: 'Messaging', href: '/chat', icon: ChatBubbleLeftEllipsisIcon, activeIcon: ChatBubbleLeftEllipsisIconSolid },
+        { name: 'Messaging', href: '/messaging', icon: ChatBubbleLeftEllipsisIcon, activeIcon: ChatBubbleLeftEllipsisIconSolid },
         { name: 'Notifications', href: '/notifications', icon: BellIcon, activeIcon: BellIconSolid },
     ];
 

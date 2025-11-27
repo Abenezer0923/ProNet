@@ -118,7 +118,7 @@ export default function UserProfilePage() {
                                 My Profile
                             </Link>
                             <Link
-                                href={`/chat?userId=${userId}`}
+                                href={`/messaging?userId=${userId}`}
                                 className="px-6 py-2 bg-white text-primary-600 border border-primary-600 rounded-lg font-semibold hover:bg-primary-50 transition"
                             >
                                 Message
