@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsNotEmpty } from 'class-validator';
+import { IsString, IsUUID, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
 export class SendMessageDto {
   @IsUUID()
@@ -7,4 +7,12 @@ export class SendMessageDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  @IsArray()
+  @IsOptional()
+  attachments?: string[];
+
+  @IsString()
+  @IsOptional()
+  attachmentType?: string;
 }

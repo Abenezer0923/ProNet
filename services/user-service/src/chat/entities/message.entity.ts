@@ -24,6 +24,12 @@ export class Message {
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ type: 'simple-array', nullable: true })
+  attachments: string[];
+
+  @Column({ nullable: true })
+  attachmentType: string; // 'image', 'pdf', 'document', etc.
+
   @Column({ type: 'boolean', default: false })
   isRead: boolean;
 
