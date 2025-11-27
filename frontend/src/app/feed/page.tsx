@@ -14,6 +14,9 @@ export default function FeedPage() {
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [recommendedCommunities, setRecommendedCommunities] = useState<any[]>([]);
+    const [recommendedUsers, setRecommendedUsers] = useState<any[]>([]);
+    const [loadingRecommendations, setLoadingRecommendations] = useState(true);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -34,9 +37,49 @@ export default function FeedPage() {
         }
     };
 
+    const fetchRecommendations = async () => {
+        setLoadingRecommendations(true);
+        try {
+            // Fetch all communities
+            const communitiesResponse = await api.get('/communities');
+            const allCommunities = communitiesResponse.data;
+
+            // Fetch user's communities
+            const myCommunitiesResponse = await api.get('/communities/my');
+            const myCommunityIds = myCommunitiesResponse.data.map((c: any) => c.id);
+
+            // Filter out communities user is already in
+            const recommended = allCommunities
+                .filter((c: any) => !myCommunityIds.includes(c.id))
+                .slice(0, 3);
+
+            setRecommendedCommunities(recommended);
+
+            // Fetch suggested users (users not yet connected)
+            try {
+                const usersResponse = await api.get('/search/users?limit=5');
+                const allUsers = usersResponse.data;
+                
+                // Filter out current user
+                const suggestedUsers = allUsers
+                    .filter((u: any) => u.id !== user?.id)
+                    .slice(0, 3);
+                
+                setRecommendedUsers(suggestedUsers);
+            } catch (err) {
+                console.error('Error fetching user recommendations:', err);
+            }
+        } catch (err) {
+            console.error('Error fetching recommendations:', err);
+        } finally {
+            setLoadingRecommendations(false);
+        }
+    };
+
     useEffect(() => {
         if (user) {
             fetchPosts();
+            fetchRecommendations();
         }
     }, [user]);
 
@@ -122,30 +165,89 @@ export default function FeedPage() {
 
                     {/* Right Sidebar - Recommendations */}
                     <div className="hidden lg:block lg:col-span-3">
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-24">
-                            <h3 className="font-bold text-gray-900 mb-4">Recommended for you</h3>
-                            <div className="space-y-4">
-                                {/* Placeholder recommendations */}
-                                <div className="flex items-start space-x-3">
-                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">Tech Enthusiasts</p>
-                                        <p className="text-xs text-gray-500">Community • 12k members</p>
-                                        <button className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth">
-                                            + Join
-                                        </button>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-24 space-y-6">
+                            {/* Communities Recommendations */}
+                            <div>
+                                <h3 className="font-bold text-gray-900 mb-4">Communities for you</h3>
+                                {loadingRecommendations ? (
+                                    <div className="space-y-3">
+                                        {[1, 2].map((i) => (
+                                            <div key={i} className="flex items-start space-x-3 animate-pulse">
+                                                <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
+                                                <div className="flex-1">
+                                                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
-                                <div className="flex items-start space-x-3">
-                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">Sarah Johnson</p>
-                                        <p className="text-xs text-gray-500">Product Designer</p>
-                                        <button className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth">
-                                            + Connect
-                                        </button>
+                                ) : recommendedCommunities.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {recommendedCommunities.map((community) => (
+                                            <div key={community.id} className="flex items-start space-x-3">
+                                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center flex-shrink-0 font-bold text-purple-700">
+                                                    {community.name[0]}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">{community.name}</p>
+                                                    <p className="text-xs text-gray-500">{community.memberCount || 0} members</p>
+                                                    <button
+                                                        onClick={() => router.push(`/communities/${community.id}`)}
+                                                        className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth"
+                                                    >
+                                                        + Join
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500">No recommendations available</p>
+                                )}
+                            </div>
+
+                            {/* User Recommendations */}
+                            <div className="pt-4 border-t border-gray-100">
+                                <h3 className="font-bold text-gray-900 mb-4">People to follow</h3>
+                                {loadingRecommendations ? (
+                                    <div className="space-y-3">
+                                        {[1, 2].map((i) => (
+                                            <div key={i} className="flex items-start space-x-3 animate-pulse">
+                                                <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
+                                                <div className="flex-1">
+                                                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : recommendedUsers.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {recommendedUsers.map((recommendedUser) => (
+                                            <div key={recommendedUser.id} className="flex items-start space-x-3">
+                                                <img
+                                                    src={recommendedUser.avatar || `https://ui-avatars.com/api/?name=${recommendedUser.firstName}+${recommendedUser.lastName}`}
+                                                    alt={recommendedUser.firstName}
+                                                    className="h-10 w-10 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {recommendedUser.firstName} {recommendedUser.lastName}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate">{recommendedUser.profession || 'Member'}</p>
+                                                    <button
+                                                        onClick={() => router.push(recommendedUser.username ? `/in/${recommendedUser.username}` : `/profile/${recommendedUser.id}`)}
+                                                        className="text-primary-700 text-xs font-medium mt-1 hover:underline transition-smooth"
+                                                    >
+                                                        View Profile
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500">No recommendations available</p>
+                                )}
                             </div>
                         </div>
                     </div>
