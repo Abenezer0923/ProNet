@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
-import MessagingPopup from "@/components/messaging/MessagingPopup";
+import ChatPopup from "@/components/chat/ChatPopup";
 
 export const metadata: Metadata = {
   title: "ProNet - Professional Community Platform",
@@ -22,7 +22,7 @@ export default function RootLayout({
           <SocketProvider>
             <NotificationProvider>
               {children}
-              <MessagingPopup />
+              <ChatPopup />
             </NotificationProvider>
           </SocketProvider>
         </AuthProvider>

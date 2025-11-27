@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function MessagingPopup() {
+export default function ChatPopup() {
     const { user } = useAuth();
     const {
         conversations,

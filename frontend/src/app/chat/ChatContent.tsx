@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +8,7 @@ import { useSocket } from '@/contexts/SocketContext';
 import { useChat } from '@/hooks/useChat';
 import { api } from '@/lib/api';
 
-export default function MessagingContent() {
+export default function ChatContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const userId = searchParams.get('userId');
@@ -26,6 +26,21 @@ export default function MessagingContent() {
 
     const [newMessage, setNewMessage] = useState('');
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+
+    const [targetUser, setTargetUser] = useState<any>(null);
+
+    const fetchUserInfo = useCallback(async (userId: string) => {
+        try {
+            const response = await api.get(`/users/profile/${userId}`);
+            setTargetUser(response.data);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            alert('Failed to load user information');
+            router.push('/chat');
+        } finally {
+            setIsCreatingConversation(false);
+        }
+    }, [router]);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -51,22 +66,7 @@ export default function MessagingContent() {
             // Fetch the user info to show in the UI
             fetchUserInfo(userId);
         }
-    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation]);
-
-    const [targetUser, setTargetUser] = useState<any>(null);
-
-    const fetchUserInfo = async (userId: string) => {
-        try {
-            const response = await api.get(`/users/profile/${userId}`);
-            setTargetUser(response.data);
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-            alert('Failed to load user information');
-            router.push('/messaging');
-        } finally {
-            setIsCreatingConversation(false);
-        }
-    };
+    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation, fetchUserInfo]);
 
     const startConversationWithMessage = async (message: string) => {
         if (!targetUser) return;

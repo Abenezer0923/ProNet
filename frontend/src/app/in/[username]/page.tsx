@@ -223,7 +223,7 @@ export default function PublicProfilePage() {
                       {isFollowing ? 'Following' : 'Follow'}
                     </button>
                     <Link
-                      href={`/chat?user=${profile.id}`}
+                      href={`/chat?userId=${profile.id}`}
                       className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition"
                     >
                       Message

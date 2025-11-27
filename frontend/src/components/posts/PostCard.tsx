@@ -329,11 +329,10 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     <button
                                         type="submit"
                                         disabled={!commentContent.trim() || isSubmitting}
-                                        className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
-                                            !commentContent.trim() || isSubmitting
+                                        className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${!commentContent.trim() || isSubmitting
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
-                                        }`}
+                                            }`}
                                     >
                                         {isSubmitting ? (
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
