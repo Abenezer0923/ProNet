@@ -35,7 +35,12 @@ export default function MessagingContent() {
 
     // Handle userId parameter - find existing conversation or show prompt to start new one
     useEffect(() => {
-        if (!userId || loading || selectedConversation || isCreatingConversation) return;
+        if (!userId || loading || selectedConversation || isCreatingConversation) {
+            console.log('Skipping userId effect:', { userId, loading, selectedConversation: !!selectedConversation, isCreatingConversation });
+            return;
+        }
+
+        console.log('Processing userId:', userId, 'Conversations:', conversations.length);
 
         // Find existing conversation with this user
         const existingConversation = conversations.find((conv) => {
@@ -44,8 +49,10 @@ export default function MessagingContent() {
         });
 
         if (existingConversation) {
+            console.log('Found existing conversation');
             selectConversation(existingConversation);
-        } else if (!loading) {
+        } else {
+            console.log('No existing conversation, fetching user info');
             // Set a flag to show "start conversation" UI
             setIsCreatingConversation(true);
             // Fetch the user info to show in the UI
@@ -62,7 +69,7 @@ export default function MessagingContent() {
         } catch (error) {
             console.error('Error fetching user info:', error);
             alert('Failed to load user information');
-            router.push('/chat');
+            router.push('/messaging');
         } finally {
             setIsCreatingConversation(false);
         }
