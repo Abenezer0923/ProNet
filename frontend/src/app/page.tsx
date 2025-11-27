@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/Logo';
+import { HeroIllustration } from '@/components/HeroIllustration';
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -100,16 +101,11 @@ export default function Home() {
                 <p>Trusted by 10,000+ professionals</p>
               </div>
             </div>
-            <div className="relative lg:h-[600px] w-full flex items-center justify-center">
+            <div className="relative lg:h-[600px] w-full flex items-center justify-center p-8">
               <div className="absolute inset-0 bg-gradient-to-tr from-primary-100/50 to-amber-100/50 rounded-full blur-3xl opacity-60 transform translate-x-10"></div>
-              <Image
-                src="/hero-illustration.png"
-                alt="Professional Networking"
-                width={800}
-                height={800}
-                className="relative z-10 object-contain drop-shadow-2xl rounded-2xl"
-                priority
-              />
+              <div className="relative z-10 w-full max-w-lg">
+                <HeroIllustration />
+              </div>
             </div>
           </div>
         </div>
