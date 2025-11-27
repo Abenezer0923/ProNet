@@ -92,6 +92,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       newSocket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
