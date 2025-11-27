@@ -360,9 +360,9 @@ export default function ProfilePage() {
             </div>
 
             {profile.profileType === 'personal' ? (
-              <PersonalProfile profile={profile} />
+              <PersonalProfile profile={profile} isOwnProfile={true} />
             ) : (
-              <OrganizationalProfile profile={profile} />
+              <OrganizationalProfile profile={profile} isOwnProfile={true} />
             )}
 
             {/* Communities Section */}

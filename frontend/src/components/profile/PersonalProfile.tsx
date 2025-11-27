@@ -2,20 +2,23 @@ import Link from 'next/link';
 
 interface PersonalProfileProps {
     profile: any;
+    isOwnProfile?: boolean;
 }
 
-export const PersonalProfile = ({ profile }: PersonalProfileProps) => {
+export const PersonalProfile = ({ profile, isOwnProfile = false }: PersonalProfileProps) => {
     return (
         <div className="space-y-6">
             {/* Experience Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Experience</h2>
-                    <button className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Placeholder Experience Item */}
@@ -57,11 +60,13 @@ export const PersonalProfile = ({ profile }: PersonalProfileProps) => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Education</h2>
-                    <button className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
 
                 {profile.educations && profile.educations.length > 0 ? (
@@ -96,11 +101,13 @@ export const PersonalProfile = ({ profile }: PersonalProfileProps) => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-                    <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </Link>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
 
                 {profile.skills && profile.skills.length > 0 ? (
@@ -119,9 +126,11 @@ export const PersonalProfile = ({ profile }: PersonalProfileProps) => {
                 ) : (
                     <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                         <p className="text-gray-500 mb-2">No skills added yet</p>
-                        <Link href="/profile/edit" className="text-indigo-600 font-medium hover:underline">
-                            Add skills to showcase your expertise
-                        </Link>
+                        {isOwnProfile && (
+                            <Link href="/profile/edit" className="text-indigo-600 font-medium hover:underline">
+                                Add skills to showcase your expertise
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>

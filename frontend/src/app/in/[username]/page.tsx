@@ -251,7 +251,16 @@ export default function PublicProfilePage() {
 
         {/* About Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-900">About</h2>
+            {isOwnProfile && (
+              <Link href="/profile/edit" className="text-gray-400 hover:text-primary-800 transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </Link>
+            )}
+          </div>
           {profile.bio ? (
             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
           ) : (
@@ -265,7 +274,14 @@ export default function PublicProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Activity/Feed Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Activity</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Activity</h2>
+                {isOwnProfile && (
+                  <Link href="/profile/edit" className="text-sm text-primary-700 hover:text-primary-800 font-medium">
+                    Create a post
+                  </Link>
+                )}
+              </div>
               <div className="text-center py-12 text-gray-500">
                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -276,14 +292,24 @@ export default function PublicProfilePage() {
             </div>
 
             {profile.profileType === 'personal' ? (
-              <PersonalProfile profile={profile} />
+              <PersonalProfile profile={profile} isOwnProfile={isOwnProfile} />
             ) : (
-              <OrganizationalProfile profile={profile} />
+              <OrganizationalProfile profile={profile} isOwnProfile={isOwnProfile} />
             )}
 
             {/* Communities Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Communities</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Communities</h2>
+                {isOwnProfile && (
+                  <Link
+                    href="/communities/create"
+                    className="text-sm text-primary-700 hover:text-primary-800 font-medium"
+                  >
+                    + Create New
+                  </Link>
+                )}
+              </div>
               {communities.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-4">
                   {communities.map((community) => (

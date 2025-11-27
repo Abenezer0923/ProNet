@@ -2,20 +2,23 @@ import Link from 'next/link';
 
 interface OrganizationalProfileProps {
     profile: any;
+    isOwnProfile?: boolean;
 }
 
-export const OrganizationalProfile = ({ profile }: OrganizationalProfileProps) => {
+export const OrganizationalProfile = ({ profile, isOwnProfile = false }: OrganizationalProfileProps) => {
     return (
         <div className="space-y-6">
             {/* Company Overview */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-gray-900">Company Overview</h2>
-                    <button className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -43,11 +46,13 @@ export const OrganizationalProfile = ({ profile }: OrganizationalProfileProps) =
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">What we do</h2>
-                    <button className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
                 <div className="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-200">
                     <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -59,9 +64,11 @@ export const OrganizationalProfile = ({ profile }: OrganizationalProfileProps) =
                     <p className="text-gray-600 mb-4 max-w-md mx-auto">
                         Add detailed information about what your organization offers to attract potential clients and employees.
                     </p>
-                    <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
-                        Add Products & Services
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition inline-block">
+                            Add Products & Services
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -69,11 +76,13 @@ export const OrganizationalProfile = ({ profile }: OrganizationalProfileProps) =
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Life at {profile.organizationName || 'Company'}</h2>
-                    <button className="text-gray-400 hover:text-indigo-600 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
+                    {isOwnProfile && (
+                        <Link href="/profile/edit" className="text-gray-400 hover:text-indigo-600 transition">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </Link>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
