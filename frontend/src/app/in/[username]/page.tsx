@@ -38,11 +38,7 @@ export default function PublicProfilePage() {
                       response.data.username === currentUser.username;
         setIsOwnProfile(isOwn);
         
-        if (isOwn) {
-          // Redirect to /profile if viewing own profile
-          router.push('/profile');
-          return;
-        } else {
+        if (!isOwn) {
           checkFollowStatus(response.data.id);
         }
       }
@@ -131,7 +127,7 @@ export default function PublicProfilePage() {
             </div>
             <div className="flex items-center space-x-4">
               {currentUser && (
-                <Link href="/profile" className="flex flex-col items-center group">
+                <Link href={currentUser.username ? `/in/${currentUser.username}` : '/profile'} className="flex flex-col items-center group">
                   <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200 group-hover:ring-2 group-hover:ring-primary-200 transition">
                     {currentUser.firstName?.[0] || 'U'}
                   </div>

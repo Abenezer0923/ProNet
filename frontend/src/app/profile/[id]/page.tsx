@@ -21,9 +21,13 @@ export default function UserProfilePage() {
         if (!authLoading && !currentUser) {
             router.push('/login');
         } else if (currentUser && userId) {
-            // If viewing own profile, redirect to /profile
+            // If viewing own profile, redirect to username-based URL
             if (userId === currentUser.id) {
-                router.push('/profile');
+                if (currentUser.username) {
+                    router.push(`/in/${currentUser.username}`);
+                } else {
+                    router.push('/profile');
+                }
                 return;
             }
             fetchProfile();
@@ -36,6 +40,11 @@ export default function UserProfilePage() {
         try {
             const response = await api.get(`/users/profile/${userId}`);
             setProfile(response.data);
+            
+            // Redirect to username-based URL if username exists
+            if (response.data.username) {
+                router.replace(`/in/${response.data.username}`);
+            }
         } catch (error) {
             console.error('Error fetching profile:', error);
         } finally {

@@ -29,6 +29,13 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
+  // Redirect to username-based URL if username exists
+  useEffect(() => {
+    if (profile?.username) {
+      router.replace(`/in/${profile.username}`);
+    }
+  }, [profile?.username, router]);
+
   const fetchProfile = async () => {
     try {
       const response = await api.get('/users/profile');
@@ -175,7 +182,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/profile" className="flex flex-col items-center group">
+              <Link href={profile?.username ? `/in/${profile.username}` : '/profile'} className="flex flex-col items-center group">
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border border-primary-200 group-hover:ring-2 group-hover:ring-primary-200 transition">
                   {isOrg ? displayName[0] : profile.firstName[0]}
                 </div>
