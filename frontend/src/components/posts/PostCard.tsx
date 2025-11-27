@@ -61,6 +61,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [comments, setComments] = useState<any[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [localCommentCount, setLocalCommentCount] = useState(post.commentCount || 0);
 
     const hasLiked = post.likes?.some(like => like.userId === user?.id);
     const userReaction = post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE';
@@ -94,6 +95,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
         try {
             const response = await api.get(`/posts/${post.id}/comments`);
             setComments(response.data);
+            setLocalCommentCount(response.data.length);
         } catch (error) {
             console.error('Error fetching comments:', error);
         } finally {
@@ -250,7 +252,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                             className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
                         >
                             <ChatBubbleLeftIcon className="h-6 w-6" />
-                            <span className="font-semibold">{post.commentCount > 0 ? post.commentCount : 'Comment'}</span>
+                            <span className="font-semibold">{localCommentCount > 0 ? localCommentCount : 'Comment'}</span>
                         </button>
 
                         <button
@@ -269,6 +271,15 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
 
                     {showComments && (
                         <div className="mt-5 pt-5 border-t-2 border-purple-50 space-y-4">
+                            {/* Comment Count Header */}
+                            {localCommentCount > 0 && (
+                                <div className="flex items-center justify-between mb-2">
+                                    <h4 className="text-sm font-semibold text-gray-700">
+                                        {localCommentCount} {localCommentCount === 1 ? 'Comment' : 'Comments'}
+                                    </h4>
+                                </div>
+                            )}
+
                             {/* Existing Comments */}
                             {loadingComments ? (
                                 <div className="text-center py-4">
