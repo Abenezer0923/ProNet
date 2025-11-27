@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { useChat } from '@/hooks/useChat';
+import { api } from '@/lib/api';
 
 export default function ChatPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('userId');
   const { user, loading: authLoading } = useAuth();
   const { isConnected } = useSocket();
   const {
@@ -22,12 +25,46 @@ export default function ChatPage() {
   } = useChat();
 
   const [newMessage, setNewMessage] = useState('');
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
+
+  // Handle userId parameter - find or create conversation
+  useEffect(() => {
+    if (!userId || !conversations.length || loading || selectedConversation) return;
+
+    // Find existing conversation with this user
+    const existingConversation = conversations.find((conv) => {
+      const otherUser = getOtherParticipant(conv);
+      return otherUser?.id === userId;
+    });
+
+    if (existingConversation) {
+      selectConversation(existingConversation);
+    } else {
+      // Create new conversation
+      createConversation(userId);
+    }
+  }, [userId, conversations, loading, selectedConversation, getOtherParticipant, selectConversation]);
+
+  const createConversation = async (otherUserId: string) => {
+    setIsCreatingConversation(true);
+    try {
+      const response = await api.post('/chat/conversations', {
+        participantId: otherUserId,
+      });
+      // The conversation will appear in the list and be auto-selected
+      selectConversation(response.data);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    } finally {
+      setIsCreatingConversation(false);
+    }
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +74,7 @@ export default function ChatPage() {
     setNewMessage('');
   };
 
-  if (loading || authLoading) {
+  if (loading || authLoading || isCreatingConversation) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>
@@ -162,8 +199,8 @@ export default function ChatPage() {
                         >
                           <div
                             className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwn
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-gray-200 text-gray-900'
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-gray-200 text-gray-900'
                               }`}
                           >
                             <p>{message.content}</p>
