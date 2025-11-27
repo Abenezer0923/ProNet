@@ -59,6 +59,8 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const [showReactionPicker, setShowReactionPicker] = useState(false);
     const [commentContent, setCommentContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [comments, setComments] = useState<any[]>([]);
+    const [loadingComments, setLoadingComments] = useState(false);
 
     const hasLiked = post.likes?.some(like => like.userId === user?.id);
     const userReaction = post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE';
@@ -87,6 +89,18 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
         }
     };
 
+    const fetchComments = async () => {
+        setLoadingComments(true);
+        try {
+            const response = await api.get(`/posts/${post.id}/comments`);
+            setComments(response.data);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
     const handleComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!commentContent.trim()) return;
@@ -96,11 +110,21 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
             await api.post(`/posts/${post.id}/comments`, { content: commentContent });
             setCommentContent('');
             setShowComments(true);
+            await fetchComments(); // Refresh comments
             if (onPostUpdated) onPostUpdated();
         } catch (error) {
             console.error('Error commenting:', error);
+            alert('Failed to post comment. Please try again.');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleToggleComments = async () => {
+        const newShowComments = !showComments;
+        setShowComments(newShowComments);
+        if (newShowComments && comments.length === 0) {
+            await fetchComments();
         }
     };
 
@@ -222,7 +246,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                         </div>
 
                         <button
-                            onClick={() => setShowComments(!showComments)}
+                            onClick={handleToggleComments}
                             className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
                         >
                             <ChatBubbleLeftIcon className="h-6 w-6" />
@@ -244,22 +268,68 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                     </div>
 
                     {showComments && (
-                        <div className="mt-5 pt-5 border-t-2 border-purple-50">
+                        <div className="mt-5 pt-5 border-t-2 border-purple-50 space-y-4">
+                            {/* Existing Comments */}
+                            {loadingComments ? (
+                                <div className="text-center py-4">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+                                </div>
+                            ) : comments.length > 0 ? (
+                                <div className="space-y-3 mb-4">
+                                    {comments.map((comment) => (
+                                        <div key={comment.id} className="flex space-x-3">
+                                            <img
+                                                src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${comment.author?.firstName}+${comment.author?.lastName}`}
+                                                alt={comment.author?.firstName}
+                                                className="h-8 w-8 rounded-full ring-2 ring-purple-100 flex-shrink-0"
+                                            />
+                                            <div className="flex-1 bg-gray-50 rounded-2xl px-4 py-2">
+                                                <div className="flex items-center space-x-2 mb-1">
+                                                    <span className="font-semibold text-sm text-gray-900">
+                                                        {comment.author?.firstName} {comment.author?.lastName}
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-700">{comment.content}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+
+                            {/* Comment Input */}
                             <form onSubmit={handleComment} className="flex space-x-3">
                                 <img
                                     src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                                     alt="Your avatar"
-                                    className="h-10 w-10 rounded-full ring-2 ring-purple-100"
+                                    className="h-10 w-10 rounded-full ring-2 ring-purple-100 flex-shrink-0"
                                 />
-                                <div className="flex-1">
+                                <div className="flex-1 flex space-x-2">
                                     <input
                                         type="text"
                                         value={commentContent}
                                         onChange={(e) => setCommentContent(e.target.value)}
                                         placeholder="Add a comment..."
-                                        className="w-full bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                        className="flex-1 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         disabled={isSubmitting}
                                     />
+                                    <button
+                                        type="submit"
+                                        disabled={!commentContent.trim() || isSubmitting}
+                                        className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
+                                            !commentContent.trim() || isSubmitting
+                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                                        }`}
+                                    >
+                                        {isSubmitting ? (
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        ) : (
+                                            'Post'
+                                        )}
+                                    </button>
                                 </div>
                             </form>
                         </div>
