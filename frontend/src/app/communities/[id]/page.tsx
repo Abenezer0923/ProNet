@@ -10,6 +10,8 @@ import ArticleCard from '@/components/articles/ArticleCard';
 import GroupMessage from '@/components/community/GroupMessage';
 import PinnedMessages from '@/components/community/PinnedMessages';
 import StartMeetingButton from '@/components/communities/StartMeetingButton';
+import PostCard from '@/components/posts/PostCard';
+import { PhotoIcon } from '@heroicons/react/24/outline';
 import {
   UserGroupIcon,
   ChatBubbleLeftRightIcon,
@@ -82,8 +84,13 @@ export default function CommunityPage() {
   const [newGroupType, setNewGroupType] = useState('chat');
   const [newGroupCategory, setNewGroupCategory] = useState('');
   const [articles, setArticles] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [postContent, setPostContent] = useState('');
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [isPostingSubmitting, setIsPostingSubmitting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const postImageInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -155,6 +162,12 @@ export default function CommunityPage() {
     }
   }, [activeTab, communityId]);
 
+  useEffect(() => {
+    if (activeTab === 'posts' && communityId) {
+      fetchPosts();
+    }
+  }, [activeTab, communityId]);
+
   const fetchCommunity = async () => {
     try {
       const response = await api.get(`/communities/${communityId}`);
@@ -184,6 +197,64 @@ export default function CommunityPage() {
       setArticles(response.data);
     } catch (error) {
       console.error('Error fetching articles:', error);
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const response = await api.get(`/posts?communityId=${communityId}`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const handleCreatePost = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!postContent.trim() && !postImage) return;
+
+    setIsPostingSubmitting(true);
+    try {
+      let imageUrl = '';
+      
+      // Upload image if selected
+      if (postImage) {
+        const formData = new FormData();
+        formData.append('file', postImage);
+        
+        const uploadResponse = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        imageUrl = uploadResponse.data.url;
+      }
+
+      const postData: any = {
+        content: postContent,
+        communityId,
+        visibility: 'community',
+      };
+
+      if (imageUrl) {
+        postData.images = [imageUrl];
+      }
+
+      await api.post('/posts', postData);
+
+      setPostContent('');
+      setPostImage(null);
+      fetchPosts();
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to create post';
+      alert(errorMessage);
+    } finally {
+      setIsPostingSubmitting(false);
+    }
+  };
+
+  const handlePostImageSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPostImage(e.target.files[0]);
     }
   };
 
@@ -774,35 +845,107 @@ export default function CommunityPage() {
             )}
 
             {activeTab === 'posts' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold mb-6">Community Posts</h2>
-                {isMember ? (
-                  <div className="space-y-8">
-                    {/* Create Post */}
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div className="space-y-6">
+                {/* Create Post - Only for Community Owner */}
+                {isMember && userRole === 'owner' && (
+                  <div className="bg-gradient-to-br from-white via-white to-purple-50/30 rounded-2xl shadow-lg border-2 border-purple-100/50 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Create Post</h3>
+                    <form onSubmit={handleCreatePost}>
                       <textarea
-                        placeholder="Share something with the community..."
-                        rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                        value={postContent}
+                        onChange={(e) => setPostContent(e.target.value)}
+                        placeholder="Share something with your community..."
+                        rows={4}
+                        className="w-full px-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white resize-none"
                       />
-                      <div className="flex justify-end mt-3">
-                        <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
-                          Post
+                      
+                      {postImage && (
+                        <div className="mt-4 relative inline-block group">
+                          <img
+                            src={URL.createObjectURL(postImage)}
+                            alt="Selected"
+                            className="h-32 w-auto rounded-xl border-2 border-purple-100 shadow-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setPostImage(null)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 transform"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between mt-4">
+                        <button
+                          type="button"
+                          onClick={() => postImageInputRef.current?.click()}
+                          className="flex items-center space-x-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-xl transition"
+                        >
+                          <PhotoIcon className="w-5 h-5" />
+                          <span className="font-medium">Add Photo</span>
+                        </button>
+
+                        <button
+                          type="submit"
+                          disabled={(!postContent.trim() && !postImage) || isPostingSubmitting}
+                          className={`px-6 py-2.5 rounded-xl font-semibold transition ${
+                            (!postContent.trim() && !postImage) || isPostingSubmitting
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+                          }`}
+                        >
+                          {isPostingSubmitting ? 'Posting...' : 'Share Post'}
                         </button>
                       </div>
-                    </div>
-
-                    {/* Posts Feed */}
-                    <div className="text-center py-12 text-gray-500">
-                      <NewspaperIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                      <p>No posts yet. Be the first to share something!</p>
-                    </div>
+                      <input
+                        type="file"
+                        ref={postImageInputRef}
+                        onChange={handlePostImageSelect}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                    </form>
                   </div>
+                )}
+
+                {/* Posts Feed */}
+                {isMember ? (
+                  posts.length === 0 ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                      <NewspaperIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+                      <p className="text-gray-500">
+                        {userRole === 'owner' 
+                          ? 'Be the first to share something with your community!' 
+                          : 'The community owner hasn\'t posted anything yet.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {posts.map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={post}
+                          onPostUpdated={fetchPosts}
+                        />
+                      ))}
+                    </div>
+                  )
                 ) : (
-                  <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p className="text-gray-500 font-medium">Join the community to see and create posts</p>
-                    <button onClick={handleJoinCommunity} className="mt-4 text-indigo-600 font-semibold hover:underline">
-                      Join Now
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <NewspaperIcon className="w-8 h-8 text-indigo-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Join to see posts</h3>
+                    <p className="text-gray-500 mb-4">Become a member to view and interact with community posts</p>
+                    <button 
+                      onClick={handleJoinCommunity} 
+                      className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold shadow-sm"
+                    >
+                      Join Community
                     </button>
                   </div>
                 )}

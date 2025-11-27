@@ -48,10 +48,27 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
         setIsSubmitting(true);
         try {
+            let imageUrl = '';
+            
+            // Upload image if selected
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                const uploadResponse = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                imageUrl = uploadResponse.data.url;
+            }
+
             const postData: any = {
                 content,
                 visibility: selectedCommunity ? 'community' : 'public',
             };
+
+            if (imageUrl) {
+                postData.images = [imageUrl];
+            }
 
             if (selectedCommunity) {
                 postData.communityId = selectedCommunity;
@@ -64,9 +81,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
             setSelectedCommunity('');
             setIsFocused(false);
             onPostCreated();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating post:', error);
-            alert('Failed to create post');
+            const errorMessage = error.response?.data?.message || 'Failed to create post';
+            alert(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

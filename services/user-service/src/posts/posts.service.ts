@@ -21,6 +21,21 @@ export class PostsService {
   ) { }
 
   async create(userId: string, createPostDto: CreatePostDto) {
+    // If posting to a community, verify user is the owner
+    if (createPostDto.communityId) {
+      const community = await this.postRepository.manager.findOne('communities', {
+        where: { id: createPostDto.communityId },
+      });
+
+      if (!community) {
+        throw new NotFoundException('Community not found');
+      }
+
+      if (community.createdBy !== userId) {
+        throw new Error('Only community owners can create posts in their community');
+      }
+    }
+
     const post = this.postRepository.create({
       ...createPostDto,
       authorId: userId,
