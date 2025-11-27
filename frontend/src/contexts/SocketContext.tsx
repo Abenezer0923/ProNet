@@ -39,12 +39,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // Connect to WebSocket
     // Use the API URL but replace the gateway port with user-service port
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    
+
     // For production, we need to connect directly to the user-service
     // In production: https://pronet-user-service.onrender.com (if deployed separately)
     // Or use the same backend URL if WebSocket is proxied through API gateway
     let socketUrl = process.env.NEXT_PUBLIC_WS_URL;
-    
+
     if (!socketUrl) {
       // If no WS_URL is set, derive it from API_URL
       if (apiUrl.includes('localhost')) {
@@ -54,9 +54,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         socketUrl = apiUrl.replace('api-gateway', 'user-service');
       }
     }
-    
+
     console.log('Connecting to WebSocket:', socketUrl);
-    
+
     const newSocket = io(`${socketUrl}/chat`, {
       auth: { token },
       transports: ['websocket', 'polling'],
