@@ -8,6 +8,8 @@ import { useSocket } from '@/contexts/SocketContext';
 import { useChat } from '@/hooks/useChat';
 import { api } from '@/lib/api';
 
+export const dynamic = 'force-dynamic';
+
 export default function ChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
