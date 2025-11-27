@@ -33,7 +33,7 @@ export default function MessagingContent() {
         }
     }, [user, authLoading, router]);
 
-    // Handle userId parameter - find or create conversation
+    // Handle userId parameter - find existing conversation or show prompt to start new one
     useEffect(() => {
         if (!userId || loading || selectedConversation || isCreatingConversation) return;
 
@@ -46,24 +46,42 @@ export default function MessagingContent() {
         if (existingConversation) {
             selectConversation(existingConversation);
         } else if (!loading) {
-            // Create new conversation (even if conversations list is empty)
-            createConversation(userId);
+            // Set a flag to show "start conversation" UI
+            setIsCreatingConversation(true);
+            // Fetch the user info to show in the UI
+            fetchUserInfo(userId);
         }
     }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation]);
 
-    const createConversation = async (otherUserId: string) => {
-        setIsCreatingConversation(true);
+    const [targetUser, setTargetUser] = useState<any>(null);
+
+    const fetchUserInfo = async (userId: string) => {
         try {
-            const response = await api.post('/chat/conversations', {
-                participantId: otherUserId,
-            });
-            // The conversation will appear in the list and be auto-selected
-            selectConversation(response.data);
-        } catch (error: any) {
-            console.error('Error creating conversation:', error);
-            alert(`Failed to create conversation: ${error.response?.data?.message || error.message || 'Unknown error'}`);
+            const response = await api.get(`/users/profile/${userId}`);
+            setTargetUser(response.data);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            alert('Failed to load user information');
+            router.push('/messaging');
         } finally {
             setIsCreatingConversation(false);
+        }
+    };
+
+    const startConversationWithMessage = async (message: string) => {
+        if (!targetUser) return;
+
+        try {
+            const response = await api.post('/chat/conversations', {
+                participantId: targetUser.id,
+            });
+            selectConversation(response.data);
+            // Send the first message
+            await sendMessage(message);
+            setTargetUser(null);
+        } catch (error: any) {
+            console.error('Error starting conversation:', error);
+            alert(`Failed to start conversation: ${error.response?.data?.message || error.message || 'Unknown error'}`);
         }
     };
 
@@ -225,6 +243,57 @@ export default function MessagingContent() {
                                                 value={newMessage}
                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                 placeholder="Type a message..."
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={!newMessage.trim() || !isConnected}
+                                                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                                            >
+                                                Send
+                                            </button>
+                                        </form>
+                                    </div>
+                                </>
+                            ) : targetUser ? (
+                                <>
+                                    {/* Start Conversation Header */}
+                                    <div className="p-4 border-b border-gray-200">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                {targetUser.firstName[0]}{targetUser.lastName[0]}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-900">
+                                                    {targetUser.firstName} {targetUser.lastName}
+                                                </p>
+                                                <p className="text-sm text-gray-500">Start a conversation</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Empty state */}
+                                    <div className="flex-1 flex items-center justify-center p-8">
+                                        <div className="text-center text-gray-500">
+                                            <p className="text-lg mb-2">Say hello to {targetUser.firstName}!</p>
+                                            <p className="text-sm">Send a message to start the conversation</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Message Input */}
+                                    <div className="p-4 border-t border-gray-200">
+                                        <form onSubmit={(e) => {
+                                            e.preventDefault();
+                                            if (newMessage.trim()) {
+                                                startConversationWithMessage(newMessage);
+                                                setNewMessage('');
+                                            }
+                                        }} className="flex space-x-2">
+                                            <input
+                                                type="text"
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                placeholder="Type your first message..."
                                                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                             />
                                             <button
