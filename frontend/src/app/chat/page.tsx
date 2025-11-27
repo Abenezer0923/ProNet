@@ -5,120 +5,36 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { api } from '@/lib/api';
-
-interface Conversation {
-  id: string;
-  participant1: any;
-  participant2: any;
-  lastMessage: {
-    content: string;
-    createdAt: string;
-    senderId: string;
-  } | null;
-  unreadCount: number;
-}
-
-interface Message {
-  id: string;
-  conversationId: string;
-  content: string;
-  senderId: string;
-  sender: any;
-  createdAt: string;
-  isRead: boolean;
-}
+import { useChat } from '@/hooks/useChat';
 
 export default function ChatPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { socket, isConnected } = useSocket();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { isConnected } = useSocket();
+  const {
+    conversations,
+    selectedConversation,
+    messages,
+    loading,
+    selectConversation,
+    sendMessage,
+    getOtherParticipant,
+  } = useChat();
+
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
-    } else if (user) {
-      fetchConversations();
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on('message', (message: Message) => {
-      if (selectedConversation && message.conversationId === selectedConversation.id) {
-        setMessages((prev) => [...prev, message]);
-      }
-      // Update conversation list
-      fetchConversations();
-    });
-
-    socket.on('userOnline', ({ userId }) => {
-      console.log('User online:', userId);
-    });
-
-    socket.on('userOffline', ({ userId }) => {
-      console.log('User offline:', userId);
-    });
-
-    return () => {
-      socket.off('message');
-      socket.off('userOnline');
-      socket.off('userOffline');
-    };
-  }, [socket, selectedConversation]);
-
-  const fetchConversations = async () => {
-    try {
-      const response = await api.get('/chat/conversations');
-      setConversations(response.data);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMessages = async (conversationId: string) => {
-    try {
-      const response = await api.get(`/chat/conversations/${conversationId}/messages`);
-      setMessages(response.data);
-      
-      if (socket) {
-        socket.emit('joinConversation', { conversationId });
-      }
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
-  const handleSelectConversation = (conversation: Conversation) => {
-    setSelectedConversation(conversation);
-    fetchMessages(conversation.id);
-  };
-
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation || !socket) return;
+    if (!newMessage.trim()) return;
 
-    socket.emit('sendMessage', {
-      conversationId: selectedConversation.id,
-      content: newMessage,
-    });
-
+    sendMessage(newMessage);
     setNewMessage('');
-  };
-
-  const getOtherParticipant = (conversation: Conversation) => {
-    if (!user) return null;
-    return conversation.participant1.id === user.id
-      ? conversation.participant2
-      : conversation.participant1;
   };
 
   if (loading || authLoading) {
@@ -142,9 +58,8 @@ export default function ChatPage() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    isConnected ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'
+                    }`}
                 ></div>
                 <span className="text-sm text-gray-600">
                   {isConnected ? 'Connected' : 'Disconnected'}
@@ -183,10 +98,9 @@ export default function ChatPage() {
                     return (
                       <button
                         key={conversation.id}
-                        onClick={() => handleSelectConversation(conversation)}
-                        className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 text-left transition ${
-                          selectedConversation?.id === conversation.id ? 'bg-primary-50' : ''
-                        }`}
+                        onClick={() => selectConversation(conversation)}
+                        className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 text-left transition ${selectedConversation?.id === conversation.id ? 'bg-primary-50' : ''
+                          }`}
                       >
                         <div className="flex items-start space-x-3">
                           <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
@@ -247,17 +161,15 @@ export default function ChatPage() {
                           className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              isOwn
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwn
                                 ? 'bg-primary-600 text-white'
                                 : 'bg-gray-200 text-gray-900'
-                            }`}
+                              }`}
                           >
                             <p>{message.content}</p>
                             <p
-                              className={`text-xs mt-1 ${
-                                isOwn ? 'text-primary-100' : 'text-gray-500'
-                              }`}
+                              className={`text-xs mt-1 ${isOwn ? 'text-primary-100' : 'text-gray-500'
+                                }`}
                             >
                               {new Date(message.createdAt).toLocaleTimeString()}
                             </p>
