@@ -35,7 +35,7 @@ export default function MessagingContent() {
 
     // Handle userId parameter - find or create conversation
     useEffect(() => {
-        if (!userId || !conversations.length || loading || selectedConversation) return;
+        if (!userId || loading || selectedConversation || isCreatingConversation) return;
 
         // Find existing conversation with this user
         const existingConversation = conversations.find((conv) => {
@@ -45,11 +45,11 @@ export default function MessagingContent() {
 
         if (existingConversation) {
             selectConversation(existingConversation);
-        } else {
-            // Create new conversation
+        } else if (!loading) {
+            // Create new conversation (even if conversations list is empty)
             createConversation(userId);
         }
-    }, [userId, conversations, loading, selectedConversation, getOtherParticipant, selectConversation]);
+    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation]);
 
     const createConversation = async (otherUserId: string) => {
         setIsCreatingConversation(true);
@@ -59,8 +59,9 @@ export default function MessagingContent() {
             });
             // The conversation will appear in the list and be auto-selected
             selectConversation(response.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating conversation:', error);
+            alert(`Failed to create conversation: ${error.response?.data?.message || error.message || 'Unknown error'}`);
         } finally {
             setIsCreatingConversation(false);
         }
