@@ -115,6 +115,22 @@ export const useChat = () => {
         setSelectedConversation(null);
     }, []);
 
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await api.post('/upload/post-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data.url;
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            throw error;
+        }
+    };
+
     return {
         conversations,
         selectedConversation,
@@ -124,6 +140,7 @@ export const useChat = () => {
         selectConversation,
         clearSelectedConversation,
         sendMessage,
+        uploadFile,
         getOtherParticipant,
         fetchConversations, // Exported in case manual refresh is needed
     };

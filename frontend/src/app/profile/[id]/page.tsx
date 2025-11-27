@@ -40,7 +40,7 @@ export default function UserProfilePage() {
         try {
             const response = await api.get(`/users/profile/${userId}`);
             setProfile(response.data);
-            
+
             // Redirect to username-based URL if username exists
             if (response.data.username) {
                 router.replace(`/in/${response.data.username}`);
@@ -116,6 +116,12 @@ export default function UserProfilePage() {
                                 className="text-gray-700 hover:text-gray-900"
                             >
                                 My Profile
+                            </Link>
+                            <Link
+                                href={`/messaging?userId=${userId}`}
+                                className="px-6 py-2 bg-white text-primary-600 border border-primary-600 rounded-lg font-semibold hover:bg-primary-50 transition"
+                            >
+                                Message
                             </Link>
                             <button
                                 onClick={handleFollow}
