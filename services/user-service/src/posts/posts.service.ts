@@ -25,13 +25,14 @@ export class PostsService {
     if (createPostDto.communityId) {
       const community = await this.postRepository.manager.findOne('communities', {
         where: { id: createPostDto.communityId },
+        select: ['id', 'createdBy'],
       });
 
       if (!community) {
         throw new NotFoundException('Community not found');
       }
 
-      if (community.createdBy !== userId) {
+      if ((community as any).createdBy !== userId) {
         throw new Error('Only community owners can create posts in their community');
       }
     }
