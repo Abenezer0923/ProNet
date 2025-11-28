@@ -216,12 +216,12 @@ export default function CommunityPage() {
     setIsPostingSubmitting(true);
     try {
       let imageUrl = '';
-      
+
       // Upload image if selected
       if (postImage) {
         const formData = new FormData();
         formData.append('file', postImage);
-        
+
         const uploadResponse = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
@@ -858,7 +858,7 @@ export default function CommunityPage() {
                         rows={4}
                         className="w-full px-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white resize-none"
                       />
-                      
+
                       {postImage && (
                         <div className="mt-4 relative inline-block group">
                           <img
@@ -891,11 +891,10 @@ export default function CommunityPage() {
                         <button
                           type="submit"
                           disabled={(!postContent.trim() && !postImage) || isPostingSubmitting}
-                          className={`px-6 py-2.5 rounded-xl font-semibold transition ${
-                            (!postContent.trim() && !postImage) || isPostingSubmitting
+                          className={`px-6 py-2.5 rounded-xl font-semibold transition ${(!postContent.trim() && !postImage) || isPostingSubmitting
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
-                          }`}
+                            }`}
                         >
                           {isPostingSubmitting ? 'Posting...' : 'Share Post'}
                         </button>
@@ -918,8 +917,8 @@ export default function CommunityPage() {
                       <NewspaperIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
                       <p className="text-gray-500">
-                        {userRole === 'owner' 
-                          ? 'Be the first to share something with your community!' 
+                        {userRole === 'owner'
+                          ? 'Be the first to share something with your community!'
                           : 'The community owner hasn\'t posted anything yet.'}
                       </p>
                     </div>
@@ -941,8 +940,8 @@ export default function CommunityPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Join to see posts</h3>
                     <p className="text-gray-500 mb-4">Become a member to view and interact with community posts</p>
-                    <button 
-                      onClick={handleJoinCommunity} 
+                    <button
+                      onClick={handleJoinCommunity}
                       className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold shadow-sm"
                     >
                       Join Community
