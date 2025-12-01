@@ -69,20 +69,29 @@ export class ArticlesService {
 
         const skip = (page - 1) * limit;
 
-        return this.articlesRepository.find({
-            where: { communityId, status },
-            relations: ['author'],
-            order: { createdAt: 'DESC' },
-            take: limit,
-            skip,
-        });
+        console.log('Fetching articles:', { communityId, status, page, limit });
+
+        const articles = await this.articlesRepository
+            .createQueryBuilder('article')
+            .leftJoinAndSelect('article.author', 'author')
+            .where('article.communityId = :communityId', { communityId })
+            .andWhere('article.status = :status', { status })
+            .orderBy('article.createdAt', 'DESC')
+            .skip(skip)
+            .take(limit)
+            .getMany();
+
+        console.log(`Found ${articles.length} articles`);
+        return articles;
     }
 
     async findOne(id: string): Promise<Article> {
-        const article = await this.articlesRepository.findOne({
-            where: { id },
-            relations: ['author', 'community'],
-        });
+        const article = await this.articlesRepository
+            .createQueryBuilder('article')
+            .leftJoinAndSelect('article.author', 'author')
+            .leftJoinAndSelect('article.community', 'community')
+            .where('article.id = :id', { id })
+            .getOne();
 
         if (!article) {
             throw new NotFoundException('Article not found');
