@@ -585,12 +585,14 @@ export default function CommunityPage() {
             <div className="flex items-center gap-3 mt-4 md:mt-0 md:mb-4">
               {isMember ? (
                 <>
-                  <button
-                    onClick={handleLeaveCommunity}
-                    className="px-6 py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-xl hover:bg-white hover:text-red-600 font-semibold shadow-sm transition-all duration-200"
-                  >
-                    Leave
-                  </button>
+                  {userRole !== 'owner' && (
+                    <button
+                      onClick={handleLeaveCommunity}
+                      className="px-6 py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-xl hover:bg-white hover:text-red-600 font-semibold shadow-sm transition-all duration-200"
+                    >
+                      Leave
+                    </button>
+                  )}
                   {['owner', 'admin'].includes(userRole) && (
                     <Link
                       href={`/communities/${communityId}/settings`}
