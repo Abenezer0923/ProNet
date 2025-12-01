@@ -22,14 +22,6 @@
         },
         "pronet-user-service": {
             "root": "services/user-service",
-            "nixpacksPlan": {
-                "providers": [
-                    "node"
-                ]
-            },
-            "build": {
-                "buildCommand": "npm run build"
-            },
             "env": {
                 "PORT": "3001",
                 "DATABASE_URL": "${{pronet-postgres.DATABASE_URL}}",
@@ -49,14 +41,6 @@
         },
         "pronet-api-gateway": {
             "root": "services/api-gateway",
-            "nixpacksPlan": {
-                "providers": [
-                    "node"
-                ]
-            },
-            "build": {
-                "buildCommand": "npm run build"
-            },
             "env": {
                 "PORT": "3000",
                 "USER_SERVICE_URL": "${{pronet-user-service.RAILWAY_PRIVATE_DOMAIN}}:3001",
