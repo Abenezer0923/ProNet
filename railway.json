@@ -22,8 +22,13 @@
         },
         "pronet-user-service": {
             "root": "services/user-service",
+            "nixpacksPlan": {
+                "providers": [
+                    "node"
+                ]
+            },
             "build": {
-                "buildCommand": "npm install --legacy-peer-deps && npm run build"
+                "buildCommand": "npm run build"
             },
             "env": {
                 "PORT": "3001",
@@ -33,7 +38,10 @@
                 "CLOUDINARY_CLOUD_NAME": "${{CLOUDINARY_CLOUD_NAME}}",
                 "CLOUDINARY_API_KEY": "${{CLOUDINARY_API_KEY}}",
                 "CLOUDINARY_API_SECRET": "${{CLOUDINARY_API_SECRET}}",
-                "FRONTEND_URL": "${{FRONTEND_URL}}"
+                "FRONTEND_URL": "${{FRONTEND_URL}}",
+                "GOOGLE_CLIENT_ID": "${{GOOGLE_CLIENT_ID}}",
+                "GOOGLE_CLIENT_SECRET": "${{GOOGLE_CLIENT_SECRET}}",
+                "GOOGLE_CALLBACK_URL": "${{GOOGLE_CALLBACK_URL}}"
             },
             "dependsOn": [
                 "pronet-postgres"
@@ -41,8 +49,13 @@
         },
         "pronet-api-gateway": {
             "root": "services/api-gateway",
+            "nixpacksPlan": {
+                "providers": [
+                    "node"
+                ]
+            },
             "build": {
-                "buildCommand": "npm install --legacy-peer-deps && npm run build"
+                "buildCommand": "npm run build"
             },
             "env": {
                 "PORT": "3000",
