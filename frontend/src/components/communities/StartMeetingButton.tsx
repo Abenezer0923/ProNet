@@ -8,12 +8,14 @@ import { Video, X } from 'lucide-react';
 interface StartMeetingButtonProps {
     groupId: string;
     groupName: string;
+    onMeetingCreated?: () => void;
 }
 
-export default function StartMeetingButton({ groupId, groupName }: StartMeetingButtonProps) {
+export default function StartMeetingButton({ groupId, groupName, onMeetingCreated }: StartMeetingButtonProps) {
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isScheduled, setIsScheduled] = useState(false);
     const [formData, setFormData] = useState<CreateMeetingDto>({
         title: `${groupName} Meeting`,
         description: '',
@@ -36,8 +38,16 @@ export default function StartMeetingButton({ groupId, groupName }: StartMeetingB
             const response = await meetingsApi.createMeeting(groupId, formData);
             const meeting = response.data;
 
-            // Join the meeting immediately
-            router.push(`/meetings/${meeting.id}`);
+            if (isScheduled) {
+                setShowModal(false);
+                if (onMeetingCreated) {
+                    onMeetingCreated();
+                }
+                alert('Meeting scheduled successfully!');
+            } else {
+                // Join the meeting immediately
+                router.push(`/meetings/${meeting.id}`);
+            }
         } catch (error: any) {
             console.error('Failed to create meeting:', error);
             const errorMessage = error.response?.data?.message || 'Failed to start meeting';
@@ -95,6 +105,41 @@ export default function StartMeetingButton({ groupId, groupName }: StartMeetingB
                                 />
                             </div>
 
+                            <div>
+                                <label className="flex items-center gap-2 mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={isScheduled}
+                                        onChange={(e) => setIsScheduled(e.target.checked)}
+                                        className="rounded text-blue-600"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Schedule for later</span>
+                                </label>
+
+                                {isScheduled && (
+                                    <div className="grid grid-cols-2 gap-4 pl-6">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Start Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={formData.scheduledStartTime || ''}
+                                                onChange={(e) => setFormData({ ...formData, scheduledStartTime: e.target.value })}
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">End Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={formData.scheduledEndTime || ''}
+                                                onChange={(e) => setFormData({ ...formData, scheduledEndTime: e.target.value })}
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2">
                                     <input
@@ -140,7 +185,7 @@ export default function StartMeetingButton({ groupId, groupName }: StartMeetingB
                                     className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50"
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? 'Starting...' : 'Start Meeting'}
+                                    {isLoading ? 'Processing...' : (isScheduled ? 'Schedule Meeting' : 'Start Meeting')}
                                 </button>
                             </div>
                         </div>

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { meetingsApi } from '@/lib/api/meetings';
 import { useCommunitySocket } from '@/hooks/useCommunitySocket';
 import ArticleCard from '@/components/articles/ArticleCard';
 import GroupMessage from '@/components/community/GroupMessage';
@@ -24,7 +25,9 @@ import {
   MegaphoneIcon,
   VideoCameraIcon,
   AcademicCapIcon,
-  HashtagIcon
+  HashtagIcon,
+  PaperClipIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Logo } from '@/components/Logo';
 
@@ -80,6 +83,9 @@ export default function CommunityPage() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [messageAttachment, setMessageAttachment] = useState<File | null>(null);
+  const [isMessageSending, setIsMessageSending] = useState(false);
+  const [meetings, setMeetings] = useState<any[]>([]);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupType, setNewGroupType] = useState('chat');
@@ -148,8 +154,12 @@ export default function CommunityPage() {
 
   useEffect(() => {
     if (selectedGroup) {
-      setMessages([]); // Clear previous messages
-      fetchMessages();
+      if (selectedGroup.type === 'meeting') {
+        fetchMeetings();
+      } else {
+        setMessages([]); // Clear previous messages
+        fetchMessages();
+      }
     }
   }, [selectedGroup]);
 
@@ -178,6 +188,16 @@ export default function CommunityPage() {
       router.push('/communities');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMeetings = async () => {
+    if (!selectedGroup) return;
+    try {
+      const response = await meetingsApi.getMeetings(selectedGroup.id);
+      setMeetings(response.data);
+    } catch (error) {
+      console.error('Error fetching meetings:', error);
     }
   };
 
@@ -320,21 +340,57 @@ export default function CommunityPage() {
 
   const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedGroup) return;
+    if ((!newMessage.trim() && !messageAttachment) || !selectedGroup) return;
 
     if (!isMember) {
       alert('Join this community to participate in group chats.');
       return;
     }
 
+    setIsMessageSending(true);
     try {
+      let attachments = [];
+      if (messageAttachment) {
+        const formData = new FormData();
+        formData.append('file', messageAttachment);
+        const uploadResponse = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        attachments.push({
+          type: messageAttachment.type.startsWith('image/') ? 'image' : 'file',
+          url: uploadResponse.data.url,
+          name: messageAttachment.name,
+          size: messageAttachment.size
+        });
+      }
+
+      const messageData = {
+        content: newMessage,
+        attachments: attachments.length > 0 ? attachments : undefined
+      };
+
       // Send via WebSocket if connected, otherwise use HTTP
       if (isConnected) {
-        sendSocketMessage(newMessage);
+        // Note: Socket message format might need adjustment for attachments depending on backend implementation
+        // For now assuming socket handles same structure or we fallback to HTTP for attachments
+        if (attachments.length > 0) {
+           // Fallback to HTTP for attachments if socket doesn't support it directly or for reliability
+           const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, messageData);
+           const fullMessage: Message = {
+            ...response.data,
+            updatedAt: response.data.updatedAt || response.data.createdAt,
+            isEdited: response.data.isEdited || false,
+            isPinned: response.data.isPinned || false,
+            reactions: response.data.reactions || [],
+            attachments: response.data.attachments || [],
+            parentMessageId: response.data.parentMessageId || undefined,
+          };
+          setMessages((prev: Message[]) => [...prev, fullMessage]);
+        } else {
+          sendSocketMessage(newMessage);
+        }
       } else {
-        const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, {
-          content: newMessage,
-        });
+        const response = await api.post(`/communities/groups/${selectedGroup.id}/messages`, messageData);
         // Ensure response has all required fields
         const fullMessage: Message = {
           ...response.data,
@@ -348,6 +404,7 @@ export default function CommunityPage() {
         setMessages((prev: Message[]) => [...prev, fullMessage]);
       }
       setNewMessage('');
+      setMessageAttachment(null);
       stopTyping();
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -357,6 +414,8 @@ export default function CommunityPage() {
       if (errorMessage.includes('member')) {
         fetchCommunity();
       }
+    } finally {
+      setIsMessageSending(false);
     }
   };
 
@@ -747,6 +806,7 @@ export default function CommunityPage() {
                         <StartMeetingButton
                           groupId={selectedGroup.id}
                           groupName={selectedGroup.name}
+                          onMeetingCreated={fetchMeetings}
                         />
                       )}
                     </div>
@@ -773,10 +833,38 @@ export default function CommunityPage() {
                         {/* Upcoming/Active Meetings List */}
                         <div>
                           <h3 className="font-semibold text-gray-900 mb-3">Recent Meetings</h3>
-                          <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-gray-200">
-                            <p className="text-sm">No recent meetings</p>
-                            <p className="text-xs mt-1">Click "Start Meeting" to create a new meeting room</p>
-                          </div>
+                          {meetings.length === 0 ? (
+                            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-gray-200">
+                              <p className="text-sm">No recent meetings</p>
+                              <p className="text-xs mt-1">Click "Start Meeting" to create a new meeting room</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {meetings.map((meeting) => (
+                                <div key={meeting.id} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm flex justify-between items-center">
+                                  <div>
+                                    <h4 className="font-medium text-gray-900">{meeting.title}</h4>
+                                    <p className="text-sm text-gray-500">
+                                      {meeting.status === 'active' ? (
+                                        <span className="text-green-600 font-medium flex items-center gap-1">
+                                          <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
+                                          Live Now
+                                        </span>
+                                      ) : (
+                                        new Date(meeting.createdAt).toLocaleDateString()
+                                      )}
+                                    </p>
+                                  </div>
+                                  <Link
+                                    href={`/meetings/${meeting.id}`}
+                                    className="px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 font-medium text-sm transition"
+                                  >
+                                    Join
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -843,18 +931,50 @@ export default function CommunityPage() {
 
                     {/* Message Input */}
                     <div className="p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
+                      {messageAttachment && (
+                        <div className="mb-2 p-2 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <PaperClipIcon className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm text-gray-700 truncate max-w-[200px]">{messageAttachment.name}</span>
+                          </div>
+                          <button
+                            onClick={() => setMessageAttachment(null)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <XMarkIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById('chat-file-input')?.click()}
+                          className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-full transition"
+                          disabled={!isMember || isMessageSending}
+                        >
+                          <PaperClipIcon className="w-5 h-5" />
+                        </button>
+                        <input
+                          type="file"
+                          id="chat-file-input"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              setMessageAttachment(e.target.files[0]);
+                            }
+                          }}
+                        />
                         <input
                           type="text"
                           value={newMessage}
                           onChange={handleTyping}
                           placeholder={isMember ? `Message #${selectedGroup.name}` : "Join community to chat"}
-                          disabled={!isMember}
+                          disabled={!isMember || isMessageSending}
                           className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400"
                         />
                         <button
                           type="submit"
-                          disabled={!newMessage.trim() || !isMember}
+                          disabled={(!newMessage.trim() && !messageAttachment) || !isMember || isMessageSending}
                           className="p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                         >
                           <PaperAirplaneIcon className="w-5 h-5" />
