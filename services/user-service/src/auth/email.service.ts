@@ -1,46 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
 
   constructor() {
     // Check if email credentials are configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.warn('⚠️  Email credentials not configured. OTP will be logged to console only.');
-      this.transporter = null;
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('⚠️  RESEND_API_KEY not configured. OTP will be logged to console only.');
+      this.resend = null;
       return;
     }
 
-    // Create transporter with Gmail using explicit SSL (Port 465)
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Use SSL
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      // Fail fast if connection hangs
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
-    });
-
-    console.log(`📧 Email service initialized with: ${process.env.EMAIL_USER}`);
+    this.resend = new Resend(process.env.RESEND_API_KEY);
+    console.log(`📧 Email service initialized with Resend`);
   }
 
   async sendOtpEmail(email: string, otp: string): Promise<void> {
-    // If transporter is not configured, throw error
-    if (!this.transporter) {
-      throw new Error('Email service not configured. Please set EMAIL_USER and EMAIL_PASSWORD environment variables.');
+    // If resend is not configured, throw error
+    if (!this.resend) {
+      throw new Error('Email service not configured. Please set RESEND_API_KEY environment variable.');
     }
 
     try {
-      const mailOptions = {
-        from: `"ProNet" <${process.env.EMAIL_USER}>`,
-        to: email,
+      const { data, error } = await this.resend.emails.send({
+        from: 'ProNet <onboarding@resend.dev>', // Default Resend testing domain
+        to: [email],
         subject: 'Your ProNet Verification Code',
         html: `
           <!DOCTYPE html>
@@ -88,24 +74,18 @@ export class EmailService {
           </body>
           </html>
         `,
-      };
+      });
 
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ OTP email sent successfully to ${email}`);
-      console.log(`📬 Message ID: ${info.messageId}`);
-    } catch (error) {
-      console.error('❌ Error sending OTP email:', error);
-
-      // Provide helpful error messages
-      if (error.code === 'EAUTH') {
-        console.error('🔐 Authentication failed. Please check:');
-        console.error('   1. EMAIL_USER is correct');
-        console.error('   2. EMAIL_PASSWORD is a Gmail App Password (not your regular password)');
-        console.error('   3. 2-Step Verification is enabled in your Google Account');
-        console.error('   4. Generate App Password at: https://myaccount.google.com/apppasswords');
+      if (error) {
+        throw new Error(error.message);
       }
 
+      console.log(`✅ OTP email sent successfully to ${email}`);
+      console.log(`📬 Message ID: ${data?.id}`);
+    } catch (error) {
+      console.error('❌ Error sending OTP email:', error);
       throw error;
     }
   }
 }
+
