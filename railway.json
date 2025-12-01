@@ -34,7 +34,9 @@
                 "FRONTEND_URL": "${{FRONTEND_URL}}",
                 "GOOGLE_CLIENT_ID": "${{GOOGLE_CLIENT_ID}}",
                 "GOOGLE_CLIENT_SECRET": "${{GOOGLE_CLIENT_SECRET}}",
-                "GOOGLE_CALLBACK_URL": "${{GOOGLE_CALLBACK_URL}}"
+                "GOOGLE_CALLBACK_URL": "${{GOOGLE_CALLBACK_URL}}",
+                "STREAM_API_KEY": "${{STREAM_API_KEY}}",
+                "STREAM_SECRET_KEY": "${{STREAM_SECRET_KEY}}"
             },
             "dependsOn": [
                 "pronet-postgres"
