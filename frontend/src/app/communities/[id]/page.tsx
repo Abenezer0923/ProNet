@@ -478,13 +478,13 @@ export default function CommunityPage() {
                   <img
                     src={community.logo}
                     alt={community.name}
-                    className="relative w-48 h-48 rounded-3xl border-[6px] border-white shadow-2xl object-cover bg-white transition transform group-hover/logo:scale-105 duration-300"
+                    className="relative w-48 h-48 rounded-3xl border-[6px] border-white shadow-2xl object-cover bg-white transition-transform duration-300 transform hover:scale-105 hover:rotate-3"
                   />
                 </div>
               ) : (
-                <div className="relative w-48 h-48 group/logo">
+                <div className="relative w-48 h-48 group/logo cursor-default">
                   <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
-                  <div className="relative w-full h-full bg-primary-800 rounded-3xl flex items-center justify-center transform rotate-3 transition-transform group-hover/logo:rotate-6 group-hover/logo:scale-105 shadow-2xl border-[6px] border-white">
+                  <div className="relative w-full h-full bg-primary-800 rounded-3xl flex items-center justify-center transform rotate-3 transition-transform duration-300 hover:rotate-6 hover:scale-105 shadow-2xl border-[6px] border-white">
                     <div className="w-[85%] h-[85%] border-2 border-primary-300/30 rounded-2xl transform -rotate-6 flex items-center justify-center bg-gradient-to-br from-primary-700 to-primary-900">
                       <span className="font-bold text-white text-6xl tracking-tighter drop-shadow-lg">
                         {community.name.substring(0, 2).toUpperCase()}
