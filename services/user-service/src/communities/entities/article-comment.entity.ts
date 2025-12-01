@@ -14,8 +14,14 @@ export class ArticleComment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  articleId: string;
+
   @ManyToOne(() => Article)
   article: Article;
+
+  @Column()
+  userId: string;
 
   @ManyToOne(() => User)
   author: User;

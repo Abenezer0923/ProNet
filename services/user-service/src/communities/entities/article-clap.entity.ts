@@ -13,8 +13,14 @@ export class ArticleClap {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  articleId: string;
+
   @ManyToOne(() => Article)
   article: Article;
+
+  @Column()
+  userId: string;
 
   @ManyToOne(() => User)
   user: User;

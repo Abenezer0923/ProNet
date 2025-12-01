@@ -15,8 +15,14 @@ export class Article {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  communityId: string;
+
   @ManyToOne(() => Community, community => community.articles)
   community: Community;
+
+  @Column()
+  authorId: string;
 
   @ManyToOne(() => User)
   author: User;

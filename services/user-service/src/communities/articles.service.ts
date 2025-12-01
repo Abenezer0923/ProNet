@@ -33,7 +33,9 @@ export class ArticlesService {
 
             const article = this.articlesRepository.create({
                 ...createArticleDto,
+                communityId,
                 community,
+                authorId: userId,
                 author: { id: userId } as User,
                 slug,
                 publishedAt,
@@ -116,7 +118,9 @@ export class ArticlesService {
         const article = await this.findOne(id);
 
         const clap = this.clapsRepository.create({
+            articleId: id,
             article,
+            userId,
             user: { id: userId } as User,
         });
 
@@ -128,7 +132,9 @@ export class ArticlesService {
         const article = await this.findOne(id);
 
         const comment = this.commentsRepository.create({
+            articleId: id,
             article,
+            userId,
             author: { id: userId } as User,
             content,
         });
