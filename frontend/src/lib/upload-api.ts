@@ -4,7 +4,7 @@ import axios from 'axios';
 // This bypasses the API gateway to avoid proxy issues
 const USER_SERVICE_URL =
   process.env.NEXT_PUBLIC_USER_SERVICE_URL ||
-  'https://pronet-user-service.onrender.com';
+  'http://localhost:3001';
 
 export const uploadApi = axios.create({
   baseURL: USER_SERVICE_URL,
