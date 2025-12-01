@@ -33,3 +33,17 @@ uploadApi.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// Helper function to upload images
+export const uploadImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await uploadApi.post('/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data.url;
+};

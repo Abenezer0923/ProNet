@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { uploadImage } from '@/lib/upload-api';
+import Image from 'next/image';
 
 export default function CommunitySettingsPage() {
   const params = useParams();
@@ -20,6 +22,13 @@ export default function CommunitySettingsPage() {
   const [description, setDescription] = useState('');
   const [privacy, setPrivacy] = useState('public');
   const [category, setCategory] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [coverImage, setCoverImage] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (communityId) {
@@ -36,6 +45,8 @@ export default function CommunitySettingsPage() {
       setDescription(data.description);
       setPrivacy(data.privacy);
       setCategory(data.category || '');
+      setAvatar(data.avatar || '');
+      setCoverImage(data.coverImage || '');
       
       // Check if user is admin/owner
       const member = data.members?.find((m: any) => m.user.id === user?.id);
@@ -50,6 +61,38 @@ export default function CommunitySettingsPage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const url = await uploadImage(file);
+      setAvatar(url);
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCover(true);
+    try {
+      const url = await uploadImage(file);
+      setCoverImage(url);
+    } catch (error) {
+      console.error('Error uploading cover image:', error);
+      alert('Failed to upload cover image');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -59,8 +102,11 @@ export default function CommunitySettingsPage() {
         description,
         privacy,
         category,
+        avatar,
+        coverImage,
       });
       alert('Community updated successfully');
+      fetchCommunity();
     } catch (error) {
       console.error('Error updating community:', error);
       alert('Failed to update community');
@@ -162,75 +208,216 @@ export default function CommunitySettingsPage() {
           <div className="p-6">
             {/* General Settings */}
             {activeTab === 'general' && (
-              <form onSubmit={handleSave} className="space-y-6">
+              <form onSubmit={handleSave} className="space-y-8">
+                {/* Cover Image Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Community Name
+                  <label className="block text-sm font-medium text-gray-900 mb-3">
+                    Cover Image
                   </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    required
-                  />
+                  <div className="relative group">
+                    <div className="relative h-48 w-full rounded-xl overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600">
+                      {coverImage ? (
+                        <Image
+                          src={coverImage}
+                          alt="Cover"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <svg className="w-16 h-16 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => coverInputRef.current?.click()}
+                          disabled={uploadingCover}
+                          className="px-4 py-2 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition disabled:opacity-50"
+                        >
+                          {uploadingCover ? 'Uploading...' : 'Change Cover'}
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      className="hidden"
+                    />
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Recommended: 1200x300px. Max file size: 5MB
+                  </p>
                 </div>
 
+                {/* Avatar Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                  <label className="block text-sm font-medium text-gray-900 mb-3">
+                    Community Avatar
                   </label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    required
-                  />
+                  <div className="flex items-center gap-6">
+                    <div className="relative group">
+                      <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        {avatar ? (
+                          <Image
+                            src={avatar}
+                            alt="Avatar"
+                            width={96}
+                            height={96}
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-3xl font-bold text-white">
+                            {name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => avatarInputRef.current?.click()}
+                          disabled={uploadingAvatar}
+                          className="text-white text-sm font-medium"
+                        >
+                          {uploadingAvatar ? '...' : 'Edit'}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={uploadingAvatar}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+                      >
+                        {uploadingAvatar ? 'Uploading...' : 'Upload New Avatar'}
+                      </button>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Square image, at least 200x200px
+                      </p>
+                    </div>
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
-                  </label>
-                  <input
-                    type="text"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="e.g., Technology, Business, Education"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
+                {/* Divider */}
+                <div className="border-t border-gray-200"></div>
+
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Community Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="Enter community name"
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
+                      placeholder="Describe your community..."
+                      required
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                      {description.length}/500 characters
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Category
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    >
+                      <option value="">Select a category</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Business">Business</option>
+                      <option value="Education">Education</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Design">Design</option>
+                      <option value="Engineering">Engineering</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Privacy
+                    </label>
+                    <select
+                      value={privacy}
+                      onChange={(e) => setPrivacy(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    >
+                      <option value="public">🌍 Public - Anyone can join</option>
+                      <option value="private">🔒 Private - Invite only</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Privacy
-                  </label>
-                  <select
-                    value={privacy}
-                    onChange={(e) => setPrivacy(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  >
-                    <option value="public">Public - Anyone can join</option>
-                    <option value="private">Private - Invite only</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-between items-center pt-6 border-t">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={handleDeleteCommunity}
-                    className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    className="w-full sm:w-auto px-6 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition font-medium"
                   >
                     Delete Community
                   </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/communities/${communityId}`)}
+                      className="flex-1 sm:flex-none px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="flex-1 sm:flex-none px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {saving ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Saving...
+                        </span>
+                      ) : (
+                        'Save Changes'
+                      )}
+                    </button>
+                  </div>
                 </div>
               </form>
             )}
