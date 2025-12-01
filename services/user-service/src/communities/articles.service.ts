@@ -23,10 +23,14 @@ export class ArticlesService {
 
     async create(communityId: string, userId: string, createArticleDto: CreateArticleDto): Promise<Article> {
         try {
+            console.log('Creating article:', { communityId, userId, dto: createArticleDto });
+            
             const community = await this.communitiesRepository.findOne({ where: { id: communityId } });
             if (!community) {
+                console.error('Community not found:', communityId);
                 throw new NotFoundException('Community not found');
             }
+            console.log('Community found:', community.name);
 
             const slug = this.generateSlug(createArticleDto.title);
             const publishedAt = createArticleDto.status === 'published' ? new Date() : null;
@@ -42,9 +46,14 @@ export class ArticlesService {
                 readingTime: this.calculateReadingTime(createArticleDto.content),
             });
 
-            return await this.articlesRepository.save(article);
+            console.log('Article entity created, saving to database...');
+            const savedArticle = await this.articlesRepository.save(article);
+            console.log('Article saved successfully:', savedArticle.id);
+            
+            return savedArticle;
         } catch (error) {
             console.error('Error creating article:', error);
+            console.error('Error details:', error.message, error.stack);
             throw error;
         }
     }
@@ -61,7 +70,7 @@ export class ArticlesService {
         const skip = (page - 1) * limit;
 
         return this.articlesRepository.find({
-            where: { community: { id: communityId }, status },
+            where: { communityId, status },
             relations: ['author'],
             order: { createdAt: 'DESC' },
             take: limit,
@@ -147,7 +156,7 @@ export class ArticlesService {
 
     async getComments(id: string): Promise<ArticleComment[]> {
         return this.commentsRepository.find({
-            where: { article: { id } },
+            where: { articleId: id },
             relations: ['author'],
             order: { createdAt: 'DESC' },
         });
