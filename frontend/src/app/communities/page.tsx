@@ -12,6 +12,7 @@ import {
   UsersIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
+import { Logo } from '@/components/Logo';
 
 interface Community {
   id: string;
@@ -117,12 +118,7 @@ export default function CommunitiesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/dashboard" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-800 to-primary-700 rounded-xl flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                P
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-800 to-amber-700 bg-clip-text text-transparent">
-                ProNet
-              </span>
+              <Logo />
             </Link>
             <div className="flex items-center space-x-4">
               <Link

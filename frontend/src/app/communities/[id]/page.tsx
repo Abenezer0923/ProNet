@@ -26,6 +26,7 @@ import {
   AcademicCapIcon,
   HashtagIcon
 } from '@heroicons/react/24/outline';
+import { Logo } from '@/components/Logo';
 
 type TabType = 'home' | 'groups' | 'posts' | 'members' | 'articles';
 
@@ -445,7 +446,9 @@ export default function CommunityPage() {
               </Link>
             </div>
             <div className="flex items-center">
-              <Link href="/dashboard" className="text-xl font-bold text-primary-600">ProNet</Link>
+              <Link href="/dashboard">
+                <Logo />
+              </Link>
             </div>
           </div>
         </div>
