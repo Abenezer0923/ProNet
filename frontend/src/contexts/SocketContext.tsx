@@ -41,7 +41,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
     // For production, we need to connect directly to the user-service
-    // In production: https://<your-railway-app>.up.railway.app (if deployed separately)
+    // In production: https://pronet-user-service.onrender.com (if deployed separately)
     // Or use the same backend URL if WebSocket is proxied through API gateway
     let socketUrl = process.env.NEXT_PUBLIC_WS_URL;
 
