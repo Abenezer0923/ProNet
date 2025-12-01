@@ -10,7 +10,7 @@ import { useCommunitySocket } from '@/hooks/useCommunitySocket';
 import ArticleCard from '@/components/articles/ArticleCard';
 import GroupMessage from '@/components/community/GroupMessage';
 import PinnedMessages from '@/components/community/PinnedMessages';
-import StartMeetingButton from '@/components/communities/StartMeetingButton';
+import MeetingHome from '@/components/meetings/MeetingHome';
 import PostCard from '@/components/posts/PostCard';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import {
@@ -793,81 +793,11 @@ export default function CommunityPage() {
                 {selectedGroup.type === 'meeting' ? (
                   // Meeting Room UI
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                          <span className="text-2xl">🎥</span> {selectedGroup.name}
-                        </h2>
-                        {selectedGroup.description && (
-                          <p className="text-gray-600 mt-1">{selectedGroup.description}</p>
-                        )}
-                      </div>
-                      {isMember && (
-                        <StartMeetingButton
-                          groupId={selectedGroup.id}
-                          groupName={selectedGroup.name}
-                          onMeetingCreated={fetchMeetings}
-                        />
-                      )}
-                    </div>
-
-                    {!isMember && (
-                      <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                        <p className="text-gray-500 font-medium">Join the community to start or join meetings</p>
-                        <button onClick={handleJoinCommunity} className="mt-4 text-primary-600 font-semibold hover:underline">
-                          Join Now
-                        </button>
-                      </div>
-                    )}
-
-                    {isMember && (
-                      <div className="space-y-4">
-                        <div className="bg-gradient-to-r from-primary-50 to-accent-orange-50 rounded-xl p-6 border border-primary-100">
-                          <h3 className="font-semibold text-gray-900 mb-2">About Meeting Rooms</h3>
-                          <p className="text-gray-600 text-sm">
-                            Start instant video meetings with up to 100 participants. Features include screen sharing,
-                            recording, breakout rooms, polls, and Q&A.
-                          </p>
-                        </div>
-
-                        {/* Upcoming/Active Meetings List */}
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-3">Recent Meetings</h3>
-                          {meetings.length === 0 ? (
-                            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-sm">No recent meetings</p>
-                              <p className="text-xs mt-1">Click "Start Meeting" to create a new meeting room</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              {meetings.map((meeting) => (
-                                <div key={meeting.id} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm flex justify-between items-center">
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">{meeting.title}</h4>
-                                    <p className="text-sm text-gray-500">
-                                      {meeting.status === 'active' ? (
-                                        <span className="text-green-600 font-medium flex items-center gap-1">
-                                          <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
-                                          Live Now
-                                        </span>
-                                      ) : (
-                                        new Date(meeting.createdAt).toLocaleDateString()
-                                      )}
-                                    </p>
-                                  </div>
-                                  <Link
-                                    href={`/meetings/${meeting.id}`}
-                                    className="px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 font-medium text-sm transition"
-                                  >
-                                    Join
-                                  </Link>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    <MeetingHome 
+                      groupId={selectedGroup.id}
+                      groupName={selectedGroup.name}
+                      isMember={isMember}
+                    />
                   </div>
                 ) : (
                   // Regular Chat UI
