@@ -13,13 +13,13 @@ export class ArticleClap {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   articleId: string;
 
   @ManyToOne(() => Article)
   article: Article;
 
-  @Column()
+  @Column({ nullable: true })
   userId: string;
 
   @ManyToOne(() => User)

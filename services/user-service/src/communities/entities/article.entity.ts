@@ -15,13 +15,13 @@ export class Article {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   communityId: string;
 
   @ManyToOne(() => Community, community => community.articles)
   community: Community;
 
-  @Column()
+  @Column({ nullable: true })
   authorId: string;
 
   @ManyToOne(() => User)
