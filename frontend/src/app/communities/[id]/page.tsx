@@ -452,42 +452,70 @@ export default function CommunityPage() {
       </nav>
 
       {/* Cover Photo */}
-      <div className="relative">
+      <div className="relative group">
         <div
-          className="h-64 bg-gradient-to-r from-primary-800 to-primary-600"
+          className="h-80 w-full bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 relative overflow-hidden"
           style={{
             backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
-        />
-        <div className="absolute inset-0 bg-black/30"></div>
+        >
+          {!community.coverImage && (
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        </div>
 
         {/* Community Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-20 flex flex-col md:flex-row items-start md:items-end gap-6 pb-6">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-black/20 rounded-2xl blur-lg transform translate-y-2"></div>
-              <img
-                src={community.logo || `https://ui-avatars.com/api/?name=${community.name}&size=160&background=random`}
-                alt={community.name}
-                className="relative w-40 h-40 rounded-2xl border-4 border-white shadow-2xl object-cover bg-white transition transform group-hover:scale-105 duration-300"
-              />
+          <div className="relative -mt-32 flex flex-col md:flex-row items-end gap-8 pb-8">
+            {/* Logo Section */}
+            <div className="relative z-10">
+              {community.logo ? (
+                <div className="relative group/logo">
+                  <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
+                  <img
+                    src={community.logo}
+                    alt={community.name}
+                    className="relative w-48 h-48 rounded-3xl border-[6px] border-white shadow-2xl object-cover bg-white transition transform group-hover/logo:scale-105 duration-300"
+                  />
+                </div>
+              ) : (
+                <div className="relative w-48 h-48 group/logo">
+                  <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
+                  <div className="relative w-full h-full bg-primary-800 rounded-3xl flex items-center justify-center transform rotate-3 transition-transform group-hover/logo:rotate-6 group-hover/logo:scale-105 shadow-2xl border-[6px] border-white">
+                    <div className="w-[85%] h-[85%] border-2 border-primary-300/30 rounded-2xl transform -rotate-6 flex items-center justify-center bg-gradient-to-br from-primary-700 to-primary-900">
+                      <span className="font-bold text-white text-6xl tracking-tighter drop-shadow-lg">
+                        {community.name.substring(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="flex-1 text-white md:text-gray-900 md:mb-4">
-              <h1 className="text-4xl font-extrabold drop-shadow-lg md:drop-shadow-none tracking-tight">{community.name}</h1>
-              <p className="text-white/95 md:text-gray-600 mt-2 text-lg drop-shadow-md md:drop-shadow-none max-w-2xl leading-relaxed">
-                {community.description}
-              </p>
-              <div className="flex items-center gap-4 mt-4 text-sm font-medium text-white/90 md:text-gray-500">
-                <span className="flex items-center gap-1.5 bg-black/30 md:bg-primary-50 md:text-primary-700 px-3 py-1 rounded-full backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-primary-100">
-                  <UsersIcon className="w-4 h-4" />
-                  {community.members?.length || 0} members
-                </span>
-                <span className="flex items-center gap-1.5 bg-black/30 md:bg-gray-100 md:text-gray-700 px-3 py-1 rounded-full backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-gray-200 capitalize">
-                  {community.privacy} Group
-                </span>
+            {/* Content Section */}
+            <div className="flex-1 text-white md:mb-2 z-10">
+              <div className="flex flex-col gap-2">
+                <h1 className="text-5xl font-extrabold text-white tracking-tight drop-shadow-lg leading-tight">
+                  {community.name}
+                </h1>
+                <p className="text-white/90 text-xl font-medium max-w-2xl leading-relaxed drop-shadow-md line-clamp-2">
+                  {community.description}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 mt-6">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm">
+                  <UsersIcon className="w-5 h-5 text-primary-200" />
+                  <span className="font-semibold text-white">{community.members?.length || 0}</span>
+                  <span className="text-primary-100 text-sm">members</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm capitalize">
+                  <span className={`w-2.5 h-2.5 rounded-full ${community.privacy === 'public' ? 'bg-green-400' : 'bg-amber-400'} shadow-[0_0_8px_rgba(74,222,128,0.5)]`}></span>
+                  <span className="font-medium text-white">{community.privacy} Group</span>
+                </div>
               </div>
             </div>
 
