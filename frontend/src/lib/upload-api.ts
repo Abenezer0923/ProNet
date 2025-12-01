@@ -39,7 +39,21 @@ export const uploadImage = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await uploadApi.post('/upload/image', formData, {
+  const response = await uploadApi.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data.url;
+};
+
+// Helper function to upload community images (avatar or cover)
+export const uploadCommunityImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await uploadApi.post('/upload/community-image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

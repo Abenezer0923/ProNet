@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-import { uploadImage } from '@/lib/upload-api';
+import { uploadCommunityImage } from '@/lib/upload-api';
 import Image from 'next/image';
 
 export default function CommunitySettingsPage() {
@@ -67,7 +67,7 @@ export default function CommunitySettingsPage() {
 
     setUploadingAvatar(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadCommunityImage(file);
       setAvatar(url);
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -83,7 +83,7 @@ export default function CommunitySettingsPage() {
 
     setUploadingCover(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadCommunityImage(file);
       setCoverImage(url);
     } catch (error) {
       console.error('Error uploading cover image:', error);
