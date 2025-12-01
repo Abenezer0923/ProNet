@@ -23,7 +23,7 @@ interface Community {
   privacy: string;
   isMember?: boolean;
   coverImage?: string;
-  logo?: string;
+  avatar?: string;
 }
 
 export default function CommunitiesPage() {
@@ -238,14 +238,18 @@ export default function CommunitiesPage() {
                 >
                   {/* Cover Image with Gradient Overlay */}
                   <div className="relative h-32 bg-gradient-to-br from-primary-700 via-primary-600 to-amber-600 overflow-hidden">
-                    {community.coverImage && (
-                      <img
-                        src={community.coverImage}
-                        alt={community.name}
-                        className="w-full h-full object-cover"
-                      />
+                    {community.coverImage ? (
+                      <>
+                        <img
+                          src={community.coverImage}
+                          alt={community.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent group-hover:from-black/50 transition-smooth"></div>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary-800/80 to-primary-700/80"></div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-800/80 to-primary-700/80 group-hover:from-primary-800/90 group-hover:to-primary-700/90 transition-smooth"></div>
 
                     {/* Category Badge */}
                     <div className="absolute top-3 right-3">
@@ -270,8 +274,8 @@ export default function CommunitiesPage() {
                     {/* Logo */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-16 h-16 -mt-12 bg-white rounded-2xl shadow-lg flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-primary-800 to-primary-700 text-white group-hover:scale-110 transition-transform duration-300 border-4 border-white">
-                        {community.logo ? (
-                          <img src={community.logo} alt={community.name} className="w-full h-full object-cover rounded-2xl" />
+                        {community.avatar ? (
+                          <img src={community.avatar} alt={community.name} className="w-full h-full object-cover rounded-2xl" />
                         ) : (
                           community.name[0]
                         )}
