@@ -445,7 +445,7 @@ export default function CommunityPage() {
               </Link>
             </div>
             <div className="flex items-center">
-              <Link href="/dashboard" className="text-xl font-bold text-indigo-600">ProNet</Link>
+              <Link href="/dashboard" className="text-xl font-bold text-primary-600">ProNet</Link>
             </div>
           </div>
         </div>
@@ -454,37 +454,38 @@ export default function CommunityPage() {
       {/* Cover Photo */}
       <div className="relative">
         <div
-          className="h-64 bg-gradient-to-r from-indigo-600 to-purple-600"
+          className="h-64 bg-gradient-to-r from-primary-800 to-primary-600"
           style={{
             backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
 
         {/* Community Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative -mt-20 flex flex-col md:flex-row items-start md:items-end gap-6 pb-6">
-            <div className="relative">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-black/20 rounded-2xl blur-lg transform translate-y-2"></div>
               <img
                 src={community.logo || `https://ui-avatars.com/api/?name=${community.name}&size=160&background=random`}
                 alt={community.name}
-                className="w-40 h-40 rounded-xl border-4 border-white shadow-lg object-cover bg-white"
+                className="relative w-40 h-40 rounded-2xl border-4 border-white shadow-2xl object-cover bg-white transition transform group-hover:scale-105 duration-300"
               />
             </div>
 
             <div className="flex-1 text-white md:text-gray-900 md:mb-4">
-              <h1 className="text-3xl font-bold drop-shadow-md md:drop-shadow-none">{community.name}</h1>
-              <p className="text-white/90 md:text-gray-600 mt-1 text-lg drop-shadow-md md:drop-shadow-none max-w-2xl">
+              <h1 className="text-4xl font-extrabold drop-shadow-lg md:drop-shadow-none tracking-tight">{community.name}</h1>
+              <p className="text-white/95 md:text-gray-600 mt-2 text-lg drop-shadow-md md:drop-shadow-none max-w-2xl leading-relaxed">
                 {community.description}
               </p>
-              <div className="flex items-center gap-4 mt-3 text-sm font-medium text-white/90 md:text-gray-500">
-                <span className="flex items-center gap-1 bg-black/20 md:bg-transparent px-2 py-1 rounded-full md:p-0 backdrop-blur-sm md:backdrop-blur-none">
+              <div className="flex items-center gap-4 mt-4 text-sm font-medium text-white/90 md:text-gray-500">
+                <span className="flex items-center gap-1.5 bg-black/30 md:bg-primary-50 md:text-primary-700 px-3 py-1 rounded-full backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-primary-100">
                   <UsersIcon className="w-4 h-4" />
                   {community.members?.length || 0} members
                 </span>
-                <span className="flex items-center gap-1 bg-black/20 md:bg-transparent px-2 py-1 rounded-full md:p-0 backdrop-blur-sm md:backdrop-blur-none capitalize">
+                <span className="flex items-center gap-1.5 bg-black/30 md:bg-gray-100 md:text-gray-700 px-3 py-1 rounded-full backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-gray-200 capitalize">
                   {community.privacy} Group
                 </span>
               </div>
@@ -496,14 +497,14 @@ export default function CommunityPage() {
                 <>
                   <button
                     onClick={handleLeaveCommunity}
-                    className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold shadow-sm transition"
+                    className="px-6 py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-xl hover:bg-white hover:text-red-600 font-semibold shadow-sm transition-all duration-200"
                   >
                     Leave
                   </button>
                   {['owner', 'admin'].includes(userRole) && (
                     <Link
                       href={`/communities/${communityId}/settings`}
-                      className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-sm transition"
+                      className="px-6 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold shadow-lg hover:shadow-primary-500/30 transition-all duration-200"
                     >
                       Settings
                     </Link>
@@ -512,7 +513,7 @@ export default function CommunityPage() {
               ) : (
                 <button
                   onClick={handleJoinCommunity}
-                  className="px-8 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+                  className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-bold shadow-lg hover:shadow-primary-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                   Join Community
                 </button>
@@ -531,14 +532,14 @@ export default function CommunityPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`
-                  py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap flex items-center
+                  py-4 px-1 border-b-2 font-medium text-sm transition-all whitespace-nowrap flex items-center
                   ${activeTab === tab.id
-                    ? 'border-indigo-600 text-indigo-600'
+                    ? 'border-primary-600 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >
-                <tab.icon className="w-5 h-5 mr-2" />
+                <tab.icon className={`w-5 h-5 mr-2 ${activeTab === tab.id ? 'text-primary-600' : 'text-gray-400'}`} />
                 {tab.label}
               </button>
             ))}
@@ -558,7 +559,7 @@ export default function CommunityPage() {
                   {['owner', 'admin', 'moderator'].includes(userRole) && (
                     <button
                       onClick={() => setShowCreateGroup(true)}
-                      className="text-indigo-600 hover:text-indigo-700 p-1 hover:bg-indigo-50 rounded-full transition"
+                      className="text-primary-600 hover:text-primary-700 p-1 hover:bg-primary-50 rounded-full transition"
                       title="Create Group"
                     >
                       <PlusIcon className="w-5 h-5" />
@@ -573,7 +574,7 @@ export default function CommunityPage() {
                       value={newGroupName}
                       onChange={(e) => setNewGroupName(e.target.value)}
                       placeholder="Group name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       required
                     />
                     <input
@@ -581,12 +582,12 @@ export default function CommunityPage() {
                       value={newGroupCategory}
                       onChange={(e) => setNewGroupCategory(e.target.value)}
                       placeholder="Category (optional)"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                     <select
                       value={newGroupType}
                       onChange={(e) => setNewGroupType(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
                       <option value="chat">Chat</option>
                       <option value="announcement">Announcement</option>
@@ -596,7 +597,7 @@ export default function CommunityPage() {
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        className="flex-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+                        className="flex-1 px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
                       >
                         Create
                       </button>
@@ -635,13 +636,13 @@ export default function CommunityPage() {
                         const getGroupColor = () => {
                           switch (group.type) {
                             case 'announcement':
-                              return 'text-orange-600 bg-orange-50';
+                              return 'text-accent-orange-600 bg-accent-orange-50';
                             case 'meeting':
-                              return 'text-purple-600 bg-purple-50';
+                              return 'text-primary-600 bg-primary-50';
                             case 'mentorship':
-                              return 'text-green-600 bg-green-50';
+                              return 'text-accent-green-600 bg-accent-green-50';
                             default:
-                              return 'text-indigo-600 bg-indigo-50';
+                              return 'text-gray-600 bg-gray-100';
                           }
                         };
 
@@ -652,12 +653,12 @@ export default function CommunityPage() {
                             className={`
                               w-full text-left px-3 py-2.5 rounded-lg text-sm transition flex items-center gap-3
                               ${selectedGroup?.id === group.id
-                                ? 'bg-indigo-50 text-indigo-700 font-medium shadow-sm'
+                                ? 'bg-primary-50 text-primary-700 font-medium shadow-sm'
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                               }
                             `}
                           >
-                            <span className={`p-1.5 rounded-lg ${selectedGroup?.id === group.id ? 'bg-indigo-100 text-indigo-700' : getGroupColor()}`}>
+                            <span className={`p-1.5 rounded-lg ${selectedGroup?.id === group.id ? 'bg-primary-100 text-primary-700' : getGroupColor()}`}>
                               {getGroupIcon()}
                             </span>
                             <span className="truncate">{group.name}</span>
@@ -681,16 +682,16 @@ export default function CommunityPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-gray-100">
-                  <div className="p-6 bg-indigo-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-indigo-600 mb-1">{community.members?.length || 0}</div>
+                  <div className="p-6 bg-primary-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-primary-600 mb-1">{community.members?.length || 0}</div>
                     <div className="text-sm font-medium text-gray-600">Members</div>
                   </div>
-                  <div className="p-6 bg-purple-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-purple-600 mb-1">{community.groups?.length || 0}</div>
+                  <div className="p-6 bg-accent-orange-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-accent-orange-600 mb-1">{community.groups?.length || 0}</div>
                     <div className="text-sm font-medium text-gray-600">Groups</div>
                   </div>
-                  <div className="p-6 bg-pink-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-pink-600 mb-1 capitalize">{community.privacy}</div>
+                  <div className="p-6 bg-gray-50 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-gray-700 mb-1 capitalize">{community.privacy}</div>
                     <div className="text-sm font-medium text-gray-600">Privacy</div>
                   </div>
                 </div>
@@ -722,7 +723,7 @@ export default function CommunityPage() {
                     {!isMember && (
                       <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                         <p className="text-gray-500 font-medium">Join the community to start or join meetings</p>
-                        <button onClick={handleJoinCommunity} className="mt-4 text-indigo-600 font-semibold hover:underline">
+                        <button onClick={handleJoinCommunity} className="mt-4 text-primary-600 font-semibold hover:underline">
                           Join Now
                         </button>
                       </div>
@@ -730,7 +731,7 @@ export default function CommunityPage() {
 
                     {isMember && (
                       <div className="space-y-4">
-                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+                        <div className="bg-gradient-to-r from-primary-50 to-accent-orange-50 rounded-xl p-6 border border-primary-100">
                           <h3 className="font-semibold text-gray-900 mb-2">About Meeting Rooms</h3>
                           <p className="text-gray-600 text-sm">
                             Start instant video meetings with up to 100 participants. Features include screen sharing,
@@ -763,7 +764,7 @@ export default function CommunityPage() {
                     <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
                       <div>
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                          <span className="text-indigo-500">#</span> {selectedGroup.name}
+                          <span className="text-primary-500">#</span> {selectedGroup.name}
                         </h2>
                         {selectedGroup.description && (
                           <p className="text-sm text-gray-500 mt-0.5">{selectedGroup.description}</p>
@@ -818,12 +819,12 @@ export default function CommunityPage() {
                           onChange={handleTyping}
                           placeholder={isMember ? `Message #${selectedGroup.name}` : "Join community to chat"}
                           disabled={!isMember}
-                          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400"
+                          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400"
                         />
                         <button
                           type="submit"
                           disabled={!newMessage.trim() || !isMember}
-                          className="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                          className="p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                         >
                           <PaperAirplaneIcon className="w-5 h-5" />
                         </button>
@@ -836,8 +837,8 @@ export default function CommunityPage() {
 
             {activeTab === 'groups' && !selectedGroup && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center h-[600px] flex flex-col items-center justify-center">
-                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
-                  <ChatBubbleLeftRightIcon className="w-8 h-8 text-indigo-600" />
+                <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+                  <ChatBubbleLeftRightIcon className="w-8 h-8 text-primary-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Group</h3>
                 <p className="text-gray-500 max-w-sm">Choose a group from the sidebar to start chatting with other community members.</p>
@@ -848,7 +849,7 @@ export default function CommunityPage() {
               <div className="space-y-6">
                 {/* Create Post - Only for Community Owner */}
                 {isMember && userRole === 'owner' && (
-                  <div className="bg-gradient-to-br from-white via-white to-purple-50/30 rounded-2xl shadow-lg border-2 border-purple-100/50 p-6">
+                  <div className="bg-gradient-to-br from-white via-white to-primary-50/30 rounded-2xl shadow-lg border-2 border-primary-100/50 p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Create Post</h3>
                     <form onSubmit={handleCreatePost}>
                       <textarea
@@ -856,7 +857,7 @@ export default function CommunityPage() {
                         onChange={(e) => setPostContent(e.target.value)}
                         placeholder="Share something with your community..."
                         rows={4}
-                        className="w-full px-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white resize-none"
+                        className="w-full px-4 py-3 border-2 border-primary-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white resize-none"
                       />
 
                       {postImage && (
@@ -864,7 +865,7 @@ export default function CommunityPage() {
                           <img
                             src={URL.createObjectURL(postImage)}
                             alt="Selected"
-                            className="h-32 w-auto rounded-xl border-2 border-purple-100 shadow-md"
+                            className="h-32 w-auto rounded-xl border-2 border-primary-100 shadow-md"
                           />
                           <button
                             type="button"
@@ -882,7 +883,7 @@ export default function CommunityPage() {
                         <button
                           type="button"
                           onClick={() => postImageInputRef.current?.click()}
-                          className="flex items-center space-x-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-xl transition"
+                          className="flex items-center space-x-2 px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-xl transition"
                         >
                           <PhotoIcon className="w-5 h-5" />
                           <span className="font-medium">Add Photo</span>
@@ -892,8 +893,8 @@ export default function CommunityPage() {
                           type="submit"
                           disabled={(!postContent.trim() && !postImage) || isPostingSubmitting}
                           className={`px-6 py-2.5 rounded-xl font-semibold transition ${(!postContent.trim() && !postImage) || isPostingSubmitting
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-primary-600 to-primary-800 text-white hover:from-primary-700 hover:to-primary-900 shadow-lg hover:shadow-xl'
                             }`}
                         >
                           {isPostingSubmitting ? 'Posting...' : 'Share Post'}
@@ -935,14 +936,14 @@ export default function CommunityPage() {
                   )
                 ) : (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-                    <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <NewspaperIcon className="w-8 h-8 text-indigo-600" />
+                    <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <NewspaperIcon className="w-8 h-8 text-primary-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Join to see posts</h3>
                     <p className="text-gray-500 mb-4">Become a member to view and interact with community posts</p>
                     <button
                       onClick={handleJoinCommunity}
-                      className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold shadow-sm"
+                      className="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold shadow-sm"
                     >
                       Join Community
                     </button>
@@ -960,7 +961,7 @@ export default function CommunityPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {community.members?.map((member: any) => (
                     <div key={member.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl border border-gray-100 transition">
-                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg border border-indigo-200">
+                      <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-lg border border-primary-200">
                         {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
                       </div>
                       <div>
@@ -984,7 +985,7 @@ export default function CommunityPage() {
                   {isMember && (
                     <Link
                       href={`/communities/${communityId}/articles/new`}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm font-medium"
+                      className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition shadow-sm font-medium"
                     >
                       Write Article
                     </Link>
