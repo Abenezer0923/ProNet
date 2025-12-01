@@ -38,7 +38,7 @@ interface Community {
   name: string;
   description: string;
   coverImage?: string;
-  logo?: string;
+  avatar?: string;
   privacy: string;
   memberCount: number;
   owner: any;
@@ -534,11 +534,11 @@ export default function CommunityPage() {
           <div className="relative -mt-32 flex flex-col md:flex-row items-end gap-8 pb-8">
             {/* Logo Section */}
             <div className="relative z-10">
-              {community.logo ? (
+              {community.avatar ? (
                 <div className="relative group/logo">
                   <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
                   <img
-                    src={community.logo}
+                    src={community.avatar}
                     alt={community.name}
                     className="relative w-48 h-48 rounded-3xl border-[6px] border-white shadow-2xl object-cover bg-white transition-transform duration-300 transform hover:scale-105 hover:rotate-3"
                   />
