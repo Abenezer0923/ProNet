@@ -12,7 +12,14 @@ export class ProxyService {
   async forward(req: Request, res: Response, service: string) {
     try {
       const serviceUrl = this.serviceUrls[service];
-      const url = `${serviceUrl}${req.url}`;
+      
+      // Strip /api prefix if present for user service
+      let urlPath = req.url;
+      if (service === 'users' && urlPath.startsWith('/api/')) {
+        urlPath = urlPath.substring(4); // Remove '/api' prefix
+      }
+      
+      const url = `${serviceUrl}${urlPath}`;
 
       console.log(`Forwarding ${req.method} ${req.url} to ${url}`);
       console.log(`Content-Type: ${req.headers['content-type']}`);

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
-import axios from 'axios';
+import { authAPI } from '@/lib/api';
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
         setLoading(true);
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, { email });
+            await authAPI.forgotPassword({ email });
 
             // Redirect to reset password page with only email
             router.push(`/reset-password?email=${encodeURIComponent(email)}`);
