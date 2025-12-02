@@ -68,9 +68,12 @@ export class AuthController {
 
   @Post('resend-otp')
   async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
-    const result = await this.authService.resendOtp(resendOtpDto.email);
-    // For demo: include OTP in response
-    return { ...result, otpCode: result.otpCode };
+    await this.authService.resendOtp(resendOtpDto.email);
+    // Don't return OTP in response for security
+    return { 
+      message: 'Verification code sent successfully',
+      email: resendOtpDto.email 
+    };
   }
 
   @Post('login-with-otp')
@@ -80,7 +83,12 @@ export class AuthController {
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto.email);
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+    // Don't return OTP in response for security
+    return { 
+      message: 'If an account exists with this email, you will receive a verification code.',
+      email: forgotPasswordDto.email 
+    };
   }
 
   @Post('reset-password')

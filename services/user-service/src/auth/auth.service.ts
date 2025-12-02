@@ -285,7 +285,7 @@ export class AuthService {
     };
   }
 
-  async resendOtp(email: string): Promise<{ message: string; otpCode: string }> {
+  async resendOtp(email: string): Promise<void> {
     // Check if user exists
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
@@ -293,12 +293,7 @@ export class AuthService {
     }
 
     // Generate and send new OTP
-    const otpCode = await this.generateAndSendOtp(email);
-
-    return {
-      message: 'OTP sent successfully',
-      otpCode, // Include OTP for demo purposes
-    };
+    await this.generateAndSendOtp(email);
   }
 
   async logout(userId: string) {
@@ -333,20 +328,16 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
-      // Don't reveal if user exists
-      return { message: 'If an account exists, an OTP has been sent.' };
+      // Don't reveal if user exists - but still return success
+      console.log(`Forgot password attempt for non-existent email: ${email}`);
+      return;
     }
 
     // Generate and send OTP
-    const otpCode = await this.generateAndSendOtp(email);
-
-    return {
-      message: 'OTP sent successfully',
-      otpCode, // For demo purposes
-    };
+    await this.generateAndSendOtp(email);
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

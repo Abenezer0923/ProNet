@@ -16,29 +16,50 @@ function ResetPasswordContent() {
         confirmPassword: '',
     });
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resending, setResending] = useState(false);
 
     useEffect(() => {
         const emailParam = searchParams.get('email');
-        const otpParam = searchParams.get('otp');
-
-        setFormData(prev => ({
-            ...prev,
-            ...(emailParam && { email: emailParam }),
-            ...(otpParam && { otp: otpParam }),
-        }));
+        if (emailParam) {
+            setFormData(prev => ({ ...prev, email: emailParam }));
+        }
     }, [searchParams]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleResendOtp = async () => {
+        setError('');
+        setSuccess('');
+        setResending(true);
+
+        try {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-otp`, {
+                email: formData.email,
+            });
+            setSuccess('Verification code sent! Check your email.');
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Failed to resend code');
+        } finally {
+            setResending(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccess('');
 
         if (formData.newPassword !== formData.confirmPassword) {
             setError('Passwords do not match');
+            return;
+        }
+
+        if (formData.newPassword.length < 6) {
+            setError('Password must be at least 6 characters');
             return;
         }
 
@@ -52,7 +73,7 @@ function ResetPasswordContent() {
             });
             router.push('/login?message=password_reset_success');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to reset password');
+            setError(err.response?.data?.message || 'Failed to reset password. Please check your code and try again.');
         } finally {
             setLoading(false);
         }
@@ -72,7 +93,12 @@ function ResetPasswordContent() {
                 <div className="max-w-md w-full">
                     <div className="text-center mb-10">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2 font-display">Reset Password</h1>
-                        <p className="text-gray-600 text-lg">Enter the code sent to your email</p>
+                        <p className="text-gray-600 text-lg">Check your email for the verification code</p>
+                        {formData.email && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                Code sent to <span className="font-medium text-gray-700">{formData.email}</span>
+                            </p>
+                        )}
                     </div>
 
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -84,6 +110,15 @@ function ResetPasswordContent() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         {error}
+                                    </div>
+                                )}
+
+                                {success && (
+                                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {success}
                                     </div>
                                 )}
 
@@ -104,9 +139,19 @@ function ResetPasswordContent() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1.5">
-                                        Verification Code (OTP)
-                                    </label>
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+                                            Verification Code
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleResendOtp}
+                                            disabled={resending}
+                                            className="text-sm text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {resending ? 'Sending...' : 'Resend Code'}
+                                        </button>
+                                    </div>
                                     <input
                                         id="otp"
                                         name="otp"
@@ -114,9 +159,14 @@ function ResetPasswordContent() {
                                         value={formData.otp}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                        placeholder="Enter 6-digit code"
+                                        maxLength={6}
+                                        pattern="[0-9]{6}"
+                                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-center text-2xl tracking-widest font-mono"
+                                        placeholder="000000"
                                     />
+                                    <p className="mt-1.5 text-xs text-gray-500">
+                                        Enter the 6-digit code sent to your email
+                                    </p>
                                 </div>
 
                                 <div>

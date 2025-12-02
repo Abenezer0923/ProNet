@@ -107,7 +107,7 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     ATTEMPT=$((ATTEMPT + 1))
     echo -n "   Attempt $ATTEMPT/$MAX_ATTEMPTS: "
     
-    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "https://pronet-user-service.onrender.com/health")
+    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "https://pronet-user-service.onrender.com/api/health")
     
     if [ "$RESPONSE" == "200" ]; then
         echo -e "${GREEN}✓ Service is live!${NC}"
@@ -132,7 +132,7 @@ echo "------------------------------"
 
 # Test health endpoints
 echo -n "   /health: "
-HEALTH=$(curl -s "https://pronet-user-service.onrender.com/health")
+HEALTH=$(curl -s "https://pronet-user-service.onrender.com/api/health")
 if echo "$HEALTH" | grep -q "ok"; then
     echo -e "${GREEN}✓ OK${NC}"
 else
@@ -140,7 +140,7 @@ else
 fi
 
 echo -n "   /health/ping: "
-PING=$(curl -s "https://pronet-user-service.onrender.com/health/ping")
+PING=$(curl -s "https://pronet-user-service.onrender.com/api/health/ping")
 if echo "$PING" | grep -q "alive"; then
     echo -e "${GREEN}✓ OK${NC}"
 else
@@ -148,7 +148,7 @@ else
 fi
 
 echo -n "   /health/ready: "
-READY=$(curl -s "https://pronet-user-service.onrender.com/health/ready")
+READY=$(curl -s "https://pronet-user-service.onrender.com/api/health/ready")
 if echo "$READY" | grep -q "ready"; then
     echo -e "${GREEN}✓ OK${NC}"
 else
@@ -186,7 +186,7 @@ echo "   Run: ./test-auth-system.sh prod"
 echo ""
 echo "🔗 Useful Links:"
 echo "   - Service: https://pronet-user-service.onrender.com"
-echo "   - Health: https://pronet-user-service.onrender.com/health"
+echo "   - Health: https://pronet-user-service.onrender.com/api/health"
 echo "   - Frontend: https://pro-net-ten.vercel.app"
 echo "   - Render: https://dashboard.render.com"
 echo ""

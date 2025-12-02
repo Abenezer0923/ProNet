@@ -32,7 +32,7 @@ Use external cron services to ping your endpoints every 14 minutes, keeping serv
 1. Click "Create Cronjob" button
 2. Fill in details:
    - **Title**: `ProNet User Service Keep-Alive`
-   - **URL**: `https://pronet-user-service.onrender.com/health`
+   - **URL**: `https://pronet-user-service.onrender.com/api/health`
    - **Schedule**: 
      - Select "Every 14 minutes"
      - Or use custom: `*/14 * * * *`
@@ -44,7 +44,7 @@ Use external cron services to ping your endpoints every 14 minutes, keeping serv
 1. Click "Create Cronjob" again
 2. Fill in details:
    - **Title**: `ProNet API Gateway Keep-Alive`
-   - **URL**: `https://pronet-api-gateway.onrender.com/health`
+   - **URL**: `https://pronet-api-gateway.onrender.com/api/health`
    - **Schedule**: `*/14 * * * *`
    - **Request Method**: GET
    - **Timeout**: 30 seconds
@@ -54,7 +54,7 @@ Use external cron services to ping your endpoints every 14 minutes, keeping serv
 1. Click "Create Cronjob" again
 2. Fill in details:
    - **Title**: `ProNet Auth Warmup`
-   - **URL**: `https://pronet-user-service.onrender.com/health/ping`
+   - **URL**: `https://pronet-user-service.onrender.com/api/health/ping`
    - **Schedule**: `7,21,35,49 * * * *` (offset by 7 minutes)
    - **Request Method**: GET
    - **Timeout**: 30 seconds
@@ -92,13 +92,13 @@ Use external cron services to ping your endpoints every 14 minutes, keeping serv
 1. Click "Add New Monitor"
 2. **Monitor Type**: HTTP(s)
 3. **Friendly Name**: ProNet User Service
-4. **URL**: `https://pronet-user-service.onrender.com/health`
+4. **URL**: `https://pronet-user-service.onrender.com/api/health`
 5. **Monitoring Interval**: 5 minutes
 6. Click "Create Monitor"
 
 7. Repeat for API Gateway:
    - **Friendly Name**: ProNet API Gateway
-   - **URL**: `https://pronet-api-gateway.onrender.com/health`
+   - **URL**: `https://pronet-api-gateway.onrender.com/api/health`
 
 #### 3. Setup Alerts (Optional)
 1. Go to "Alert Contacts"
@@ -164,16 +164,16 @@ Use **both** Cron-Job.org AND GitHub Actions:
 ### 1. Test Health Endpoints
 ```bash
 # Test user service
-curl https://pronet-user-service.onrender.com/health
+curl https://pronet-user-service.onrender.com/api/health
 
 # Expected response:
 # {"status":"ok","timestamp":"2024-...","service":"user-service","uptime":123.45}
 
 # Test API gateway
-curl https://pronet-api-gateway.onrender.com/health
+curl https://pronet-api-gateway.onrender.com/api/health
 
 # Test ping endpoint
-curl https://pronet-user-service.onrender.com/health/ping
+curl https://pronet-user-service.onrender.com/api/health/ping
 ```
 
 ### 2. Monitor Execution

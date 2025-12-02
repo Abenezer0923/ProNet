@@ -9,23 +9,26 @@ async function bootstrap() {
       bodyParser: true,
     });
 
+    // Set global prefix
+    app.setGlobalPrefix('api');
+
     // Increase payload size limit for file uploads
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  // Enable validation
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+    // Enable validation
+    app.useGlobalPipes(new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }));
 
-  // Enable CORS
-  app.enableCors({
-    origin: true, // Allow all origins in development
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+    // Enable CORS
+    app.enableCors({
+      origin: true, // Allow all origins in development
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    });
 
     const port = process.env.PORT || 3001;
     await app.listen(port);

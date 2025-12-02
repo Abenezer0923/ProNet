@@ -26,17 +26,17 @@ chmod +x deploy-auth-fix.sh
 
 **Job 1:**
 - Title: `ProNet User Service`
-- URL: `https://pronet-user-service.onrender.com/health`
+- URL: `https://pronet-user-service.onrender.com/api/health`
 - Schedule: Every 14 minutes (`*/14 * * * *`)
 
 **Job 2:**
 - Title: `ProNet API Gateway`
-- URL: `https://pronet-api-gateway.onrender.com/health`
+- URL: `https://pronet-api-gateway.onrender.com/api/health`
 - Schedule: Every 14 minutes (`*/14 * * * *`)
 
 **Job 3:**
 - Title: `ProNet Auth Warmup`
-- URL: `https://pronet-user-service.onrender.com/health/ping`
+- URL: `https://pronet-user-service.onrender.com/api/health/ping`
 - Schedule: `7,21,35,49 * * * *`
 
 **Option B: GitHub Actions (Already Setup)**
@@ -137,9 +137,9 @@ After completing the above steps, verify:
 
 - [ ] Render service is deployed and running
 - [ ] Health endpoints return 200 OK
-  - [ ] `/health`
-  - [ ] `/health/ping`
-  - [ ] `/health/ready`
+  - [ ] `/api/health`
+  - [ ] `/api/health/ping`
+  - [ ] `/api/health/ready`
 - [ ] Cron jobs are created and running
 - [ ] Google OAuth callback URL is updated
 - [ ] Render environment variables are set
@@ -273,7 +273,7 @@ If you encounter issues:
 ./test-auth-system.sh prod
 
 # Check health
-curl https://pronet-user-service.onrender.com/health
+curl https://pronet-user-service.onrender.com/api/health
 
 # View logs (requires Render CLI)
 render logs -s pronet-user-service
