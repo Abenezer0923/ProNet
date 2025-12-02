@@ -18,29 +18,23 @@ export class EmailService {
 
     // Initialize SMTP if configured
     if (smtpUser && smtpPass) {
-      // Use 'service: gmail' if host is gmail, otherwise use host/port
-      // This handles port/secure settings automatically for Gmail
-      if (smtpHost === 'smtp.gmail.com') {
-        this.transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: smtpUser,
-            pass: smtpPass,
-          },
-        });
-        console.log(`📧 Email service initialized with Gmail Service`);
-      } else {
-        this.transporter = nodemailer.createTransport({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpSecure,
-          auth: {
-            user: smtpUser,
-            pass: smtpPass,
-          },
-        });
-        console.log(`📧 Email service initialized with SMTP (${smtpHost}:${smtpPort})`);
-      }
+      // Try Port 465 with SSL (often works better in cloud environments than 587)
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // Use SSL
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+        // Add timeouts and debug logging
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        logger: true,
+        debug: true,
+      });
+      console.log(`📧 Email service initialized with SMTP (smtp.gmail.com:465 SSL)`);
       
       this.emailProvider = 'smtp';
     } else {
