@@ -18,25 +18,32 @@ export class EmailService {
 
     // Initialize SMTP if configured
     if (smtpUser && smtpPass) {
-      // Use connection pooling and force IPv4 to avoid timeouts
+      // Standard Gmail SMTP configuration
       this.transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // Use STARTTLS
+        requireTLS: true,
         auth: {
           user: smtpUser,
           pass: smtpPass,
         },
-        pool: true, // Use pooled connections
-        maxConnections: 1,
-        rateLimit: 5,
-        // Force IPv4 to avoid IPv6 connectivity issues in some cloud environments
-        // @ts-ignore - family is a valid socket option but missing in types
-        family: 4, 
         logger: true,
         debug: true,
-      } as nodemailer.TransportOptions);
-      console.log(`📧 Email service initialized with Gmail (Pooled, IPv4)`);
+      });
       
       this.emailProvider = 'smtp';
+      
+      // Verify connection configuration
+      this.transporter.verify((error, success) => {
+        if (error) {
+          console.error('❌ SMTP Connection Error:', error);
+        } else {
+          console.log('✅ SMTP Server is ready to take our messages');
+        }
+      });
+      
+      console.log(`📧 Email service initialized with SMTP (smtp.gmail.com:587)`);
     } else {
       console.warn('⚠️  No email provider configured. OTP will be logged to console only.');
       console.warn('⚠️  To enable email delivery, configure EMAIL_USER and EMAIL_PASSWORD variables.');
