@@ -18,17 +18,31 @@ export class EmailService {
 
     // Initialize SMTP if configured
     if (smtpUser && smtpPass) {
-      this.transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpSecure,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
+      // Use 'service: gmail' if host is gmail, otherwise use host/port
+      // This handles port/secure settings automatically for Gmail
+      if (smtpHost === 'smtp.gmail.com') {
+        this.transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: smtpUser,
+            pass: smtpPass,
+          },
+        });
+        console.log(`📧 Email service initialized with Gmail Service`);
+      } else {
+        this.transporter = nodemailer.createTransport({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpSecure,
+          auth: {
+            user: smtpUser,
+            pass: smtpPass,
+          },
+        });
+        console.log(`📧 Email service initialized with SMTP (${smtpHost}:${smtpPort})`);
+      }
+      
       this.emailProvider = 'smtp';
-      console.log(`📧 Email service initialized with SMTP (${smtpHost})`);
     } else {
       console.warn('⚠️  No email provider configured. OTP will be logged to console only.');
       console.warn('⚠️  To enable email delivery, configure EMAIL_USER and EMAIL_PASSWORD variables.');
