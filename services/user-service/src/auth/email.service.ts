@@ -18,23 +18,23 @@ export class EmailService {
 
     // Initialize SMTP if configured
     if (smtpUser && smtpPass) {
-      // Try Port 465 with SSL (often works better in cloud environments than 587)
+      // Use connection pooling and force IPv4 to avoid timeouts
       this.transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // Use SSL
+        service: 'gmail',
         auth: {
           user: smtpUser,
           pass: smtpPass,
         },
-        // Add timeouts and debug logging
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
+        pool: true, // Use pooled connections
+        maxConnections: 1,
+        rateLimit: 5,
+        // Force IPv4 to avoid IPv6 connectivity issues in some cloud environments
+        // @ts-ignore - family is a valid socket option but missing in types
+        family: 4, 
         logger: true,
         debug: true,
-      });
-      console.log(`📧 Email service initialized with SMTP (smtp.gmail.com:465 SSL)`);
+      } as nodemailer.TransportOptions);
+      console.log(`📧 Email service initialized with Gmail (Pooled, IPv4)`);
       
       this.emailProvider = 'smtp';
     } else {
