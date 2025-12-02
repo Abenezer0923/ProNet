@@ -42,14 +42,18 @@ export class EmailService {
 
       if (error) {
         console.error('❌ Resend API error:', error);
-        throw new Error(error.message);
+        console.log('📝 Falling back to console OTP due to email service error');
+        console.log(`🔑 Use OTP: ${otp} (expires in 10 minutes)`);
+        // Don't throw - allow authentication to continue with console OTP
+        return;
       }
 
       console.log(`✅ OTP email sent successfully to ${email}`);
       console.log(`📬 Message ID: ${data?.id}`);
     } catch (error) {
       console.error('❌ Error sending OTP email:', error);
-      console.log('📝 OTP is still available in console logs above');
+      console.log('📝 Falling back to console OTP due to email service error');
+      console.log(`🔑 Use OTP: ${otp} (expires in 10 minutes)`);
       // Don't throw - allow authentication to continue with console OTP
     }
   }
