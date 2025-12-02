@@ -35,22 +35,22 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-stone-50 font-sans text-stone-900">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-stone-200 sticky top-0 z-50">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <Link href="/" className="hover:opacity-90 transition-opacity">
               <Logo />
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">Features</a>
-              <a href="#communities" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">Communities</a>
-              <a href="#about" className="text-sm font-medium text-slate-600 hover:text-primary-800 transition-smooth">About</a>
+              <a href="#features" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Features</a>
+              <a href="#communities" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Communities</a>
+              <a href="#about" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">About</a>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-primary-900 px-4 py-2 rounded-lg hover:bg-primary-50 transition-smooth">
+            <Link href="/login" className="text-sm font-semibold text-stone-700 hover:text-primary-900 px-4 py-2 rounded-lg hover:bg-primary-50 transition-smooth">
               Sign in
             </Link>
             <Link href="/register" className="text-sm font-semibold text-white bg-primary-800 px-5 py-2.5 rounded-lg hover:bg-primary-900 transition-smooth shadow-md hover:shadow-lg">
@@ -69,14 +69,14 @@ export default function Home() {
                 <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
                 New: Article Publishing
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 leading-[1.1]">
                 Connect. <br />
                 Collaborate. <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-800 to-amber-600">
                   Grow Together.
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl text-slate-600 max-w-lg leading-relaxed">
+              <p className="text-lg sm:text-xl text-stone-600 max-w-lg leading-relaxed">
                 The professional network designed for meaningful interactions. Join specialized communities, share your expertise, and accelerate your career.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -86,11 +86,11 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </Link>
-                <a href="#features" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-smooth">
+                <a href="#features" className="inline-flex justify-center items-center px-8 py-4 text-base font-bold text-stone-700 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 hover:border-stone-300 transition-smooth">
                   Learn More
                 </a>
               </div>
-              <div className="pt-8 flex items-center gap-4 text-sm text-slate-500">
+              <div className="pt-8 flex items-center gap-4 text-sm text-stone-500">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-primary-100 flex items-center justify-center text-xs font-medium text-primary-700">
@@ -115,8 +115,8 @@ export default function Home() {
       <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Everything you need to excel</h2>
-            <p className="text-lg text-slate-600">We provide the tools to help you build your network, showcase your work, and find new opportunities.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">Everything you need to excel</h2>
+            <p className="text-lg text-stone-600">We provide the tools to help you build your network, showcase your work, and find new opportunities.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -152,12 +152,12 @@ export default function Home() {
                 color: "bg-primary-600"
               }
             ].map((feature, i) => (
-              <div key={i} className="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-200 hover:bg-white hover:shadow-xl transition-smooth">
+              <div key={i} className="group p-8 bg-stone-50 rounded-2xl border border-stone-100 hover:border-primary-200 hover:bg-white hover:shadow-xl transition-smooth">
                 <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">
+                <h3 className="text-xl font-bold text-stone-900 mb-3">{feature.title}</h3>
+                <p className="text-stone-600 leading-relaxed">
                   {feature.desc}
                 </p>
               </div>
@@ -186,19 +186,19 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-24 bg-stone-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-stone-900 text-center mb-12">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div key={index} className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50 transition-colors"
+                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-stone-50 transition-colors"
                 >
-                  <span className="font-semibold text-slate-900">{faq.question}</span>
+                  <span className="font-semibold text-stone-900">{faq.question}</span>
                   <svg
-                    className={`w-5 h-5 text-slate-400 transition-transform ${openFaq === index ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 text-stone-400 transition-transform ${openFaq === index ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -207,7 +207,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-4 text-slate-600 leading-relaxed">
+                  <div className="px-6 pb-4 text-stone-600 leading-relaxed">
                     {faq.answer}
                   </div>
                 )}
@@ -243,7 +243,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+      <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-1 md:col-span-1">
@@ -277,7 +277,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-slate-800 text-center text-sm">
+          <div className="pt-8 border-t border-stone-800 text-center text-sm">
             &copy; {new Date().getFullYear()} ProNet Inc. All rights reserved.
           </div>
         </div>
