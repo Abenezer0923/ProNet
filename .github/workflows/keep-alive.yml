@@ -1,0 +1,50 @@
+name: Keep Render Services Alive
+
+on:
+  schedule:
+    # Run every 14 minutes
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping-services:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping User Service Health
+        run: |
+          echo "🏥 Pinging User Service..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://pronet-user-service.onrender.com/health)
+          echo "Status: $response"
+          if [ "$response" != "200" ]; then
+            echo "⚠️  User Service health check failed with status $response"
+            exit 1
+          fi
+          echo "✅ User Service is healthy"
+
+      - name: Ping API Gateway Health
+        run: |
+          echo "🏥 Pinging API Gateway..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://pronet-api-gateway.onrender.com/health)
+          echo "Status: $response"
+          if [ "$response" != "200" ]; then
+            echo "⚠️  API Gateway health check failed with status $response"
+            exit 1
+          fi
+          echo "✅ API Gateway is healthy"
+
+      - name: Ping User Service (Lightweight)
+        run: |
+          echo "🏓 Pinging User Service (lightweight)..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://pronet-user-service.onrender.com/health/ping)
+          echo "Status: $response"
+          if [ "$response" != "200" ]; then
+            echo "⚠️  User Service ping failed with status $response"
+          else
+            echo "✅ User Service ping successful"
+          fi
+
+      - name: Summary
+        run: |
+          echo "🎉 Keep-alive ping completed successfully!"
+          echo "⏰ Next ping in 14 minutes"

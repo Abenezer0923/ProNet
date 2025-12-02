@@ -48,7 +48,7 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_CALLBACK_URL
-        value: https://pronet-user-service.onrender.com/auth/google/callback
+        value: https://pronet-user-service.onrender.com/api/auth/google/callback
       - key: FRONTEND_URL
         value: https://pro-net-ten.vercel.app
       - key: RESEND_API_KEY
