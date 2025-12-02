@@ -41,6 +41,9 @@ export const authAPI = {
   loginWithOtp: (data: { email: string; otp: string }) =>
     api.post('/auth/login-with-otp', data),
 
+  verifyEmail: (data: { email: string; otp: string }) =>
+    api.post('/auth/verify-email', data),
+
   resendOtp: (data: { email: string }) =>
     api.post('/auth/resend-otp', data),
 };

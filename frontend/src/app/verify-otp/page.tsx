@@ -87,6 +87,8 @@ function VerifyOtpForm() {
       // Use different endpoint based on verification type
       const endpoint = verificationType === 'login' 
         ? `${apiUrl}/auth/login-with-otp`
+        : verificationType === 'register'
+        ? `${apiUrl}/auth/verify-email`
         : `${apiUrl}/auth/verify-otp`;
       
       const response = await fetch(endpoint, {
@@ -105,6 +107,14 @@ function VerifyOtpForm() {
 
       // For login, store token and set user in context
       if (verificationType === 'login' && data.token && data.user) {
+        localStorage.setItem('token', data.token);
+        // Dynamically import and use loginWithToken
+        const { useAuth } = await import('@/contexts/AuthContext');
+        // We can't use hooks here, so we'll just store the token and let the dashboard handle it
+      }
+
+      // For registration verification, store token and set user
+      if (verificationType === 'register' && data.token && data.user) {
         localStorage.setItem('token', data.token);
         // Dynamically import and use loginWithToken
         const { useAuth } = await import('@/contexts/AuthContext');

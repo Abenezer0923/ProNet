@@ -68,18 +68,23 @@ export class AuthService {
         organizationName: profileType === 'organizational' ? organizationName : null,
         profileType,
         profession: profileType === 'personal' ? profession : null,
+        isEmailVerified: false, // Require email verification
       });
 
       console.log('Saving user to database...');
       await this.userRepository.save(user);
       console.log('User saved successfully');
 
-      // Generate token
-      const token = this.generateToken(user);
+      // Generate and send verification OTP
+      console.log('Generating verification OTP...');
+      const otp = await this.generateAndSendOtp(email);
+      console.log('Verification OTP sent successfully');
 
       return {
         user: this.sanitizeUser(user),
-        token,
+        requiresVerification: true,
+        message: 'Registration successful. Please check your email for verification code.',
+        otp: otp, // Include OTP for demo purposes
       };
     } catch (error) {
       console.error('Registration error:', error);
@@ -100,6 +105,11 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException('Please verify your email address before logging in');
     }
 
     // Check if user needs OTP verification (logged out previously)
@@ -168,6 +178,7 @@ export class AuthService {
           profilePicture: picture,
           password: '', // No password for OAuth users
           profileType: 'personal',
+          isEmailVerified: true, // Google OAuth verifies email
         });
         await this.userRepository.save(user);
         isNewUser = true;
@@ -282,6 +293,32 @@ export class AuthService {
     return {
       success: true,
       message: 'Email verified successfully',
+    };
+  }
+
+  async verifyEmail(verifyOtpDto: VerifyOtpDto): Promise<{ success: boolean; message: string; token?: string; user?: any }> {
+    const { email, otp } = verifyOtpDto;
+
+    // Verify OTP first
+    await this.verifyOtp(verifyOtpDto);
+
+    // Find user and mark as verified
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.isEmailVerified = true;
+    await this.userRepository.save(user);
+
+    // Generate token now that email is verified
+    const token = this.generateToken(user);
+
+    return {
+      success: true,
+      message: 'Email verified successfully. You can now log in.',
+      token,
+      user: this.sanitizeUser(user),
     };
   }
 

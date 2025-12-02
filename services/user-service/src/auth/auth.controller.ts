@@ -61,9 +61,9 @@ export class AuthController {
     }
   }
 
-  @Post('verify-otp')
-  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
-    return this.authService.verifyOtp(verifyOtpDto);
+  @Post('verify-email')
+  async verifyEmail(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyEmail(verifyOtpDto);
   }
 
   @Post('resend-otp')

@@ -24,7 +24,10 @@ interface AuthContextType {
     firstName: string;
     lastName: string;
     profession?: string;
-  }) => Promise<void>;
+    organizationName?: string;
+    profileType?: string;
+  }) => Promise<{ requiresVerification: boolean; message: string; user: any }>;
+  verifyEmail: (email: string, otp: string) => Promise<{ success: boolean; message: string; token?: string; user?: User }>;
   logout: () => void;
 }
 
@@ -65,11 +68,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     firstName: string;
     lastName: string;
     profession?: string;
+    organizationName?: string;
+    profileType?: string;
   }) => {
     const response = await authAPI.register(data);
-    const { user, token } = response.data;
-    localStorage.setItem('token', token);
-    setUser(user);
+    // Registration now requires email verification - don't log in automatically
+    return response.data;
+  };
+
+  const verifyEmail = async (email: string, otp: string) => {
+    const response = await authAPI.verifyEmail({ email, otp });
+    const { token, user } = response.data;
+    if (token && user) {
+      localStorage.setItem('token', token);
+      setUser(user);
+    }
+    return response.data;
   };
 
   const loginWithToken = (userData: User, token: string) => {
@@ -90,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithToken, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithToken, register, verifyEmail, logout }}>
       {children}
     </AuthContext.Provider>
   );
