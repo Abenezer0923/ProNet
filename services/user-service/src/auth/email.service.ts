@@ -9,13 +9,15 @@ export class EmailService {
   private emailProvider: 'resend' | 'smtp' | 'console';
 
   constructor() {
-    // Check if Resend API key is configured
+    // Initialize Resend if configured
     if (process.env.RESEND_API_KEY) {
       this.resend = new Resend(process.env.RESEND_API_KEY);
       this.emailProvider = 'resend';
       console.log(`📧 Email service initialized with Resend`);
-    } else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      // Fallback to SMTP (Gmail, etc.)
+    }
+
+    // Initialize SMTP if configured (as fallback or primary)
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -25,12 +27,19 @@ export class EmailService {
           pass: process.env.SMTP_PASS,
         },
       });
-      this.emailProvider = 'smtp';
-      console.log(`📧 Email service initialized with SMTP (${process.env.SMTP_HOST})`);
-    } else {
+      
+      // If Resend wasn't configured, set provider to SMTP
+      if (!this.emailProvider) {
+        this.emailProvider = 'smtp';
+        console.log(`📧 Email service initialized with SMTP (${process.env.SMTP_HOST})`);
+      } else {
+        console.log(`📧 SMTP configured as fallback (${process.env.SMTP_HOST})`);
+      }
+    }
+
+    if (!this.emailProvider) {
       console.warn('⚠️  No email provider configured. OTP will be logged to console only.');
       console.warn('⚠️  To enable email delivery, configure RESEND_API_KEY or SMTP variables.');
-      this.resend = null;
       this.emailProvider = 'console';
     }
   }
@@ -42,7 +51,18 @@ export class EmailService {
 
     try {
       if (this.emailProvider === 'resend') {
-        await this.sendWithResend(email, otp);
+        try {
+          await this.sendWithResend(email, otp);
+        } catch (error) {
+          console.warn(`⚠️ Resend failed: ${error.message}`);
+          
+          if (this.transporter) {
+            console.log('🔄 Attempting SMTP fallback...');
+            await this.sendWithSmtp(email, otp);
+          } else {
+            throw error;
+          }
+        }
       } else if (this.emailProvider === 'smtp') {
         await this.sendWithSmtp(email, otp);
       } else {
