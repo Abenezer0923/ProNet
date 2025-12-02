@@ -53,6 +53,18 @@ services:
         value: https://pro-net-ten.vercel.app
       - key: RESEND_API_KEY
         sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_SECURE
+        value: false
+      - key: SMTP_FROM
+        sync: false
         
   # API Gateway
   - type: web
