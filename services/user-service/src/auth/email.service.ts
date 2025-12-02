@@ -43,6 +43,7 @@ export class EmailService {
 
     try {
       if (this.emailProvider === 'smtp') {
+        console.log('🚀 Attempting to send email via SMTP...');
         await this.sendWithSmtp(email, otp);
       } else {
         console.log('📝 Email service not configured - OTP logged to console only');
@@ -56,16 +57,22 @@ export class EmailService {
 
   private async sendWithSmtp(email: string, otp: string) {
     const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
+    console.log(`📨 Sending email to ${email} from ${fromAddress}`);
     
-    const info = await this.transporter.sendMail({
-      from: `"ProNet" <${fromAddress}>`,
-      to: email,
-      subject: 'Your ProNet Verification Code',
-      html: this.getEmailTemplate(otp),
-    });
+    try {
+      const info = await this.transporter.sendMail({
+        from: `"ProNet" <${fromAddress}>`,
+        to: email,
+        subject: 'Your ProNet Verification Code',
+        html: this.getEmailTemplate(otp),
+      });
 
-    console.log(`✅ OTP email sent successfully via SMTP to ${email}`);
-    console.log(`📬 Message ID: ${info.messageId}`);
+      console.log(`✅ OTP email sent successfully via SMTP to ${email}`);
+      console.log(`📬 Message ID: ${info.messageId}`);
+    } catch (error) {
+      console.error('💥 SMTP Send Error:', error);
+      throw error;
+    }
   }
 
   private getEmailTemplate(otp: string): string {
