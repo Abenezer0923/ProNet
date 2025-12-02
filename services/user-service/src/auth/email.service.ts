@@ -1,10 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
+// Use global fetch if available (Node 18+). If not, we'll dynamically require 'node-fetch' at runtime.
+let fetchFn: any = null;
+try {
+  // @ts-ignore
+  if (typeof fetch !== 'undefined') fetchFn = fetch;
+} catch (err) {
+  fetchFn = null;
+}
+
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
-  private emailProvider: 'smtp' | 'console';
+  private emailProvider: 'sendgrid' | 'smtp' | 'console';
+  private sendgridApiKey?: string;
 
   constructor() {
     // Configuration from environment variables
@@ -15,6 +25,27 @@ export class EmailService {
     const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD;
     const smtpSecure = process.env.SMTP_SECURE === 'true';
     const smtpFrom = process.env.SMTP_FROM || smtpUser;
+
+    // Prefer SendGrid HTTP API if configured (works over HTTPS so bypasses SMTP blocks)
+    if (process.env.SENDGRID_API_KEY) {
+      this.sendgridApiKey = process.env.SENDGRID_API_KEY;
+      // ensure fetchFn exists
+      if (!fetchFn) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          fetchFn = require('node-fetch');
+        } catch (err) {
+          console.warn('⚠️ node-fetch not available; SendGrid may not work in this runtime');
+          fetchFn = null;
+        }
+      }
+
+      if (this.sendgridApiKey && fetchFn) {
+        this.emailProvider = 'sendgrid';
+        console.log('📧 Email service initialized with SendGrid (HTTP API)');
+        return;
+      }
+    }
 
     // Initialize SMTP if configured
     if (smtpUser && smtpPass) {
@@ -32,7 +63,7 @@ export class EmailService {
         debug: true,
       });
       
-      this.emailProvider = 'smtp';
+  this.emailProvider = 'smtp';
       
       // Verify connection configuration
       this.transporter.verify((error, success) => {
@@ -57,7 +88,10 @@ export class EmailService {
     console.log(`⏰ OTP expires in 10 minutes`);
 
     try {
-      if (this.emailProvider === 'smtp') {
+      if (this.emailProvider === 'sendgrid') {
+        console.log('🚀 Attempting to send email via SendGrid API...');
+        await this.sendWithSendGrid(email, otp);
+      } else if (this.emailProvider === 'smtp') {
         console.log('🚀 Attempting to send email via SMTP...');
         await this.sendWithSmtp(email, otp);
       } else {
@@ -88,6 +122,44 @@ export class EmailService {
       console.error('💥 SMTP Send Error:', error);
       throw error;
     }
+  }
+
+  private async sendWithSendGrid(email: string, otp: string) {
+    if (!this.sendgridApiKey) throw new Error('SendGrid API key not configured');
+    if (!fetchFn) throw new Error('Fetch not available to call SendGrid API');
+
+    const fromAddress = process.env.SENDGRID_FROM || process.env.EMAIL_USER || process.env.SMTP_USER;
+    const payload = {
+      personalizations: [
+        {
+          to: [{ email }],
+        },
+      ],
+      from: { email: fromAddress },
+      subject: 'Your ProNet Verification Code',
+      content: [
+        {
+          type: 'text/html',
+          value: this.getEmailTemplate(otp),
+        },
+      ],
+    };
+
+    const res = await fetchFn('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.sendgridApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`SendGrid error: ${res.status} ${text}`);
+    }
+
+    console.log(`✅ OTP email sent successfully via SendGrid to ${email}`);
   }
 
   private getEmailTemplate(otp: string): string {

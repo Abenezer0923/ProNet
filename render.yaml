@@ -61,6 +61,10 @@ services:
         value: 587
       - key: SMTP_SECURE
         value: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM
+        sync: false
         
   # API Gateway
   - type: web
