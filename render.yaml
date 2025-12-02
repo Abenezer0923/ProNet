@@ -51,20 +51,16 @@ services:
         value: https://pronet-user-service.onrender.com/api/auth/google/callback
       - key: FRONTEND_URL
         value: https://pro-net-ten.vercel.app
-      - key: RESEND_API_KEY
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
         sync: false
       - key: SMTP_HOST
-        sync: false
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
       - key: SMTP_SECURE
         value: false
-      - key: SMTP_FROM
-        sync: false
         
   # API Gateway
   - type: web

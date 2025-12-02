@@ -7,22 +7,31 @@ export class EmailService {
   private emailProvider: 'smtp' | 'console';
 
   constructor() {
+    // Configuration from environment variables
+    // Support both SMTP_* and EMAIL_* naming conventions
+    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+    const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD;
+    const smtpSecure = process.env.SMTP_SECURE === 'true';
+    const smtpFrom = process.env.SMTP_FROM || smtpUser;
+
     // Initialize SMTP if configured
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    if (smtpUser && smtpPass) {
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: smtpUser,
+          pass: smtpPass,
         },
       });
       this.emailProvider = 'smtp';
-      console.log(`📧 Email service initialized with SMTP (${process.env.SMTP_HOST})`);
+      console.log(`📧 Email service initialized with SMTP (${smtpHost})`);
     } else {
       console.warn('⚠️  No email provider configured. OTP will be logged to console only.');
-      console.warn('⚠️  To enable email delivery, configure SMTP variables.');
+      console.warn('⚠️  To enable email delivery, configure EMAIL_USER and EMAIL_PASSWORD variables.');
       this.emailProvider = 'console';
     }
   }
@@ -46,8 +55,10 @@ export class EmailService {
   }
 
   private async sendWithSmtp(email: string, otp: string) {
+    const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
+    
     const info = await this.transporter.sendMail({
-      from: `"ProNet" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"ProNet" <${fromAddress}>`,
       to: email,
       subject: 'Your ProNet Verification Code',
       html: this.getEmailTemplate(otp),
