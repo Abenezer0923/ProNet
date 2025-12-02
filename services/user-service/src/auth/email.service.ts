@@ -1,22 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-  private resend: Resend;
   private transporter: nodemailer.Transporter;
-  private emailProvider: 'resend' | 'smtp' | 'console';
+  private emailProvider: 'smtp' | 'console';
 
   constructor() {
-    // Initialize Resend if configured
-    if (process.env.RESEND_API_KEY) {
-      this.resend = new Resend(process.env.RESEND_API_KEY);
-      this.emailProvider = 'resend';
-      console.log(`📧 Email service initialized with Resend`);
-    }
-
-    // Initialize SMTP if configured (as fallback or primary)
+    // Initialize SMTP if configured
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -27,19 +18,11 @@ export class EmailService {
           pass: process.env.SMTP_PASS,
         },
       });
-      
-      // If Resend wasn't configured, set provider to SMTP
-      if (!this.emailProvider) {
-        this.emailProvider = 'smtp';
-        console.log(`📧 Email service initialized with SMTP (${process.env.SMTP_HOST})`);
-      } else {
-        console.log(`📧 SMTP configured as fallback (${process.env.SMTP_HOST})`);
-      }
-    }
-
-    if (!this.emailProvider) {
+      this.emailProvider = 'smtp';
+      console.log(`📧 Email service initialized with SMTP (${process.env.SMTP_HOST})`);
+    } else {
       console.warn('⚠️  No email provider configured. OTP will be logged to console only.');
-      console.warn('⚠️  To enable email delivery, configure RESEND_API_KEY or SMTP variables.');
+      console.warn('⚠️  To enable email delivery, configure SMTP variables.');
       this.emailProvider = 'console';
     }
   }
@@ -50,20 +33,7 @@ export class EmailService {
     console.log(`⏰ OTP expires in 10 minutes`);
 
     try {
-      if (this.emailProvider === 'resend') {
-        try {
-          await this.sendWithResend(email, otp);
-        } catch (error) {
-          console.warn(`⚠️ Resend failed: ${error.message}`);
-          
-          if (this.transporter) {
-            console.log('🔄 Attempting SMTP fallback...');
-            await this.sendWithSmtp(email, otp);
-          } else {
-            throw error;
-          }
-        }
-      } else if (this.emailProvider === 'smtp') {
+      if (this.emailProvider === 'smtp') {
         await this.sendWithSmtp(email, otp);
       } else {
         console.log('📝 Email service not configured - OTP logged to console only');
@@ -73,26 +43,6 @@ export class EmailService {
       console.log('📝 Falling back to console OTP due to email service error');
       console.log(`🔑 Use OTP: ${otp} (expires in 10 minutes)`);
     }
-  }
-
-  private async sendWithResend(email: string, otp: string) {
-    const { data, error } = await this.resend.emails.send({
-      from: 'ProNet <onboarding@resend.dev>', // Default Resend testing domain
-      to: [email],
-      subject: 'Your ProNet Verification Code',
-      html: this.getEmailTemplate(otp),
-    });
-
-    if (error) {
-      // If validation error (testing restriction), throw specific error to trigger fallback
-      if (error.name === 'validation_error') {
-        throw new Error(`Resend validation error: ${error.message}`);
-      }
-      throw new Error(error.message);
-    }
-
-    console.log(`✅ OTP email sent successfully via Resend to ${email}`);
-    console.log(`📬 Message ID: ${data?.id}`);
   }
 
   private async sendWithSmtp(email: string, otp: string) {
