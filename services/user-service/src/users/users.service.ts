@@ -11,6 +11,10 @@ import { UserSkill } from './entities/user-skill.entity';
 import { Connection } from './entities/connection.entity';
 import { Experience } from './entities/experience.entity';
 import { Education } from './entities/education.entity';
+import { Post } from '../posts/entities/post.entity';
+import { Comment } from '../posts/entities/comment.entity';
+import { PostLike } from '../posts/entities/post-like.entity';
+import { CommunityMember } from '../communities/entities/community-member.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
@@ -37,6 +41,14 @@ export class UsersService {
     private experienceRepository: Repository<Experience>,
     @InjectRepository(Education)
     private educationRepository: Repository<Education>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
+    @InjectRepository(Comment)
+    private commentRepository: Repository<Comment>,
+    @InjectRepository(PostLike)
+    private postLikeRepository: Repository<PostLike>,
+    @InjectRepository(CommunityMember)
+    private communityMemberRepository: Repository<CommunityMember>,
     private notificationsService: NotificationsService,
   ) { }
 
@@ -195,14 +207,35 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Delete all user's connections (as follower and following)
+    // 1. Delete Community Memberships
+    await this.communityMemberRepository.delete({ userId });
+
+    // 2. Delete Post Likes
+    await this.postLikeRepository.delete({ userId });
+
+    // 3. Delete Comments
+    await this.commentRepository.delete({ authorId: userId });
+
+    // 4. Delete Posts (and their related comments/likes)
+    const userPosts = await this.postRepository.find({ where: { authorId: userId } });
+    for (const post of userPosts) {
+      await this.commentRepository.delete({ postId: post.id });
+      await this.postLikeRepository.delete({ postId: post.id });
+      await this.postRepository.remove(post);
+    }
+
+    // 5. Delete Experience & Education
+    await this.experienceRepository.delete({ user: { id: userId } });
+    await this.educationRepository.delete({ user: { id: userId } });
+
+    // 6. Delete all user's connections (as follower and following)
     await this.connectionRepository.delete({ followerId: userId });
     await this.connectionRepository.delete({ followingId: userId });
 
-    // Delete all user's skills
+    // 7. Delete all user's skills
     await this.userSkillRepository.delete({ userId });
 
-    // Delete the user
+    // 8. Delete the user
     await this.userRepository.remove(user);
 
     return { message: 'Account deleted successfully' };

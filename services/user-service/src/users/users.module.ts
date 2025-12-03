@@ -8,10 +8,24 @@ import { Connection } from './entities/connection.entity';
 import { Experience } from './entities/experience.entity';
 import { Education } from './entities/education.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { Post } from '../posts/entities/post.entity';
+import { Comment } from '../posts/entities/comment.entity';
+import { PostLike } from '../posts/entities/post-like.entity';
+import { CommunityMember } from '../communities/entities/community-member.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserSkill, Connection, Experience, Education]),
+    TypeOrmModule.forFeature([
+      User, 
+      UserSkill, 
+      Connection, 
+      Experience, 
+      Education,
+      Post,
+      Comment,
+      PostLike,
+      CommunityMember
+    ]),
     NotificationsModule,
   ],
   controllers: [UsersController],
