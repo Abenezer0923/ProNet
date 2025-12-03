@@ -13,6 +13,7 @@ import {
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('communities')
 @UseGuards(JwtAuthGuard)
@@ -74,5 +75,14 @@ export class ArticlesController {
     @Get('articles/:articleId/comments')
     getComments(@Param('articleId') articleId: string) {
         return this.articlesService.getComments(articleId);
+    }
+
+    @Public()
+    @Get('articles/public')
+    getPublicArticles(
+        @Query('page') page?: number,
+        @Query('limit') limit?: number,
+    ) {
+        return this.articlesService.getPublicArticles({ page, limit });
     }
 }

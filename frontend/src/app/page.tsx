@@ -44,9 +44,9 @@ export default function Home() {
               <Logo />
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Features</a>
-              <a href="#communities" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Communities</a>
-              <a href="#about" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">About</a>
+              <Link href="/articles" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Articles</Link>
+              <Link href="/communities" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">Communities</Link>
+              <Link href="/about" className="text-sm font-medium text-stone-600 hover:text-primary-800 transition-smooth">About</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -255,15 +255,15 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Communities</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><Link href="/articles" className="hover:text-white transition-colors">Articles</Link></li>
+                <li><Link href="/communities" className="hover:text-white transition-colors">Communities</Link></li>
+                <li><Link href="/discover" className="hover:text-white transition-colors">Discover</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
               </ul>

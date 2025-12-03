@@ -183,4 +183,46 @@ export class ArticlesService {
         const words = content.trim().split(/\s+/).length;
         return Math.ceil(words / wordsPerMinute);
     }
+
+    async getPublicArticles(query: any): Promise<Article[]> {
+        let page = query.page ? parseInt(query.page.toString()) : 1;
+        if (isNaN(page) || page < 1) page = 1;
+
+        let limit = query.limit ? parseInt(query.limit.toString()) : 20;
+        if (isNaN(limit) || limit < 1) limit = 20;
+
+        const skip = (page - 1) * limit;
+
+        console.log('Fetching public articles:', { page, limit });
+
+        const articles = await this.articlesRepository
+            .createQueryBuilder('article')
+            .leftJoinAndSelect('article.author', 'author')
+            .leftJoinAndSelect('article.community', 'community')
+            .where('article.status = :status', { status: 'published' })
+            .orderBy('article.createdAt', 'DESC')
+            .skip(skip)
+            .take(limit)
+            .getMany();
+
+        // Add claps and comments count
+        const articlesWithCounts = await Promise.all(
+            articles.map(async (article) => {
+                const clapsCount = await this.clapsRepository.count({
+                    where: { articleId: article.id },
+                });
+                const commentsCount = await this.commentsRepository.count({
+                    where: { articleId: article.id },
+                });
+                return {
+                    ...article,
+                    clapsCount,
+                    commentsCount,
+                };
+            })
+        );
+
+        console.log(`Found ${articlesWithCounts.length} public articles`);
+        return articlesWithCounts as any;
+    }
 }
