@@ -15,6 +15,11 @@ import { Post } from '../posts/entities/post.entity';
 import { Comment } from '../posts/entities/comment.entity';
 import { PostLike } from '../posts/entities/post-like.entity';
 import { CommunityMember } from '../communities/entities/community-member.entity';
+import { Community } from '../communities/entities/community.entity';
+import { Article } from '../communities/entities/article.entity';
+import { Conversation } from '../chat/entities/conversation.entity';
+import { Message } from '../chat/entities/message.entity';
+import { Notification } from '../notifications/entities/notification.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AddSkillDto } from './dto/add-skill.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
@@ -49,6 +54,16 @@ export class UsersService {
     private postLikeRepository: Repository<PostLike>,
     @InjectRepository(CommunityMember)
     private communityMemberRepository: Repository<CommunityMember>,
+    @InjectRepository(Community)
+    private communityRepository: Repository<Community>,
+    @InjectRepository(Article)
+    private articleRepository: Repository<Article>,
+    @InjectRepository(Conversation)
+    private conversationRepository: Repository<Conversation>,
+    @InjectRepository(Message)
+    private messageRepository: Repository<Message>,
+    @InjectRepository(Notification)
+    private notificationRepository: Repository<Notification>,
     private notificationsService: NotificationsService,
   ) { }
 
@@ -228,14 +243,61 @@ export class UsersService {
     await this.experienceRepository.delete({ user: { id: userId } });
     await this.educationRepository.delete({ user: { id: userId } });
 
-    // 6. Delete all user's connections (as follower and following)
+    // 6. Delete Chat Data (Conversations and Messages)
+    // Find conversations where user is a participant
+    const conversations = await this.conversationRepository.find({
+      where: [
+        { participant1Id: userId },
+        { participant2Id: userId }
+      ]
+    });
+
+    for (const conversation of conversations) {
+      // Delete all messages in the conversation
+      await this.messageRepository.delete({ conversationId: conversation.id });
+      // Delete the conversation itself
+      await this.conversationRepository.remove(conversation);
+    }
+
+    // 7. Delete Notifications
+    await this.notificationRepository.delete({ userId: userId }); // Notifications received
+    await this.notificationRepository.delete({ actorId: userId }); // Notifications triggered
+
+    // 8. Delete Articles created by user
+    await this.articleRepository.delete({ authorId: userId });
+
+    // 9. Delete Communities created by user
+    // Note: This is a destructive action. It will delete the community and all its content.
+    // Alternatively, we could transfer ownership or just set createdBy to null (which is handled by DB constraint usually)
+    // But user requested "commuinty were created" to be deleted.
+    const communities = await this.communityRepository.find({ where: { createdBy: userId } });
+    for (const community of communities) {
+      // Delete community members
+      await this.communityMemberRepository.delete({ communityId: community.id });
+      
+      // Delete community articles
+      await this.articleRepository.delete({ communityId: community.id });
+
+      // Delete community posts (if any linked to community)
+      const communityPosts = await this.postRepository.find({ where: { communityId: community.id } });
+      for (const post of communityPosts) {
+        await this.commentRepository.delete({ postId: post.id });
+        await this.postLikeRepository.delete({ postId: post.id });
+        await this.postRepository.remove(post);
+      }
+
+      // Finally delete the community
+      await this.communityRepository.remove(community);
+    }
+
+    // 10. Delete all user's connections (as follower and following)
     await this.connectionRepository.delete({ followerId: userId });
     await this.connectionRepository.delete({ followingId: userId });
 
-    // 7. Delete all user's skills
+    // 11. Delete all user's skills
     await this.userSkillRepository.delete({ userId });
 
-    // 8. Delete the user
+    // 12. Delete the user
     await this.userRepository.remove(user);
 
     return { message: 'Account deleted successfully' };

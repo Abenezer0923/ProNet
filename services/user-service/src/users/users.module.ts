@@ -12,6 +12,11 @@ import { Post } from '../posts/entities/post.entity';
 import { Comment } from '../posts/entities/comment.entity';
 import { PostLike } from '../posts/entities/post-like.entity';
 import { CommunityMember } from '../communities/entities/community-member.entity';
+import { Conversation } from '../chat/entities/conversation.entity';
+import { Message } from '../chat/entities/message.entity';
+import { Notification } from '../notifications/entities/notification.entity';
+import { Community } from '../communities/entities/community.entity';
+import { Article } from '../communities/entities/article.entity';
 
 @Module({
   imports: [
@@ -24,7 +29,12 @@ import { CommunityMember } from '../communities/entities/community-member.entity
       Post,
       Comment,
       PostLike,
-      CommunityMember
+      CommunityMember,
+      Conversation,
+      Message,
+      Notification,
+      Community,
+      Article
     ]),
     NotificationsModule,
   ],
