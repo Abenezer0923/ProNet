@@ -43,7 +43,23 @@ export default function CommunitiesPage() {
   const fetchCommunities = async () => {
     try {
       const communitiesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities`);
+      
+      if (!communitiesRes.ok) {
+        console.error('Failed to fetch communities:', communitiesRes.status);
+        setCommunities([]);
+        setLoading(false);
+        return;
+      }
+
       const communitiesData = await communitiesRes.json();
+
+      // Ensure we have an array
+      if (!Array.isArray(communitiesData)) {
+        console.error('Communities data is not an array:', communitiesData);
+        setCommunities([]);
+        setLoading(false);
+        return;
+      }
 
       let enhancedCommunities = communitiesData;
 
@@ -58,12 +74,14 @@ export default function CommunitiesPage() {
           }));
         } catch (error) {
           console.error('Error fetching my communities:', error);
+          // Continue with non-enhanced communities
         }
       }
 
       setCommunities(enhancedCommunities);
     } catch (error) {
       console.error('Error fetching communities:', error);
+      setCommunities([]);
     } finally {
       setLoading(false);
     }
