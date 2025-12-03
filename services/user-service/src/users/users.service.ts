@@ -17,6 +17,7 @@ import { PostLike } from '../posts/entities/post-like.entity';
 import { CommunityMember } from '../communities/entities/community-member.entity';
 import { Community } from '../communities/entities/community.entity';
 import { Article } from '../communities/entities/article.entity';
+import { Group } from '../communities/entities/group.entity';
 import { GroupMessage } from '../communities/entities/group-message.entity';
 import { ArticleComment } from '../communities/entities/article-comment.entity';
 import { ArticleClap } from '../communities/entities/article-clap.entity';
@@ -70,6 +71,8 @@ export class UsersService {
     private communityRepository: Repository<Community>,
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
+    @InjectRepository(Group)
+    private groupRepository: Repository<Group>,
     @InjectRepository(GroupMessage)
     private groupMessageRepository: Repository<GroupMessage>,
     @InjectRepository(ArticleComment)
@@ -316,15 +319,12 @@ export class UsersService {
 
     // 9. Delete Communities created by user
     // Note: This is a destructive action. It will delete the community and all its content.
-    // Alternatively, we could transfer ownership or just set createdBy to null (which is handled by DB constraint usually)
-    // But user requested "commuinty were created" to be deleted.
     const communities = await this.communityRepository.find({ where: { createdBy: userId } });
     for (const community of communities) {
       // Delete community members
       await this.communityMemberRepository.delete({ communityId: community.id });
       
       // Delete community articles
-      // (Need to clean up article comments/claps first)
       const communityArticles = await this.articleRepository.find({ where: { communityId: community.id } });
       for (const article of communityArticles) {
         await this.articleCommentRepository.delete({ articleId: article.id });
@@ -332,7 +332,7 @@ export class UsersService {
         await this.articleRepository.remove(article);
       }
 
-      // Delete community posts (if any linked to community)
+      // Delete community posts
       const communityPosts = await this.postRepository.find({ where: { communityId: community.id } });
       for (const post of communityPosts) {
         await this.commentRepository.delete({ postId: post.id });
@@ -340,10 +340,14 @@ export class UsersService {
         await this.postRepository.remove(post);
       }
 
-      // Delete Group Messages in this community's groups?
-      // Groups are deleted by cascade usually if defined in entity, but let's be safe if we can access them.
-      // Since we don't have GroupRepository injected, we rely on DB cascade or manual cleanup if needed.
-      // However, we MUST delete messages sent by THIS user in ANY group.
+      // Delete Groups in this community
+      const communityGroups = await this.groupRepository.find({ where: { community: { id: community.id } } });
+      for (const group of communityGroups) {
+        // Delete messages in the group
+        await this.groupMessageRepository.delete({ group: { id: group.id } });
+        // Delete the group
+        await this.groupRepository.remove(group);
+      }
       
       // Finally delete the community
       await this.communityRepository.remove(community);
