@@ -17,6 +17,9 @@ import { Message } from '../chat/entities/message.entity';
 import { Notification } from '../notifications/entities/notification.entity';
 import { Community } from '../communities/entities/community.entity';
 import { Article } from '../communities/entities/article.entity';
+import { GroupMessage } from '../communities/entities/group-message.entity';
+import { ArticleComment } from '../communities/entities/article-comment.entity';
+import { ArticleClap } from '../communities/entities/article-clap.entity';
 
 @Module({
   imports: [
@@ -34,7 +37,10 @@ import { Article } from '../communities/entities/article.entity';
       Message,
       Notification,
       Community,
-      Article
+      Article,
+      GroupMessage,
+      ArticleComment,
+      ArticleClap
     ]),
     NotificationsModule,
   ],

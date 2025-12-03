@@ -17,6 +17,9 @@ import { PostLike } from '../posts/entities/post-like.entity';
 import { CommunityMember } from '../communities/entities/community-member.entity';
 import { Community } from '../communities/entities/community.entity';
 import { Article } from '../communities/entities/article.entity';
+import { GroupMessage } from '../communities/entities/group-message.entity';
+import { ArticleComment } from '../communities/entities/article-comment.entity';
+import { ArticleClap } from '../communities/entities/article-clap.entity';
 import { Conversation } from '../chat/entities/conversation.entity';
 import { Message } from '../chat/entities/message.entity';
 import { Notification } from '../notifications/entities/notification.entity';
@@ -58,6 +61,12 @@ export class UsersService {
     private communityRepository: Repository<Community>,
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
+    @InjectRepository(GroupMessage)
+    private groupMessageRepository: Repository<GroupMessage>,
+    @InjectRepository(ArticleComment)
+    private articleCommentRepository: Repository<ArticleComment>,
+    @InjectRepository(ArticleClap)
+    private articleClapRepository: Repository<ArticleClap>,
     @InjectRepository(Conversation)
     private conversationRepository: Repository<Conversation>,
     @InjectRepository(Message)
@@ -216,6 +225,7 @@ export class UsersService {
   }
 
   async deleteAccount(userId: string) {
+    console.log(`Starting comprehensive account deletion for user ${userId}...`);
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -264,7 +274,18 @@ export class UsersService {
     await this.notificationRepository.delete({ actorId: userId }); // Notifications triggered
 
     // 8. Delete Articles created by user
-    await this.articleRepository.delete({ authorId: userId });
+    // First delete comments and claps by user on ANY article
+    await this.articleCommentRepository.delete({ userId: userId });
+    await this.articleClapRepository.delete({ userId: userId });
+    
+    // Then delete articles authored by user
+    // Note: We should also delete comments/claps on these articles by OTHER users to avoid orphans/FK issues
+    const userArticles = await this.articleRepository.find({ where: { authorId: userId } });
+    for (const article of userArticles) {
+      await this.articleCommentRepository.delete({ articleId: article.id });
+      await this.articleClapRepository.delete({ articleId: article.id });
+      await this.articleRepository.remove(article);
+    }
 
     // 9. Delete Communities created by user
     // Note: This is a destructive action. It will delete the community and all its content.
@@ -276,7 +297,13 @@ export class UsersService {
       await this.communityMemberRepository.delete({ communityId: community.id });
       
       // Delete community articles
-      await this.articleRepository.delete({ communityId: community.id });
+      // (Need to clean up article comments/claps first)
+      const communityArticles = await this.articleRepository.find({ where: { communityId: community.id } });
+      for (const article of communityArticles) {
+        await this.articleCommentRepository.delete({ articleId: article.id });
+        await this.articleClapRepository.delete({ articleId: article.id });
+        await this.articleRepository.remove(article);
+      }
 
       // Delete community posts (if any linked to community)
       const communityPosts = await this.postRepository.find({ where: { communityId: community.id } });
@@ -286,9 +313,17 @@ export class UsersService {
         await this.postRepository.remove(post);
       }
 
+      // Delete Group Messages in this community's groups?
+      // Groups are deleted by cascade usually if defined in entity, but let's be safe if we can access them.
+      // Since we don't have GroupRepository injected, we rely on DB cascade or manual cleanup if needed.
+      // However, we MUST delete messages sent by THIS user in ANY group.
+      
       // Finally delete the community
       await this.communityRepository.remove(community);
     }
+
+    // 9.5 Delete Group Messages sent by user (in any group)
+    await this.groupMessageRepository.delete({ authorId: userId });
 
     // 10. Delete all user's connections (as follower and following)
     await this.connectionRepository.delete({ followerId: userId });
