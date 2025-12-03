@@ -33,6 +33,7 @@ export default function CommunitiesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -42,25 +43,56 @@ export default function CommunitiesPage() {
 
   const fetchCommunities = async () => {
     try {
-      const communitiesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log('API URL:', apiUrl);
+      console.log('Fetching communities from:', `${apiUrl}/communities`);
+      
+      if (!apiUrl) {
+        setError('API URL is not configured. Please check environment variables.');
+        setCommunities([]);
+        setLoading(false);
+        return;
+      }
+      
+      const communitiesRes = await fetch(`${apiUrl}/communities`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Communities response status:', communitiesRes.status);
       
       if (!communitiesRes.ok) {
-        console.error('Failed to fetch communities:', communitiesRes.status);
+        console.error('Failed to fetch communities:', communitiesRes.status, communitiesRes.statusText);
+        const errorText = await communitiesRes.text();
+        console.error('Error response:', errorText);
+        setError(`Failed to load communities (Status: ${communitiesRes.status}). Please try again later.`);
         setCommunities([]);
         setLoading(false);
         return;
       }
 
       const communitiesData = await communitiesRes.json();
+      console.log('Communities data received:', communitiesData);
+      console.log('Is array?', Array.isArray(communitiesData));
+      console.log('Length:', communitiesData?.length);
 
       // Ensure we have an array
       if (!Array.isArray(communitiesData)) {
         console.error('Communities data is not an array:', communitiesData);
+        setError('Received invalid data format from server.');
         setCommunities([]);
         setLoading(false);
         return;
       }
 
+      console.log(`Found ${communitiesData.length} communities`);
+      
+      if (communitiesData.length === 0) {
+        console.warn('No communities found in database');
+      }
+      
       let enhancedCommunities = communitiesData;
 
       // If user is logged in, check which communities they're a member of
@@ -79,8 +111,10 @@ export default function CommunitiesPage() {
       }
 
       setCommunities(enhancedCommunities);
-    } catch (error) {
+      setError(null);
+    } catch (error: any) {
       console.error('Error fetching communities:', error);
+      setError(`Failed to connect to server: ${error.message}`);
       setCommunities([]);
     } finally {
       setLoading(false);
@@ -253,18 +287,48 @@ export default function CommunitiesPage() {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {filteredCommunities.length === 0 ? (
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-red-900 font-semibold mb-1">Error Loading Communities</h3>
+                <p className="text-red-700 text-sm">{error}</p>
+                <button
+                  onClick={() => {
+                    setError(null);
+                    setLoading(true);
+                    fetchCommunities();
+                  }}
+                  className="mt-3 text-sm font-semibold text-red-700 hover:text-red-900 underline"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {filteredCommunities.length === 0 && !error ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
             <UserGroupIcon className="w-20 h-20 mx-auto text-gray-300 mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No communities found</h3>
-            <p className="text-gray-500 mb-8 text-lg">Try adjusting your search or create a new community.</p>
-            <Link
-              href="/communities/create"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-lg"
-            >
-              <PlusIcon className="w-6 h-6" />
-              Create Community
-            </Link>
+            <p className="text-gray-500 mb-8 text-lg">
+              {communities.length === 0 
+                ? "No communities have been created yet. Be the first to start one!" 
+                : "Try adjusting your search or create a new community."}
+            </p>
+            {user && (
+              <Link
+                href="/communities/create"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-lg"
+              >
+                <PlusIcon className="w-6 h-6" />
+                Create Community
+              </Link>
+            )}
           </div>
         ) : (
           <>
