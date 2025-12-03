@@ -87,8 +87,7 @@ services:
   # Keep Alive Cron Job
   - type: cron
     name: pronet-keep-alive
-    runtime: image
-    image: curlimages/curl
+    runtime: node
     plan: free
     schedule: "*/10 * * * *"
-    command: curl -I https://pronet-user-service.onrender.com/api/auth/google
+    startCommand: curl -I https://pronet-user-service.onrender.com/api/auth/google
