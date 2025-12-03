@@ -48,3 +48,4 @@ env/
 *.dll
 *.so
 *.dylib
+services/user-service/scripts/generate-token-direct.js
