@@ -21,6 +21,12 @@ export class EmailService {
       this.emailProvider = 'gmail-api';
       console.log('📧 Email service initialized with Gmail API (HTTP)');
       return;
+    } else {
+      console.warn('⚠️ Gmail API not initialized. Missing config:');
+      if (!clientId) console.warn(' - GOOGLE_CLIENT_ID is missing');
+      if (!clientSecret) console.warn(' - GOOGLE_CLIENT_SECRET is missing');
+      if (!refreshToken) console.warn(' - GOOGLE_REFRESH_TOKEN is missing');
+      if (!emailUser) console.warn(' - EMAIL_USER is missing');
     }
 
     // Fallback to SMTP (will likely fail on Render free tier)
