@@ -1,13 +1,15 @@
 # ⏰ How to Keep Render Awake (Cron Job)
 
-Render's free tier spins down after 15 minutes of inactivity. To prevent this, we will use a free external service to "ping" your server every 14 minutes.
+Render's free tier spins down after 15 minutes of inactivity. To prevent this, we have configured a **Cron Job** directly in `render.yaml` to ping the server every 10 minutes.
+
+Alternatively, you can use a free external service to "ping" your server.
 
 ## Step 1: Deploy First
 Make sure you have pushed the latest changes and your Render service is deployed and running.
 
-## Step 2: Get Your Health URL
-Your health endpoint is:
-`https://pronet-user-service.onrender.com/health`
+## Step 2: Get Your Keep-Alive URL
+Your keep-alive endpoint is:
+`https://pronet-user-service.onrender.com/api/auth/google`
 
 Try visiting this URL in your browser. You should see:
 ```json
@@ -19,7 +21,7 @@ Try visiting this URL in your browser. You should see:
 2.  Sign up / Login.
 3.  Click **Create Cronjob**.
 4.  **Title**: ProNet Keep Alive
-5.  **URL**: `https://pronet-user-service.onrender.com/health`
+5.  **URL**: `https://pronet-user-service.onrender.com/api/auth/google`
 6.  **Execution Schedule**:
     *   Select **Every 14 minutes**.
     *   (Or choose "User-defined" and enter `*/14 * * * *`).

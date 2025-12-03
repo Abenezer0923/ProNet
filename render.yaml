@@ -65,6 +65,8 @@ services:
         sync: false
       - key: SENDGRID_FROM
         sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
         
   # API Gateway
   - type: web
@@ -81,3 +83,12 @@ services:
         value: https://pronet-user-service.onrender.com
       - key: JWT_SECRET
         generateValue: true
+
+  # Keep Alive Cron Job
+  - type: cron
+    name: pronet-keep-alive
+    runtime: image
+    image: curlimages/curl
+    plan: free
+    schedule: "*/10 * * * *"
+    command: curl -I https://pronet-user-service.onrender.com/api/auth/google
