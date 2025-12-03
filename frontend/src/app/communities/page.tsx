@@ -35,26 +35,31 @@ export default function CommunitiesPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    } else if (user) {
+    if (!authLoading) {
       fetchCommunities();
     }
-  }, [user, authLoading, router]);
+  }, [authLoading]);
 
   const fetchCommunities = async () => {
     try {
-      const [communitiesRes, myCommunitiesRes] = await Promise.all([
-        api.get('/communities'),
-        api.get('/communities/my')
-      ]);
+      const communitiesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities`);
+      const communitiesData = await communitiesRes.json();
 
-      const myCommunityIds = new Set(myCommunitiesRes.data.map((c: any) => c.id));
+      let enhancedCommunities = communitiesData;
 
-      const enhancedCommunities = communitiesRes.data.map((c: any) => ({
-        ...c,
-        isMember: myCommunityIds.has(c.id)
-      }));
+      // If user is logged in, check which communities they're a member of
+      if (user) {
+        try {
+          const myCommunitiesRes = await api.get('/communities/my');
+          const myCommunityIds = new Set(myCommunitiesRes.data.map((c: any) => c.id));
+          enhancedCommunities = communitiesData.map((c: any) => ({
+            ...c,
+            isMember: myCommunityIds.has(c.id)
+          }));
+        } catch (error) {
+          console.error('Error fetching my communities:', error);
+        }
+      }
 
       setCommunities(enhancedCommunities);
     } catch (error) {
@@ -67,6 +72,12 @@ export default function CommunitiesPage() {
   const handleJoin = async (e: React.MouseEvent, communityId: string) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Redirect to login if not authenticated
+    if (!user) {
+      router.push(`/login?redirect=/communities/${communityId}`);
+      return;
+    }
 
     try {
       await api.post(`/communities/${communityId}/join`);
@@ -117,23 +128,42 @@ export default function CommunitiesPage() {
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/dashboard" className="flex items-center space-x-2 group">
+            <Link href={user ? "/dashboard" : "/"} className="flex items-center space-x-2 group">
               <Logo />
             </Link>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/communities/my"
-                className="text-gray-600 hover:text-primary-800 font-medium transition-smooth"
-              >
-                My Communities
-              </Link>
-              <Link
-                href="/communities/create"
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
-              >
-                <PlusIcon className="w-5 h-5" />
-                Create Community
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/communities/my"
+                    className="text-gray-600 hover:text-primary-800 font-medium transition-smooth"
+                  >
+                    My Communities
+                  </Link>
+                  <Link
+                    href="/communities/create"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
+                  >
+                    <PlusIcon className="w-5 h-5" />
+                    Create Community
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-gray-600 hover:text-primary-800 font-medium transition-smooth px-4 py-2"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

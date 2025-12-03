@@ -179,7 +179,7 @@ export default function ArticlesPage() {
                     </div>
 
                     <Link 
-                      href={user ? `/communities/${article.community.id}/articles/${article.id}` : '/login'}
+                      href={`/communities/${article.community.id}/articles/${article.id}`}
                       className="mt-4 block w-full text-center px-4 py-2 bg-primary-50 text-primary-800 font-semibold rounded-lg hover:bg-primary-100 transition-smooth"
                     >
                       Read Article

@@ -29,6 +29,7 @@ export class ArticlesController {
         return this.articlesService.create(communityId, req.user.sub, createArticleDto);
     }
 
+    @Public()
     @Get(':id/articles')
     findAll(
         @Param('id') communityId: string,
@@ -39,6 +40,7 @@ export class ArticlesController {
         return this.articlesService.findAll(communityId, { page, limit, status });
     }
 
+    @Public()
     @Get('articles/:articleId')
     findOne(@Param('articleId') articleId: string) {
         return this.articlesService.findOne(articleId);
@@ -72,6 +74,7 @@ export class ArticlesController {
         return this.articlesService.addComment(articleId, req.user.sub, content);
     }
 
+    @Public()
     @Get('articles/:articleId/comments')
     getComments(@Param('articleId') articleId: string) {
         return this.articlesService.getComments(articleId);

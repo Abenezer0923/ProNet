@@ -18,6 +18,7 @@ import { UpdateCommunityDto } from './dto/update-community.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateGroupMessageDto } from './dto/create-group-message.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('communities')
 @UseGuards(JwtAuthGuard)
@@ -49,6 +50,7 @@ export class CommunitiesController {
     };
   }
 
+  @Public()
   @Get()
   async findAll() {
     return this.communitiesService.findAll();
@@ -69,6 +71,7 @@ export class CommunitiesController {
     return this.communitiesService.getCategories();
   }
 
+  @Public()
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.communitiesService.findOne(id);
@@ -98,6 +101,7 @@ export class CommunitiesController {
     return this.communitiesService.leave(id, req.user.sub);
   }
 
+  @Public()
   @Get(':id/members')
   async getMembers(@Param('id') id: string) {
     return this.communitiesService.getMembers(id);
