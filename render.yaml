@@ -84,10 +84,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # Keep Alive Cron Job
-  - type: cron
-    name: pronet-keep-alive
-    runtime: node
-    plan: free
-    schedule: "*/10 * * * *"
-    startCommand: curl -I https://pronet-user-service.onrender.com/api/auth/google
+
