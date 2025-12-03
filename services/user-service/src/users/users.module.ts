@@ -20,6 +20,15 @@ import { Article } from '../communities/entities/article.entity';
 import { GroupMessage } from '../communities/entities/group-message.entity';
 import { ArticleComment } from '../communities/entities/article-comment.entity';
 import { ArticleClap } from '../communities/entities/article-clap.entity';
+import { MessageReaction } from '../communities/entities/message-reaction.entity';
+import { MeetingRoom } from '../communities/entities/meeting-room.entity';
+import { MeetingParticipant } from '../communities/entities/meeting-participant.entity';
+import { MeetingPoll } from '../communities/entities/meeting-poll.entity';
+import { MeetingPollVote } from '../communities/entities/meeting-poll-vote.entity';
+import { MeetingQA } from '../communities/entities/meeting-qa.entity';
+import { MeetingQAUpvote } from '../communities/entities/meeting-qa-upvote.entity';
+import { CommunityEvent } from '../communities/entities/community-event.entity';
+import { EventAttendee } from '../communities/entities/event-attendee.entity';
 
 @Module({
   imports: [
@@ -40,7 +49,16 @@ import { ArticleClap } from '../communities/entities/article-clap.entity';
       Article,
       GroupMessage,
       ArticleComment,
-      ArticleClap
+      ArticleClap,
+      MessageReaction,
+      MeetingRoom,
+      MeetingParticipant,
+      MeetingPoll,
+      MeetingPollVote,
+      MeetingQA,
+      MeetingQAUpvote,
+      CommunityEvent,
+      EventAttendee
     ]),
     NotificationsModule,
   ],

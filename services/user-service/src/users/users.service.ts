@@ -20,6 +20,15 @@ import { Article } from '../communities/entities/article.entity';
 import { GroupMessage } from '../communities/entities/group-message.entity';
 import { ArticleComment } from '../communities/entities/article-comment.entity';
 import { ArticleClap } from '../communities/entities/article-clap.entity';
+import { MessageReaction } from '../communities/entities/message-reaction.entity';
+import { MeetingRoom } from '../communities/entities/meeting-room.entity';
+import { MeetingParticipant } from '../communities/entities/meeting-participant.entity';
+import { MeetingPoll } from '../communities/entities/meeting-poll.entity';
+import { MeetingPollVote } from '../communities/entities/meeting-poll-vote.entity';
+import { MeetingQA } from '../communities/entities/meeting-qa.entity';
+import { MeetingQAUpvote } from '../communities/entities/meeting-qa-upvote.entity';
+import { CommunityEvent } from '../communities/entities/community-event.entity';
+import { EventAttendee } from '../communities/entities/event-attendee.entity';
 import { Conversation } from '../chat/entities/conversation.entity';
 import { Message } from '../chat/entities/message.entity';
 import { Notification } from '../notifications/entities/notification.entity';
@@ -67,6 +76,24 @@ export class UsersService {
     private articleCommentRepository: Repository<ArticleComment>,
     @InjectRepository(ArticleClap)
     private articleClapRepository: Repository<ArticleClap>,
+    @InjectRepository(MessageReaction)
+    private messageReactionRepository: Repository<MessageReaction>,
+    @InjectRepository(MeetingRoom)
+    private meetingRoomRepository: Repository<MeetingRoom>,
+    @InjectRepository(MeetingParticipant)
+    private meetingParticipantRepository: Repository<MeetingParticipant>,
+    @InjectRepository(MeetingPoll)
+    private meetingPollRepository: Repository<MeetingPoll>,
+    @InjectRepository(MeetingPollVote)
+    private meetingPollVoteRepository: Repository<MeetingPollVote>,
+    @InjectRepository(MeetingQA)
+    private meetingQARepository: Repository<MeetingQA>,
+    @InjectRepository(MeetingQAUpvote)
+    private meetingQAUpvoteRepository: Repository<MeetingQAUpvote>,
+    @InjectRepository(CommunityEvent)
+    private communityEventRepository: Repository<CommunityEvent>,
+    @InjectRepository(EventAttendee)
+    private eventAttendeeRepository: Repository<EventAttendee>,
     @InjectRepository(Conversation)
     private conversationRepository: Repository<Conversation>,
     @InjectRepository(Message)
@@ -323,7 +350,65 @@ export class UsersService {
     }
 
     // 9.5 Delete Group Messages sent by user (in any group)
+    // First delete reactions by user
+    await this.messageReactionRepository.delete({ userId: userId });
+    // Then delete messages
     await this.groupMessageRepository.delete({ authorId: userId });
+
+    // 9.6 Delete Meeting & Event Interactions
+    // Delete votes and upvotes
+    await this.meetingPollVoteRepository.delete({ userId: userId });
+    await this.meetingQAUpvoteRepository.delete({ userId: userId });
+    
+    // Delete participation records
+    await this.meetingParticipantRepository.delete({ userId: userId });
+    await this.eventAttendeeRepository.delete({ user: { id: userId } });
+
+    // Delete Q&A questions asked by user
+    await this.meetingQARepository.delete({ askedById: userId });
+    // Note: We might also need to handle answers by user, but MeetingQA entity structure for answers is simple string or relation?
+    // Looking at entity: answeredBy is a relation. We should set it to null or delete? 
+    // Usually we keep the answer but remove the link, or delete. Let's set to null if possible, or delete if strict.
+    // Since we can't easily set to null with delete(), let's update.
+    await this.meetingQARepository.update({ answeredById: userId }, { answeredById: null });
+
+    // Delete Polls created by user
+    // First delete votes on these polls
+    const userPolls = await this.meetingPollRepository.find({ where: { createdBy: userId } });
+    for (const poll of userPolls) {
+        await this.meetingPollVoteRepository.delete({ pollId: poll.id });
+        await this.meetingPollRepository.remove(poll);
+    }
+
+    // Delete Events organized by user
+    const userEvents = await this.communityEventRepository.find({ where: { organizer: { id: userId } } });
+    for (const event of userEvents) {
+        await this.eventAttendeeRepository.delete({ event: { id: event.id } });
+        await this.communityEventRepository.remove(event);
+    }
+
+    // Delete Meeting Rooms hosted by user
+    const userMeetings = await this.meetingRoomRepository.find({ where: { hostId: userId } });
+    for (const meeting of userMeetings) {
+        // Delete participants
+        await this.meetingParticipantRepository.delete({ meetingRoomId: meeting.id });
+        
+        // Delete polls and their votes
+        const meetingPolls = await this.meetingPollRepository.find({ where: { meetingRoomId: meeting.id } });
+        for (const poll of meetingPolls) {
+            await this.meetingPollVoteRepository.delete({ pollId: poll.id });
+            await this.meetingPollRepository.remove(poll);
+        }
+
+        // Delete QAs and their upvotes
+        const meetingQAs = await this.meetingQARepository.find({ where: { meetingRoomId: meeting.id } });
+        for (const qa of meetingQAs) {
+            await this.meetingQAUpvoteRepository.delete({ questionId: qa.id });
+            await this.meetingQARepository.remove(qa);
+        }
+
+        await this.meetingRoomRepository.remove(meeting);
+    }
 
     // 10. Delete all user's connections (as follower and following)
     await this.connectionRepository.delete({ followerId: userId });
