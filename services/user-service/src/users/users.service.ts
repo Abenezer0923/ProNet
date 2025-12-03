@@ -19,6 +19,7 @@ import { Community } from '../communities/entities/community.entity';
 import { Article } from '../communities/entities/article.entity';
 import { Group } from '../communities/entities/group.entity';
 import { GroupMessage } from '../communities/entities/group-message.entity';
+import { BreakoutRoom } from '../communities/entities/breakout-room.entity';
 import { ArticleComment } from '../communities/entities/article-comment.entity';
 import { ArticleClap } from '../communities/entities/article-clap.entity';
 import { MessageReaction } from '../communities/entities/message-reaction.entity';
@@ -75,6 +76,8 @@ export class UsersService {
     private groupRepository: Repository<Group>,
     @InjectRepository(GroupMessage)
     private groupMessageRepository: Repository<GroupMessage>,
+    @InjectRepository(BreakoutRoom)
+    private breakoutRoomRepository: Repository<BreakoutRoom>,
     @InjectRepository(ArticleComment)
     private articleCommentRepository: Repository<ArticleComment>,
     @InjectRepository(ArticleClap)
@@ -338,6 +341,39 @@ export class UsersService {
         await this.commentRepository.delete({ postId: post.id });
         await this.postLikeRepository.delete({ postId: post.id });
         await this.postRepository.remove(post);
+      }
+
+      // Delete Community Events
+      const communityEvents = await this.communityEventRepository.find({ where: { community: { id: community.id } } });
+      for (const event of communityEvents) {
+        await this.eventAttendeeRepository.delete({ event: { id: event.id } });
+        await this.communityEventRepository.remove(event);
+      }
+
+      // Delete Community Meeting Rooms
+      const communityMeetings = await this.meetingRoomRepository.find({ where: { community: { id: community.id } } });
+      for (const meeting of communityMeetings) {
+        // Delete participants
+        await this.meetingParticipantRepository.delete({ meetingRoomId: meeting.id });
+        
+        // Delete polls and their votes
+        const meetingPolls = await this.meetingPollRepository.find({ where: { meetingRoomId: meeting.id } });
+        for (const poll of meetingPolls) {
+            await this.meetingPollVoteRepository.delete({ pollId: poll.id });
+            await this.meetingPollRepository.remove(poll);
+        }
+
+        // Delete QAs and their upvotes
+        const meetingQAs = await this.meetingQARepository.find({ where: { meetingRoomId: meeting.id } });
+        for (const qa of meetingQAs) {
+            await this.meetingQAUpvoteRepository.delete({ questionId: qa.id });
+            await this.meetingQARepository.remove(qa);
+        }
+
+        // Delete Breakout Rooms
+        await this.breakoutRoomRepository.delete({ meetingRoomId: meeting.id });
+
+        await this.meetingRoomRepository.remove(meeting);
       }
 
       // Delete Groups in this community

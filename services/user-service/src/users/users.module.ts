@@ -30,6 +30,7 @@ import { MeetingQAUpvote } from '../communities/entities/meeting-qa-upvote.entit
 import { CommunityEvent } from '../communities/entities/community-event.entity';
 import { EventAttendee } from '../communities/entities/event-attendee.entity';
 import { Group } from '../communities/entities/group.entity';
+import { BreakoutRoom } from '../communities/entities/breakout-room.entity';
 
 @Module({
   imports: [
@@ -60,7 +61,8 @@ import { Group } from '../communities/entities/group.entity';
       MeetingQAUpvote,
       CommunityEvent,
       EventAttendee,
-      Group
+      Group,
+      BreakoutRoom
     ]),
     NotificationsModule,
   ],
