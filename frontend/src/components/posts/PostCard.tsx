@@ -54,6 +54,8 @@ const REACTION_TYPES = {
     FUNNY: { icon: '😂', label: 'Funny', color: 'text-orange-600' },
 };
 
+type ReactionType = keyof typeof REACTION_TYPES;
+
 export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const { user } = useAuth();
     const [showComments, setShowComments] = useState(false);
@@ -68,26 +70,57 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const [editContent, setEditContent] = useState(post.content);
     const [isDeleting, setIsDeleting] = useState(false);
     const [localContent, setLocalContent] = useState(post.content);
+    const [commentError, setCommentError] = useState<string | null>(null);
 
     useEffect(() => {
         setLocalContent(post.content);
         setEditContent(post.content);
     }, [post.id, post.content]);
 
-    const hasLiked = post.likes?.some(like => like.userId === user?.id);
-    const userReaction = post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE';
+    const initialHasLiked = post.likes?.some(like => like.userId === user?.id) ?? false;
+    const initialReaction = (post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE') as ReactionType;
+    const [liked, setLiked] = useState(initialHasLiked);
+    const [likeCount, setLikeCount] = useState(post.likeCount || 0);
+    const [currentReaction, setCurrentReaction] = useState<ReactionType>(initialReaction);
 
-    const handleLike = async (reactionType = 'LIKE') => {
+    useEffect(() => {
+        setLiked(initialHasLiked);
+        setLikeCount(post.likeCount || 0);
+        setCurrentReaction(initialReaction);
+    }, [post.id, post.likeCount, post.likes, initialHasLiked, initialReaction]);
+
+    const handleLike = async (reactionType: ReactionType = 'LIKE') => {
+        const isSameReaction = liked && currentReaction === reactionType;
+        const previousLiked = liked;
+        const previousReaction = currentReaction;
+        const previousCount = likeCount;
+
+        if (isSameReaction) {
+            setLiked(false);
+            setCurrentReaction('LIKE');
+            setLikeCount((count) => Math.max(0, count - 1));
+        } else {
+            if (!liked) {
+                setLikeCount((count) => count + 1);
+            }
+            setLiked(true);
+            setCurrentReaction(reactionType);
+        }
+
         try {
-            if (hasLiked && userReaction === reactionType) {
+            if (isSameReaction) {
                 await api.delete(`/posts/${post.id}/unlike`);
             } else {
                 await api.post(`/posts/${post.id}/like`, { reactionType });
             }
             if (onPostUpdated) onPostUpdated();
-            setShowReactionPicker(false);
         } catch (error) {
             console.error('Error liking post:', error);
+            setLiked(previousLiked);
+            setCurrentReaction(previousReaction);
+            setLikeCount(previousCount);
+        } finally {
+            setShowReactionPicker(false);
         }
     };
 
@@ -107,8 +140,10 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
             const response = await api.get(`/posts/${post.id}/comments`);
             setComments(response.data);
             setLocalCommentCount(response.data.length);
+            return response.data;
         } catch (error) {
             console.error('Error fetching comments:', error);
+            return null;
         } finally {
             setLoadingComments(false);
         }
@@ -116,18 +151,29 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
 
     const handleComment = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!commentContent.trim()) return;
+        const trimmedContent = commentContent.trim();
+        if (!trimmedContent) return;
 
         setIsSubmitting(true);
+        const previousCount = localCommentCount;
         try {
-            await api.post(`/posts/${post.id}/comments`, { content: commentContent });
+            await api.post(`/posts/${post.id}/comments`, { content: trimmedContent });
             setCommentContent('');
             setShowComments(true);
             await fetchComments(); // Refresh comments
             if (onPostUpdated) onPostUpdated();
+            setCommentError(null);
         } catch (error) {
             console.error('Error commenting:', error);
-            alert('Failed to post comment. Please try again.');
+            const latestComments = await fetchComments();
+            if (latestComments && latestComments.length > previousCount) {
+                setCommentContent('');
+                setShowComments(true);
+                if (onPostUpdated) onPostUpdated();
+                setCommentError(null);
+            } else {
+                setCommentError('Unable to post comment right now. Please try again.');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -308,25 +354,29 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                     <div className="mt-5 flex items-center justify-between border-t-2 border-purple-50 pt-4">
                         <div className="relative" onMouseLeave={() => setShowReactionPicker(false)}>
                             <button
-                                aria-pressed={hasLiked}
-                                className={`group flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all transform hover:scale-105 ${hasLiked
+                                aria-pressed={liked}
+                                className={`group flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all transform hover:scale-105 ${liked
                                     ? 'bg-blue-50 text-blue-600 border-blue-200 shadow-sm'
                                     : 'text-gray-600 border-transparent hover:text-blue-600 hover:bg-blue-50/60'
                                     }`}
                                 onMouseEnter={() => setShowReactionPicker(true)}
                                 onClick={() => handleLike()}
                             >
-                                {hasLiked ? (
-                                    <HandThumbUpIconSolid className="h-6 w-6 text-blue-600 transition-transform group-hover:scale-110" />
+                                {liked ? (
+                                    currentReaction === 'LIKE' ? (
+                                        <HandThumbUpIconSolid className="h-6 w-6 text-blue-600 transition-transform group-hover:scale-110" />
+                                    ) : (
+                                        <span className="text-xl transition-transform group-hover:scale-110" aria-hidden>{REACTION_TYPES[currentReaction].icon}</span>
+                                    )
                                 ) : (
                                     <HandThumbUpIconOutline className="h-6 w-6 text-gray-500 transition-transform group-hover:text-blue-600 group-hover:scale-110" />
                                 )}
-                                <span className={`font-semibold ${hasLiked ? 'text-blue-600' : 'group-hover:text-blue-600'}`}>
-                                    {hasLiked ? 'Liked' : 'Like'}
+                                <span className={`font-semibold ${liked ? 'text-blue-600' : 'group-hover:text-blue-600'}`}>
+                                    {liked ? REACTION_TYPES[currentReaction].label : 'Like'}
                                 </span>
-                                {post.likeCount > 0 && (
-                                    <span className={`text-sm font-semibold ${hasLiked ? 'text-blue-500' : 'text-gray-500 group-hover:text-blue-500'}`}>
-                                        {post.likeCount}
+                                {likeCount > 0 && (
+                                    <span className={`text-sm font-semibold ${liked ? 'text-blue-500' : 'text-gray-500 group-hover:text-blue-500'}`}>
+                                        {likeCount}
                                     </span>
                                 )}
                             </button>
@@ -336,19 +386,22 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     className="absolute bottom-full left-0 mb-2 bg-white shadow-2xl rounded-2xl p-3 flex space-x-2 border-2 border-purple-100 animate-in fade-in slide-in-from-bottom-2"
                                     onMouseLeave={() => setShowReactionPicker(false)}
                                 >
-                                    {Object.entries(REACTION_TYPES).map(([type, { icon, label }]) => (
-                                        <button
-                                            key={type}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleLike(type);
-                                            }}
-                                            className="hover:scale-125 transition-transform p-2 text-2xl rounded-full hover:bg-purple-50"
-                                            title={label}
-                                        >
-                                            {icon}
-                                        </button>
-                                    ))}
+                                    {Object.entries(REACTION_TYPES).map(([type, { icon, label }]) => {
+                                        const reactionKey = type as ReactionType;
+                                        return (
+                                            <button
+                                                key={reactionKey}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleLike(reactionKey);
+                                                }}
+                                                className={`cursor-pointer transition-transform p-2 text-2xl rounded-full ${liked && currentReaction === reactionKey ? 'ring-2 ring-blue-400 bg-blue-50 scale-110' : 'hover:scale-125 hover:bg-purple-50'}`}
+                                                title={label}
+                                            >
+                                                {icon}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -422,7 +475,10 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     <input
                                         type="text"
                                         value={commentContent}
-                                        onChange={(e) => setCommentContent(e.target.value)}
+                                        onChange={(e) => {
+                                            setCommentContent(e.target.value);
+                                            if (commentError) setCommentError(null);
+                                        }}
                                         placeholder="Add a comment..."
                                         className="flex-1 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         disabled={isSubmitting}
@@ -443,6 +499,9 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     </button>
                                 </div>
                             </form>
+                            {commentError && (
+                                <p className="mt-2 text-sm text-red-500 pl-14">{commentError}</p>
+                            )}
                         </div>
                     )}
                 </div>

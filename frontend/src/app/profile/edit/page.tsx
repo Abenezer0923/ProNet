@@ -356,19 +356,21 @@ export default function EditProfilePage() {
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profession
-              </label>
-              <input
-                type="text"
-                name="profession"
-                value={formData.profession}
-                onChange={handleChange}
-                placeholder="e.g. Software Developer"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
+            {user?.profileType === 'personal' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Profession
+                </label>
+                <input
+                  type="text"
+                  name="profession"
+                  value={formData.profession}
+                  onChange={handleChange}
+                  placeholder="e.g. Software Developer"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -485,9 +487,11 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Skills */}
+          {/* Skills / Expertise */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Skills</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              {user?.profileType === 'organizational' ? 'Areas of Expertise' : 'Skills'}
+            </h2>
 
             {/* Current Skills */}
             <div className="flex flex-wrap gap-2 mb-4">
@@ -514,18 +518,20 @@ export default function EditProfilePage() {
                 type="text"
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
-                placeholder="Add a skill"
+                placeholder={user?.profileType === 'organizational' ? 'Add an expertise area' : 'Add a skill'}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
-              <select
-                value={proficiencyLevel}
-                onChange={(e) => setProficiencyLevel(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="expert">Expert</option>
-              </select>
+              {user?.profileType === 'personal' && (
+                <select
+                  value={proficiencyLevel}
+                  onChange={(e) => setProficiencyLevel(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="expert">Expert</option>
+                </select>
+              )}
               <button
                 type="button"
                 onClick={handleAddSkill}
@@ -536,8 +542,9 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          {/* Experience Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          {/* Experience Section - Personal Profiles Only */}
+          {user?.profileType === 'personal' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
               <button
@@ -591,10 +598,12 @@ export default function EditProfilePage() {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Education Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          {/* Education Section - Personal Profiles Only */}
+          {user?.profileType === 'personal' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Education</h2>
               <button
@@ -654,9 +663,10 @@ export default function EditProfilePage() {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Certifications Section - Coming Soon */}
+          {/* Certifications Section - Coming Soon - Personal Profiles Only */}
           {user?.profileType === 'personal' && (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Certifications</h2>
