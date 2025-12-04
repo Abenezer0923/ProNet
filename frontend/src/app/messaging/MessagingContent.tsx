@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,6 +27,21 @@ export default function MessagingContent() {
     const [newMessage, setNewMessage] = useState('');
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
+    const [targetUser, setTargetUser] = useState<any>(null);
+
+    const fetchUserInfo = useCallback(async (userId: string) => {
+        try {
+            const response = await api.get(`/users/profile/${userId}`);
+            setTargetUser(response.data);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            alert('Failed to load user information');
+            router.push('/chat');
+        } finally {
+            setIsCreatingConversation(false);
+        }
+    }, [router]);
+
     useEffect(() => {
         if (!authLoading && !user) {
             router.push('/login');
@@ -35,12 +50,7 @@ export default function MessagingContent() {
 
     // Handle userId parameter - find existing conversation or show prompt to start new one
     useEffect(() => {
-        if (!userId || loading || selectedConversation || isCreatingConversation) {
-            console.log('Skipping userId effect:', { userId, loading, selectedConversation: !!selectedConversation, isCreatingConversation });
-            return;
-        }
-
-        console.log('Processing userId:', userId, 'Conversations:', conversations.length);
+        if (!userId || loading || selectedConversation || isCreatingConversation) return;
 
         // Find existing conversation with this user
         const existingConversation = conversations.find((conv) => {
@@ -49,31 +59,14 @@ export default function MessagingContent() {
         });
 
         if (existingConversation) {
-            console.log('Found existing conversation');
             selectConversation(existingConversation);
-        } else {
-            console.log('No existing conversation, fetching user info');
+        } else if (!loading) {
             // Set a flag to show "start conversation" UI
             setIsCreatingConversation(true);
             // Fetch the user info to show in the UI
             fetchUserInfo(userId);
         }
-    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation]);
-
-    const [targetUser, setTargetUser] = useState<any>(null);
-
-    const fetchUserInfo = async (userId: string) => {
-        try {
-            const response = await api.get(`/users/profile/${userId}`);
-            setTargetUser(response.data);
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-            alert('Failed to load user information');
-            router.push('/messaging');
-        } finally {
-            setIsCreatingConversation(false);
-        }
-    };
+    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, getOtherParticipant, selectConversation, fetchUserInfo]);
 
     const startConversationWithMessage = async (message: string) => {
         if (!targetUser) return;

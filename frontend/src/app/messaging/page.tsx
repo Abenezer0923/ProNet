@@ -1,16 +1,16 @@
 'use client';
 
 import { Suspense } from 'react';
-import ChatContent from './ChatContent';
+import MessagingContent from './MessagingContent';
 
-export default function ChatPage() {
+export default function MessagingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
       </div>
     }>
-      <ChatContent />
+      <MessagingContent />
     </Suspense>
   );
 }

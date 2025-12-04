@@ -318,9 +318,6 @@ export default function ProfilePage() {
                     Visit Website
                   </a>
                 )}
-                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition">
-                  More
-                </button>
               </div>
             </div>
           </div>

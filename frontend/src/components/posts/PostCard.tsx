@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import {
-    HeartIcon,
+    HandThumbUpIcon as HandThumbUpIconOutline,
     ChatBubbleLeftIcon,
     ArrowPathRoundedSquareIcon,
     ShareIcon,
     EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid, UserGroupIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { HandThumbUpIcon as HandThumbUpIconSolid, UserGroupIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -320,21 +320,29 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                     )}
 
                     <div className="mt-5 flex items-center justify-between border-t-2 border-purple-50 pt-4">
-                        <div className="relative">
+                        <div className="relative" onMouseLeave={() => setShowReactionPicker(false)}>
                             <button
-                                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all transform hover:scale-105 ${hasLiked
-                                    ? 'text-pink-600 bg-gradient-to-r from-pink-50 to-purple-50'
-                                    : 'text-gray-600 hover:bg-purple-50'
+                                aria-pressed={hasLiked}
+                                className={`group flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all transform hover:scale-105 ${hasLiked
+                                    ? 'bg-blue-50 text-blue-600 border-blue-200 shadow-sm'
+                                    : 'text-gray-600 border-transparent hover:text-blue-600 hover:bg-blue-50/60'
                                     }`}
                                 onMouseEnter={() => setShowReactionPicker(true)}
                                 onClick={() => handleLike()}
                             >
                                 {hasLiked ? (
-                                    <HeartIconSolid className="h-6 w-6 text-pink-600" />
+                                    <HandThumbUpIconSolid className="h-6 w-6 text-blue-600 transition-transform group-hover:scale-110" />
                                 ) : (
-                                    <HeartIcon className="h-6 w-6" />
+                                    <HandThumbUpIconOutline className="h-6 w-6 text-gray-500 transition-transform group-hover:text-blue-600 group-hover:scale-110" />
                                 )}
-                                <span className="font-semibold">{post.likeCount > 0 ? post.likeCount : 'Like'}</span>
+                                <span className={`font-semibold ${hasLiked ? 'text-blue-600' : 'group-hover:text-blue-600'}`}>
+                                    {hasLiked ? 'Liked' : 'Like'}
+                                </span>
+                                {post.likeCount > 0 && (
+                                    <span className={`text-sm font-semibold ${hasLiked ? 'text-blue-500' : 'text-gray-500 group-hover:text-blue-500'}`}>
+                                        {post.likeCount}
+                                    </span>
+                                )}
                             </button>
 
                             {showReactionPicker && (

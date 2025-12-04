@@ -210,7 +210,7 @@ export default function PublicProfilePage() {
 
               {/* Action Buttons */}
               <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-2">
-                {currentUser ? (
+                {!isOwnProfile && currentUser ? (
                   <>
                     <button
                       onClick={handleFollow}
@@ -229,17 +229,14 @@ export default function PublicProfilePage() {
                       Message
                     </Link>
                   </>
-                ) : (
+                ) : !isOwnProfile && !currentUser ? (
                   <Link
                     href="/login"
                     className="px-6 py-2 bg-primary-700 text-white rounded-full hover:bg-primary-800 font-semibold transition shadow-sm hover:shadow"
                   >
                     Follow
                   </Link>
-                )}
-                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition">
-                  More
-                </button>
+                ) : null}
               </div>
             </div>
           </div>

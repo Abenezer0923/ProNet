@@ -16,6 +16,7 @@ export default function EditProfilePage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    organizationName: '',
     profession: '',
     bio: '',
     location: '',
@@ -120,6 +121,7 @@ export default function EditProfilePage() {
       setFormData({
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
+        organizationName: profile.organizationName || '',
         profession: profile.profession || '',
         bio: profile.bio || '',
         location: profile.location || '',
@@ -308,35 +310,51 @@ export default function EditProfilePage() {
           <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
 
-            <div className="grid grid-cols-2 gap-4">
+            {user?.profileType === 'organizational' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
+                  Organization Name
                 </label>
                 <input
                   type="text"
-                  name="firstName"
-                  value={formData.firstName}
+                  name="organizationName"
+                  value={formData.organizationName || ''}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -638,19 +656,23 @@ export default function EditProfilePage() {
             )}
           </div>
 
-          {/* Certifications Section */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Certifications</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Add your certifications and licenses (Coming soon - will be fully functional in next update)
-            </p>
-            <button
-              type="button"
-              className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition"
-            >
-              + Add Certification
-            </button>
-          </div>
+          {/* Certifications Section - Coming Soon */}
+          {user?.profileType === 'personal' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Certifications</h2>
+              <div className="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-200">
+                <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Certifications Coming Soon</h3>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  The certification feature is currently under development and will be available in the next update.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Submit */}
           <div className="flex justify-end space-x-4">
