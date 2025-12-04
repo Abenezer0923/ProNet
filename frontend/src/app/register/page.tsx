@@ -36,7 +36,24 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await register(formData);
+      // Prepare data based on profile type
+      const registrationData: any = {
+        email: formData.email,
+        password: formData.password,
+        profileType: formData.profileType,
+      };
+
+      if (formData.profileType === 'personal') {
+        registrationData.firstName = formData.firstName;
+        registrationData.lastName = formData.lastName;
+        if (formData.profession) {
+          registrationData.profession = formData.profession;
+        }
+      } else {
+        registrationData.organizationName = formData.organizationName;
+      }
+
+      const response = await register(registrationData);
       // Registration now requires email verification
       // Redirect to verification page with email
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}&type=register`);
