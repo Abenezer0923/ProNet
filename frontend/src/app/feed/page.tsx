@@ -37,40 +37,60 @@ export default function FeedPage() {
         }
     };
 
+    const deriveUsersFromPosts = () => {
+        const unique = new Map<string, any>();
+
+        const collectAuthor = (author: any) => {
+            if (!author || author.id === user?.id || unique.has(author.id)) return;
+            unique.set(author.id, {
+                id: author.id,
+                firstName: author.firstName,
+                lastName: author.lastName,
+                profilePicture: author.profilePicture,
+                avatar: author.avatar,
+                profession: author.profession,
+                username: author.username,
+            });
+        };
+
+        posts.forEach((feedPost) => {
+            collectAuthor(feedPost.author);
+            if (feedPost.originalPost?.author) {
+                collectAuthor(feedPost.originalPost.author);
+            }
+        });
+
+        return Array.from(unique.values()).slice(0, 3);
+    };
+
     const fetchRecommendations = async () => {
         setLoadingRecommendations(true);
         try {
-            // Fetch all communities
-            const communitiesResponse = await api.get('/communities');
-            const allCommunities = communitiesResponse.data;
+            const [communitiesRes, myCommunitiesRes, usersRes] = await Promise.all([
+                api.get('/search/recommendations/communities?limit=5'),
+                api.get('/communities/my'),
+                api.get('/search/recommendations/users?limit=5'),
+            ]);
 
-            // Fetch user's communities
-            const myCommunitiesResponse = await api.get('/communities/my');
-            const myCommunityIds = myCommunitiesResponse.data.map((c: any) => c.id);
+            const myCommunityIds = new Set((myCommunitiesRes.data || []).map((c: any) => c.id));
+            const communitySuggestions = (communitiesRes.data || [])
+                .filter((community: any) => community && !myCommunityIds.has(community.id))
+                .slice(0, 3);
+            setRecommendedCommunities(communitySuggestions);
 
-            // Filter out communities user is already in
-            const recommended = allCommunities
-                .filter((c: any) => !myCommunityIds.includes(c.id))
+            const filteredUsers = (usersRes.data || [])
+                .filter((candidate: any) => candidate && candidate.id !== user?.id)
                 .slice(0, 3);
 
-            setRecommendedCommunities(recommended);
-
-            // Fetch suggested users (users not yet connected)
-            try {
-                const usersResponse = await api.get('/search/users?limit=5');
-                const allUsers = usersResponse.data;
-
-                // Filter out current user
-                const suggestedUsers = allUsers
-                    .filter((u: any) => u.id !== user?.id)
-                    .slice(0, 3);
-
-                setRecommendedUsers(suggestedUsers);
-            } catch (err) {
-                console.error('Error fetching user recommendations:', err);
+            if (filteredUsers.length > 0) {
+                setRecommendedUsers(filteredUsers);
+            } else {
+                setRecommendedUsers(deriveUsersFromPosts());
             }
         } catch (err) {
             console.error('Error fetching recommendations:', err);
+            setRecommendedCommunities([]);
+            setRecommendedUsers(deriveUsersFromPosts());
         } finally {
             setLoadingRecommendations(false);
         }
@@ -82,6 +102,15 @@ export default function FeedPage() {
             fetchRecommendations();
         }
     }, [user]);
+
+    useEffect(() => {
+        if (user && posts.length > 0 && recommendedUsers.length === 0 && !loadingRecommendations) {
+            const fallbackUsers = deriveUsersFromPosts();
+            if (fallbackUsers.length > 0) {
+                setRecommendedUsers(fallbackUsers);
+            }
+        }
+    }, [user, posts, recommendedUsers.length, loadingRecommendations]);
 
     if (authLoading || !user) {
         return (
