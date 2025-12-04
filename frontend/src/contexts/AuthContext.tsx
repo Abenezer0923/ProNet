@@ -10,6 +10,7 @@ interface User {
   lastName: string;
   profession?: string;
   avatar?: string;
+  profilePicture?: string;
   username?: string;
 }
 

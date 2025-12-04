@@ -16,6 +16,7 @@ interface Community {
     id: string;
     name: string;
     avatar?: string;
+    profilePicture?: string;
 }
 
 interface Post {
@@ -28,6 +29,7 @@ interface Post {
         firstName: string;
         lastName: string;
         avatar?: string;
+        profilePicture?: string;
         profession?: string;
     };
     community?: Community;
@@ -157,7 +159,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
             <div className="flex items-start space-x-4">
                 <div className="relative">
                     <img
-                        src={displayPost.author.avatar || `https://ui-avatars.com/api/?name=${displayPost.author.firstName}+${displayPost.author.lastName}`}
+                        src={displayPost.author.profilePicture || displayPost.author.avatar || `https://ui-avatars.com/api/?name=${displayPost.author.firstName}+${displayPost.author.lastName}`}
                         alt={displayPost.author.firstName}
                         className="h-14 w-14 rounded-full object-cover ring-2 ring-purple-100"
                     />
@@ -290,7 +292,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     {comments.map((comment) => (
                                         <div key={comment.id} className="flex space-x-3">
                                             <img
-                                                src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${comment.author?.firstName}+${comment.author?.lastName}`}
+                                                src={comment.author?.profilePicture || comment.author?.avatar || `https://ui-avatars.com/api/?name=${comment.author?.firstName}+${comment.author?.lastName}`}
                                                 alt={comment.author?.firstName}
                                                 className="h-8 w-8 rounded-full ring-2 ring-purple-100 flex-shrink-0"
                                             />
@@ -313,7 +315,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                             {/* Comment Input */}
                             <form onSubmit={handleComment} className="flex space-x-3">
                                 <img
-                                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
+                                    src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                                     alt="Your avatar"
                                     className="h-10 w-10 rounded-full ring-2 ring-purple-100 flex-shrink-0"
                                 />

@@ -59,12 +59,12 @@ export default function FeedPage() {
             try {
                 const usersResponse = await api.get('/search/users?limit=5');
                 const allUsers = usersResponse.data;
-                
+
                 // Filter out current user
                 const suggestedUsers = allUsers
                     .filter((u: any) => u.id !== user?.id)
                     .slice(0, 3);
-                
+
                 setRecommendedUsers(suggestedUsers);
             } catch (err) {
                 console.error('Error fetching user recommendations:', err);
@@ -102,7 +102,7 @@ export default function FeedPage() {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
                             <div className="flex flex-col items-center text-center">
                                 <img
-                                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=5e372b&color=fff`}
+                                    src={user.profilePicture || user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=5e372b&color=fff`}
                                     alt={user.firstName}
                                     className="h-20 w-20 rounded-full object-cover border-4 border-gray-50 mb-3"
                                 />
@@ -226,7 +226,7 @@ export default function FeedPage() {
                                         {recommendedUsers.map((recommendedUser) => (
                                             <div key={recommendedUser.id} className="flex items-start space-x-3">
                                                 <img
-                                                    src={recommendedUser.avatar || `https://ui-avatars.com/api/?name=${recommendedUser.firstName}+${recommendedUser.lastName}`}
+                                                    src={recommendedUser.profilePicture || recommendedUser.avatar || `https://ui-avatars.com/api/?name=${recommendedUser.firstName}+${recommendedUser.lastName}`}
                                                     alt={recommendedUser.firstName}
                                                     className="h-10 w-10 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100"
                                                 />

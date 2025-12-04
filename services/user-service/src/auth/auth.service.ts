@@ -185,6 +185,12 @@ export class AuthService {
         console.log('New user created successfully');
       } else {
         console.log('Existing user found');
+        // Update profile picture if missing
+        if (!user.profilePicture && picture) {
+          console.log('Updating missing profile picture from Google');
+          user.profilePicture = picture;
+          await this.userRepository.save(user);
+        }
       }
 
       // Try to generate OTP - if it fails, allow login without OTP

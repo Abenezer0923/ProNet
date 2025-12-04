@@ -49,12 +49,12 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
         setIsSubmitting(true);
         try {
             let imageUrl = '';
-            
+
             // Upload image if selected
             if (selectedFile) {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
-                
+
                 const uploadResponse = await api.post('/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
@@ -105,7 +105,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 <div className="flex space-x-4">
                     <div className="relative">
                         <img
-                            src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
+                            src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                             alt="Your avatar"
                             className="h-12 w-12 rounded-full object-cover ring-2 ring-purple-100"
                         />

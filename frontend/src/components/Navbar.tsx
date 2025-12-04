@@ -84,7 +84,7 @@ export default function Navbar() {
                             >
                                 <img
                                     className="h-8 w-8 rounded-full object-cover border border-gray-200"
-                                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=5e372b&color=fff`}
+                                    src={user.profilePicture || user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=5e372b&color=fff`}
                                     alt=""
                                 />
                                 <span className="hidden md:block text-xs font-medium mt-1">Me</span>
