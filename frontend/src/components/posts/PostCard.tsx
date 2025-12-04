@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import {
     HandThumbUpIcon as HandThumbUpIconOutline,
     ChatBubbleLeftIcon,
     ArrowPathRoundedSquareIcon,
-    ShareIcon,
     EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { HandThumbUpIcon as HandThumbUpIconSolid, UserGroupIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
@@ -68,6 +67,12 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(post.content);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [localContent, setLocalContent] = useState(post.content);
+
+    useEffect(() => {
+        setLocalContent(post.content);
+        setEditContent(post.content);
+    }, [post.id, post.content]);
 
     const hasLiked = post.likes?.some(like => like.userId === user?.id);
     const userReaction = post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE';
@@ -128,29 +133,6 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
         }
     };
 
-    const handleShare = async () => {
-        const shareData = {
-            title: `Post by ${post.author.firstName}`,
-            text: post.content,
-            url: window.location.href, // Or specific post URL if available
-        };
-
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.error('Error sharing:', err);
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
-            } catch (err) {
-                console.error('Failed to copy:', err);
-            }
-        }
-    };
-
     const handleDelete = async () => {
         if (!confirm('Are you sure you want to delete this post?')) return;
         setIsDeleting(true);
@@ -166,9 +148,12 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     };
 
     const handleUpdate = async () => {
-        if (!editContent.trim()) return;
+        const trimmedContent = editContent.trim();
+        if (!trimmedContent) return;
         try {
-            await api.put(`/posts/${post.id}`, { content: editContent });
+            await api.put(`/posts/${post.id}`, { content: trimmedContent });
+            setLocalContent(trimmedContent);
+            setEditContent(trimmedContent);
             setIsEditing(false);
             if (onPostUpdated) onPostUpdated();
         } catch (error) {
@@ -186,6 +171,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     };
 
     const displayPost = post.isRepost && post.originalPost ? post.originalPost : post;
+    const displayContent = post.isRepost && post.originalPost ? post.originalPost.content : localContent;
 
     return (
         <div className="bg-gradient-to-br from-white via-white to-purple-50/20 rounded-2xl shadow-lg border-2 border-purple-100/50 p-6 mb-6 hover:shadow-xl hover:border-purple-200/70 transition-all duration-300">
@@ -292,7 +278,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                         </div>
                     ) : (
                         <div className="mt-4 text-gray-800 whitespace-pre-wrap leading-relaxed text-base">
-                            {displayPost.content}
+                            {displayContent}
                         </div>
                     )}
 
@@ -381,14 +367,6 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                         >
                             <ArrowPathRoundedSquareIcon className="h-6 w-6" />
                             <span className="font-semibold">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
-                        </button>
-
-                        <button
-                            onClick={handleShare}
-                            className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
-                        >
-                            <ShareIcon className="h-6 w-6" />
-                            <span className="font-semibold">Share</span>
                         </button>
                     </div>
 

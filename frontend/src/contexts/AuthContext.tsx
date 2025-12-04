@@ -12,6 +12,8 @@ interface User {
   avatar?: string;
   profilePicture?: string;
   username?: string;
+  profileType?: 'personal' | 'organizational';
+  organizationName?: string;
 }
 
 interface AuthContextType {
