@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 
 // Loading component
 function LoadingSpinner() {
@@ -38,19 +39,9 @@ function CallbackHandler() {
       }
 
       // Fetch user data
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-      fetch(`${apiUrl}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      api.get('/auth/me')
         .then(res => {
-          if (!res.ok) {
-            throw new Error('Failed to fetch user data');
-          }
-          return res.json();
-        })
-        .then(user => {
+          const user = res.data;
           // Set user in context
           loginWithToken(user, token);
           // Small delay to ensure state is updated before redirect

@@ -43,37 +43,10 @@ export default function CommunitiesPage() {
 
   const fetchCommunities = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      console.log('API URL:', apiUrl);
-      console.log('Fetching communities from:', `${apiUrl}/communities`);
-      
-      if (!apiUrl) {
-        setError('API URL is not configured. Please check environment variables.');
-        setCommunities([]);
-        setLoading(false);
-        return;
-      }
-      
-      const communitiesRes = await fetch(`${apiUrl}/communities`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      console.log('Communities response status:', communitiesRes.status);
-      
-      if (!communitiesRes.ok) {
-        console.error('Failed to fetch communities:', communitiesRes.status, communitiesRes.statusText);
-        const errorText = await communitiesRes.text();
-        console.error('Error response:', errorText);
-        setError(`Failed to load communities (Status: ${communitiesRes.status}). Please try again later.`);
-        setCommunities([]);
-        setLoading(false);
-        return;
-      }
+      console.log('Fetching communities...');
+      const response = await api.get('/communities');
+      const communitiesData = response.data;
 
-      const communitiesData = await communitiesRes.json();
       console.log('Communities data received:', communitiesData);
       console.log('Is array?', Array.isArray(communitiesData));
       console.log('Length:', communitiesData?.length);

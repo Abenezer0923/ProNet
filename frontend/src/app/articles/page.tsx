@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 
 interface Article {
   id: number;
@@ -36,16 +37,8 @@ export default function ArticlesPage() {
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities/articles/public`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setArticles(data);
-      }
+      const response = await api.get('/communities/articles/public');
+      setArticles(response.data);
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {

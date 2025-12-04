@@ -70,11 +70,8 @@ export default function ArticleDetailPage() {
 
   const fetchArticle = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities/articles/${articleId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setArticle(data);
-      }
+      const response = await api.get(`/communities/articles/${articleId}`);
+      setArticle(response.data);
     } catch (error) {
       console.error('Error fetching article:', error);
     } finally {
@@ -84,11 +81,8 @@ export default function ArticleDetailPage() {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/communities/articles/${articleId}/comments`);
-      if (response.ok) {
-        const data = await response.json();
-        setComments(data);
-      }
+      const response = await api.get(`/communities/articles/${articleId}/comments`);
+      setComments(response.data);
     } catch (error) {
       console.error('Error fetching comments:', error);
     }

@@ -5,10 +5,13 @@ import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Set global prefix to match user service
+  app.setGlobalPrefix('api');
+
   // Increase payload size limit for file uploads
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
-  
+
   // Enable CORS
   app.enableCors({
     origin: true, // Allow all origins in development
@@ -19,7 +22,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  
+
   console.log(`🚀 API Gateway running on http://localhost:${port}`);
 }
 
