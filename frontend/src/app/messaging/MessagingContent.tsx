@@ -28,16 +28,19 @@ export default function MessagingContent() {
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
     const [targetUser, setTargetUser] = useState<any>(null);
+    const [loadingTargetUser, setLoadingTargetUser] = useState(false);
 
     const fetchUserInfo = useCallback(async (userId: string) => {
+        setLoadingTargetUser(true);
         try {
             const response = await api.get(`/users/profile/${userId}`);
             setTargetUser(response.data);
         } catch (error) {
             console.error('Error fetching user info:', error);
             alert('Failed to load user information');
-            router.push('/chat');
+            router.push('/messaging');
         } finally {
+            setLoadingTargetUser(false);
             setIsCreatingConversation(false);
         }
     }, [router]);
@@ -93,10 +96,10 @@ export default function MessagingContent() {
         setNewMessage('');
     };
 
-    if (loading || authLoading || isCreatingConversation) {
+    if (loading || authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-xl">Loading...</div>
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
             </div>
         );
     }
@@ -255,6 +258,10 @@ export default function MessagingContent() {
                                         </form>
                                     </div>
                                 </>
+                            ) : loadingTargetUser ? (
+                                <div className="flex-1 flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
+                                </div>
                             ) : targetUser ? (
                                 <>
                                     {/* Start Conversation Header */}
