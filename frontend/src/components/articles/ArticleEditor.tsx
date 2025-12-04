@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from '../ImageUpload';
-import axios from 'axios';
+import { api } from '@/lib/api';
 
 interface ArticleEditorProps {
     communityId: string;
@@ -38,13 +38,9 @@ export default function ArticleEditor({ communityId, initialData }: ArticleEdito
                 status,
             };
 
-            const token = localStorage.getItem('token');
-            await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/communities/${communityId}/articles`,
-                articleData,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+            await api.post(
+                `/communities/${communityId}/articles`,
+                articleData
             );
 
             router.push(`/communities/${communityId}?tab=articles`);

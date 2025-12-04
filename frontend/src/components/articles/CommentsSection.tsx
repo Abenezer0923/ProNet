@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Comment {
@@ -31,12 +31,8 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
 
     const fetchComments = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/communities/articles/${articleId}/comments`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+            const response = await api.get(
+                `/communities/articles/${articleId}/comments`
             );
             setComments(response.data);
         } catch (error) {
@@ -52,13 +48,9 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
 
         setSubmitting(true);
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/communities/articles/${articleId}/comments`,
-                { content: newComment },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+            await api.post(
+                `/communities/articles/${articleId}/comments`,
+                { content: newComment }
             );
             setNewComment('');
             fetchComments(); // Refresh comments

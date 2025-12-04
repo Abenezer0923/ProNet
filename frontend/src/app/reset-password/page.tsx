@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
-import axios from 'axios';
+import { api } from '@/lib/api';
 
 function ResetPasswordContent() {
     const router = useRouter();
@@ -37,7 +37,7 @@ function ResetPasswordContent() {
         setResending(true);
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-otp`, {
+            await api.post('/auth/resend-otp', {
                 email: formData.email,
             });
             setSuccess('Verification code sent! Check your email.');
@@ -66,7 +66,7 @@ function ResetPasswordContent() {
         setLoading(true);
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+            await api.post('/auth/reset-password', {
                 email: formData.email,
                 otp: formData.otp,
                 newPassword: formData.newPassword,
