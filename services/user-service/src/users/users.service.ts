@@ -11,6 +11,9 @@ import { UserSkill } from './entities/user-skill.entity';
 import { Connection } from './entities/connection.entity';
 import { Experience } from './entities/experience.entity';
 import { Education } from './entities/education.entity';
+import { Certification } from './entities/certification.entity';
+import { ProductService } from './entities/product-service.entity';
+import { OrganizationMedia } from './entities/organization-media.entity';
 import { Post } from '../posts/entities/post.entity';
 import { Comment } from '../posts/entities/comment.entity';
 import { PostLike } from '../posts/entities/post-like.entity';
@@ -40,6 +43,9 @@ import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
+import { CreateCertificationDto } from './dto/create-certification.dto';
+import { CreateProductServiceDto } from './dto/create-product-service.dto';
+import { CreateOrganizationMediaDto } from './dto/create-organization-media.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import {
   validateUsername,
@@ -60,6 +66,12 @@ export class UsersService {
     private experienceRepository: Repository<Experience>,
     @InjectRepository(Education)
     private educationRepository: Repository<Education>,
+    @InjectRepository(Certification)
+    private certificationRepository: Repository<Certification>,
+    @InjectRepository(ProductService)
+    private productServiceRepository: Repository<ProductService>,
+    @InjectRepository(OrganizationMedia)
+    private organizationMediaRepository: Repository<OrganizationMedia>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     @InjectRepository(Comment)
@@ -112,7 +124,7 @@ export class UsersService {
   async getProfile(userId: string) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['skills', 'experiences', 'educations'],
+      relations: ['skills', 'experiences', 'educations', 'certifications', 'productServices', 'organizationMedia'],
     });
 
     if (!user) {
@@ -644,6 +656,137 @@ export class UsersService {
     return this.educationRepository.find({
       where: { user: { id: userId } },
       order: { startDate: 'DESC' },
+    });
+  }
+
+  // Certification methods
+  async addCertification(userId: string, dto: CreateCertificationDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const certification = this.certificationRepository.create({
+      ...dto,
+      user,
+    });
+
+    return this.certificationRepository.save(certification);
+  }
+
+  async updateCertification(userId: string, certId: string, dto: CreateCertificationDto) {
+    const certification = await this.certificationRepository.findOne({
+      where: { id: certId, user: { id: userId } },
+    });
+
+    if (!certification) {
+      throw new NotFoundException('Certification not found');
+    }
+
+    Object.assign(certification, dto);
+    return this.certificationRepository.save(certification);
+  }
+
+  async deleteCertification(userId: string, certId: string) {
+    const result = await this.certificationRepository.delete({
+      id: certId,
+      user: { id: userId },
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Certification not found');
+    }
+
+    return { message: 'Certification deleted successfully' };
+  }
+
+  async getCertifications(userId: string) {
+    return this.certificationRepository.find({
+      where: { user: { id: userId } },
+      order: { issueDate: 'DESC' },
+    });
+  }
+
+  // Product/Service methods
+  async addProductService(userId: string, dto: CreateProductServiceDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const productService = this.productServiceRepository.create({
+      ...dto,
+      user,
+    });
+
+    return this.productServiceRepository.save(productService);
+  }
+
+  async updateProductService(userId: string, psId: string, dto: CreateProductServiceDto) {
+    const productService = await this.productServiceRepository.findOne({
+      where: { id: psId, user: { id: userId } },
+    });
+
+    if (!productService) {
+      throw new NotFoundException('Product/Service not found');
+    }
+
+    Object.assign(productService, dto);
+    return this.productServiceRepository.save(productService);
+  }
+
+  async deleteProductService(userId: string, psId: string) {
+    const result = await this.productServiceRepository.delete({
+      id: psId,
+      user: { id: userId },
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Product/Service not found');
+    }
+
+    return { message: 'Product/Service deleted successfully' };
+  }
+
+  async getProductServices(userId: string) {
+    return this.productServiceRepository.find({
+      where: { user: { id: userId } },
+      order: { displayOrder: 'ASC' },
+    });
+  }
+
+  // Organization media methods
+  async addOrganizationMedia(userId: string, dto: CreateOrganizationMediaDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const media = this.organizationMediaRepository.create({
+      ...dto,
+      user,
+    });
+
+    return this.organizationMediaRepository.save(media);
+  }
+
+  async deleteOrganizationMedia(userId: string, mediaId: string) {
+    const result = await this.organizationMediaRepository.delete({
+      id: mediaId,
+      user: { id: userId },
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Media not found');
+    }
+
+    return { message: 'Media deleted successfully' };
+  }
+
+  async getOrganizationMedia(userId: string) {
+    return this.organizationMediaRepository.find({
+      where: { user: { id: userId } },
+      order: { displayOrder: 'ASC' },
     });
   }
 }

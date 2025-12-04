@@ -20,6 +20,9 @@ import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
+import { CreateCertificationDto } from './dto/create-certification.dto';
+import { CreateProductServiceDto } from './dto/create-product-service.dto';
+import { CreateOrganizationMediaDto } from './dto/create-organization-media.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('users')
@@ -187,5 +190,71 @@ export class UsersController {
   @Get('educations')
   async getEducations(@Request() req) {
     return this.usersService.getEducations(req.user.sub);
+  }
+
+  // Certification endpoints
+  @Post('certifications')
+  async addCertification(@Request() req, @Body() dto: CreateCertificationDto) {
+    return this.usersService.addCertification(req.user.sub, dto);
+  }
+
+  @Put('certifications/:id')
+  async updateCertification(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: CreateCertificationDto,
+  ) {
+    return this.usersService.updateCertification(req.user.sub, id, dto);
+  }
+
+  @Delete('certifications/:id')
+  async deleteCertification(@Request() req, @Param('id') id: string) {
+    return this.usersService.deleteCertification(req.user.sub, id);
+  }
+
+  @Get('certifications')
+  async getCertifications(@Request() req) {
+    return this.usersService.getCertifications(req.user.sub);
+  }
+
+  // Product/Service endpoints (for organizations)
+  @Post('product-services')
+  async addProductService(@Request() req, @Body() dto: CreateProductServiceDto) {
+    return this.usersService.addProductService(req.user.sub, dto);
+  }
+
+  @Put('product-services/:id')
+  async updateProductService(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: CreateProductServiceDto,
+  ) {
+    return this.usersService.updateProductService(req.user.sub, id, dto);
+  }
+
+  @Delete('product-services/:id')
+  async deleteProductService(@Request() req, @Param('id') id: string) {
+    return this.usersService.deleteProductService(req.user.sub, id);
+  }
+
+  @Get('product-services')
+  async getProductServices(@Request() req) {
+    return this.usersService.getProductServices(req.user.sub);
+  }
+
+  // Organization media endpoints
+  @Post('organization-media')
+  async addOrganizationMedia(@Request() req, @Body() dto: CreateOrganizationMediaDto) {
+    return this.usersService.addOrganizationMedia(req.user.sub, dto);
+  }
+
+  @Delete('organization-media/:id')
+  async deleteOrganizationMedia(@Request() req, @Param('id') id: string) {
+    return this.usersService.deleteOrganizationMedia(req.user.sub, id);
+  }
+
+  @Get('organization-media')
+  async getOrganizationMedia(@Request() req) {
+    return this.usersService.getOrganizationMedia(req.user.sub);
   }
 }

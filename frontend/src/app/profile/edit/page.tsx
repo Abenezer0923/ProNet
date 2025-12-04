@@ -8,6 +8,8 @@ import { api } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
 import ExperienceForm from '@/components/ExperienceForm';
 import EducationForm from '@/components/EducationForm';
+import CertificationForm from '@/components/CertificationForm';
+import ProductServiceForm from '@/components/ProductServiceForm';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -33,10 +35,17 @@ export default function EditProfilePage() {
   const [usernameError, setUsernameError] = useState('');
   const [experiences, setExperiences] = useState<any[]>([]);
   const [educations, setEducations] = useState<any[]>([]);
+  const [certifications, setCertifications] = useState<any[]>([]);
+  const [productServices, setProductServices] = useState<any[]>([]);
+  const [organizationMedia, setOrganizationMedia] = useState<any[]>([]);
   const [showExperienceForm, setShowExperienceForm] = useState(false);
   const [showEducationForm, setShowEducationForm] = useState(false);
+  const [showCertificationForm, setShowCertificationForm] = useState(false);
+  const [showProductServiceForm, setShowProductServiceForm] = useState(false);
   const [editingExperience, setEditingExperience] = useState<any>(null);
   const [editingEducation, setEditingEducation] = useState<any>(null);
+  const [editingCertification, setEditingCertification] = useState<any>(null);
+  const [editingProductService, setEditingProductService] = useState<any>(null);
 
   // Experience handlers
   const handleAddExperience = () => {
@@ -106,6 +115,106 @@ export default function EditProfilePage() {
     }
   };
 
+  // Certification handlers
+  const handleAddCertification = () => {
+    setEditingCertification(null);
+    setShowCertificationForm(true);
+  };
+
+  const handleEditCertification = (certification: any) => {
+    setEditingCertification(certification);
+    setShowCertificationForm(true);
+  };
+
+  const handleDeleteCertification = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this certification?')) return;
+    
+    try {
+      await api.delete(`/users/certifications/${id}`);
+      setCertifications(certifications.filter(cert => cert.id !== id));
+    } catch (error) {
+      alert('Failed to delete certification');
+    }
+  };
+
+  const handleCertificationSave = async () => {
+    setShowCertificationForm(false);
+    setEditingCertification(null);
+    try {
+      const response = await api.get('/users/certifications');
+      setCertifications(response.data);
+    } catch (error) {
+      console.error('Error reloading certifications:', error);
+    }
+  };
+
+  // Product/Service handlers
+  const handleAddProductService = () => {
+    setEditingProductService(null);
+    setShowProductServiceForm(true);
+  };
+
+  const handleEditProductService = (ps: any) => {
+    setEditingProductService(ps);
+    setShowProductServiceForm(true);
+  };
+
+  const handleDeleteProductService = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product/service?')) return;
+    
+    try {
+      await api.delete(`/users/product-services/${id}`);
+      setProductServices(productServices.filter(ps => ps.id !== id));
+    } catch (error) {
+      alert('Failed to delete product/service');
+    }
+  };
+
+  const handleProductServiceSave = async () => {
+    setShowProductServiceForm(false);
+    setEditingProductService(null);
+    try {
+      const response = await api.get('/users/product-services');
+      setProductServices(response.data);
+    } catch (error) {
+      console.error('Error reloading product/services:', error);
+    }
+  };
+
+  // Organization media handlers
+  const handleAddOrganizationMedia = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const uploadResponse = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      await api.post('/users/organization-media', {
+        mediaUrl: uploadResponse.data.url,
+        mediaType: file.type.startsWith('video/') ? 'video' : 'image',
+      });
+
+      const response = await api.get('/users/organization-media');
+      setOrganizationMedia(response.data);
+    } catch (error) {
+      console.error('Error adding media:', error);
+      alert('Failed to add media');
+    }
+  };
+
+  const handleDeleteOrganizationMedia = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this media?')) return;
+    
+    try {
+      await api.delete(`/users/organization-media/${id}`);
+      setOrganizationMedia(organizationMedia.filter(media => media.id !== id));
+    } catch (error) {
+      alert('Failed to delete media');
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -133,6 +242,9 @@ export default function EditProfilePage() {
       setUsername(profile.username || '');
       setExperiences(profile.experiences || []);
       setEducations(profile.educations || []);
+      setCertifications(profile.certifications || []);
+      setProductServices(profile.productServices || []);
+      setOrganizationMedia(profile.organizationMedia || []);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -666,21 +778,165 @@ export default function EditProfilePage() {
             </div>
           )}
 
-          {/* Certifications Section - Coming Soon - Personal Profiles Only */}
+          {/* Certifications Section - Personal Profiles Only */}
           {user?.profileType === 'personal' && (
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Certifications</h2>
-              <div className="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-200">
-                <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Certifications Coming Soon</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  The certification feature is currently under development and will be available in the next update.
-                </p>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
+                <button
+                  type="button"
+                  onClick={handleAddCertification}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                >
+                  + Add Certification
+                </button>
               </div>
+              
+              {certifications.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No certifications added yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {certifications.map((cert) => (
+                    <div key={cert.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{cert.name}</h3>
+                          <p className="text-gray-600">{cert.issuingOrganization}</p>
+                          {cert.issueDate && (
+                            <p className="text-sm text-gray-500">
+                              Issued {new Date(cert.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                              {cert.expirationDate && !cert.doesNotExpire && 
+                                ` - Expires ${new Date(cert.expirationDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+                              }
+                              {cert.doesNotExpire && ' - No Expiration'}
+                            </p>
+                          )}
+                          {cert.credentialId && (
+                            <p className="text-sm text-gray-500">Credential ID: {cert.credentialId}</p>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditCertification(cert)}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCertification(cert.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Products & Services Section - Organizational Profiles Only */}
+          {user?.profileType === 'organizational' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Products & Services</h2>
+                <button
+                  type="button"
+                  onClick={handleAddProductService}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                >
+                  + Add Product/Service
+                </button>
+              </div>
+              
+              {productServices.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No products or services added yet</p>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {productServices.map((ps) => (
+                    <div key={ps.id} className="border border-gray-200 rounded-lg p-4">
+                      {ps.imageUrl && (
+                        <img src={ps.imageUrl} alt={ps.title} className="w-full h-32 object-cover rounded-lg mb-3" />
+                      )}
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{ps.title}</h3>
+                          {ps.category && (
+                            <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">{ps.category}</span>
+                          )}
+                          <p className="text-sm text-gray-600 mt-2">{ps.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => handleEditProductService(ps)}
+                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProductService(ps.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Life at Organization Section - Organizational Profiles Only */}
+          {user?.profileType === 'organizational' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Life at {formData.organizationName || 'Organization'}</h2>
+                <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium cursor-pointer">
+                  + Add Photo/Video
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAddOrganizationMedia(file);
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              
+              {organizationMedia.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No media added yet</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {organizationMedia.map((media) => (
+                    <div key={media.id} className="relative group">
+                      {media.mediaType === 'image' ? (
+                        <img src={media.mediaUrl} alt={media.caption || ''} className="w-full h-40 object-cover rounded-lg" />
+                      ) : (
+                        <video src={media.mediaUrl} className="w-full h-40 object-cover rounded-lg" controls />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteOrganizationMedia(media.id)}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -737,6 +993,30 @@ export default function EditProfilePage() {
           onCancel={() => {
             setShowEducationForm(false);
             setEditingEducation(null);
+          }}
+        />
+      )}
+
+      {/* Certification Form Modal */}
+      {showCertificationForm && (
+        <CertificationForm
+          certification={editingCertification}
+          onSave={handleCertificationSave}
+          onCancel={() => {
+            setShowCertificationForm(false);
+            setEditingCertification(null);
+          }}
+        />
+      )}
+
+      {/* Product/Service Form Modal */}
+      {showProductServiceForm && (
+        <ProductServiceForm
+          productService={editingProductService}
+          onSave={handleProductServiceSave}
+          onCancel={() => {
+            setShowProductServiceForm(false);
+            setEditingProductService(null);
           }}
         />
       )}

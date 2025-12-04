@@ -88,6 +88,15 @@ export class User {
   @OneToMany(() => Education, (education) => education.user)
   educations: Education[];
 
+  @OneToMany(() => import('./certification.entity').Certification, (cert) => cert.user)
+  certifications: import('./certification.entity').Certification[];
+
+  @OneToMany(() => import('./product-service.entity').ProductService, (ps) => ps.user)
+  productServices: import('./product-service.entity').ProductService[];
+
+  @OneToMany(() => import('./organization-media.entity').OrganizationMedia, (media) => media.user)
+  organizationMedia: import('./organization-media.entity').OrganizationMedia[];
+
   @CreateDateColumn()
   createdAt: Date;
 

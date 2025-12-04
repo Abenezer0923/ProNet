@@ -7,6 +7,9 @@ import { UserSkill } from './entities/user-skill.entity';
 import { Connection } from './entities/connection.entity';
 import { Experience } from './entities/experience.entity';
 import { Education } from './entities/education.entity';
+import { Certification } from './entities/certification.entity';
+import { ProductService } from './entities/product-service.entity';
+import { OrganizationMedia } from './entities/organization-media.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { Post } from '../posts/entities/post.entity';
 import { Comment } from '../posts/entities/comment.entity';
@@ -40,6 +43,9 @@ import { BreakoutRoom } from '../communities/entities/breakout-room.entity';
       Connection, 
       Experience, 
       Education,
+      Certification,
+      ProductService,
+      OrganizationMedia,
       Post,
       Comment,
       PostLike,
