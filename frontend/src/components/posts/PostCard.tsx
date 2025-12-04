@@ -7,7 +7,7 @@ import {
     ShareIcon,
     EllipsisHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid, UserGroupIcon } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconSolid, UserGroupIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -64,6 +64,10 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const [comments, setComments] = useState<any[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
     const [localCommentCount, setLocalCommentCount] = useState(post.commentCount || 0);
+    const [showEditMenu, setShowEditMenu] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(post.content);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const hasLiked = post.likes?.some(like => like.userId === user?.id);
     const userReaction = post.likes?.find(like => like.userId === user?.id)?.reactionType || 'LIKE';
@@ -124,6 +128,55 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
         }
     };
 
+    const handleShare = async () => {
+        const shareData = {
+            title: `Post by ${post.author.firstName}`,
+            text: post.content,
+            url: window.location.href, // Or specific post URL if available
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this post?')) return;
+        setIsDeleting(true);
+        try {
+            await api.delete(`/posts/${post.id}`);
+            if (onPostUpdated) onPostUpdated();
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            alert('Failed to delete post');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!editContent.trim()) return;
+        try {
+            await api.put(`/posts/${post.id}`, { content: editContent });
+            setIsEditing(false);
+            if (onPostUpdated) onPostUpdated();
+        } catch (error) {
+            console.error('Error updating post:', error);
+            alert('Failed to update post');
+        }
+    };
+
     const handleToggleComments = async () => {
         const newShowComments = !showComments;
         setShowComments(newShowComments);
@@ -152,7 +205,9 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
             {post.isRepost && (
                 <div className="flex items-center text-gray-600 text-sm mb-4 pb-3 border-b border-purple-100">
                     <ArrowPathRoundedSquareIcon className="h-5 w-5 mr-2 text-purple-500" />
-                    <span className="font-semibold">{post.author.firstName} reposted this</span>
+                    <span className="font-semibold">
+                        {post.author.id === user?.id ? 'You' : `${post.author.firstName} ${post.author.lastName}`} reposted this
+                    </span>
                 </div>
             )}
 
@@ -177,14 +232,69 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                 {formatDistanceToNow(new Date(displayPost.createdAt), { addSuffix: true })}
                             </p>
                         </div>
-                        <button className="text-gray-400 hover:text-purple-600 rounded-full p-2 hover:bg-purple-50 transition-all">
-                            <EllipsisHorizontalIcon className="h-5 w-5" />
-                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowEditMenu(!showEditMenu)}
+                                className="text-gray-400 hover:text-purple-600 rounded-full p-2 hover:bg-purple-50 transition-all"
+                            >
+                                <EllipsisHorizontalIcon className="h-5 w-5" />
+                            </button>
+
+                            {showEditMenu && user?.id === post.author.id && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-purple-100 py-1 z-10">
+                                    <button
+                                        onClick={() => {
+                                            setIsEditing(true);
+                                            setShowEditMenu(false);
+                                        }}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700"
+                                    >
+                                        <PencilIcon className="h-4 w-4 mr-2" />
+                                        Edit Post
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleDelete();
+                                            setShowEditMenu(false);
+                                        }}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        <TrashIcon className="h-4 w-4 mr-2" />
+                                        Delete Post
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="mt-4 text-gray-800 whitespace-pre-wrap leading-relaxed text-base">
-                        {displayPost.content}
-                    </div>
+                    {isEditing ? (
+                        <div className="mt-4">
+                            <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full p-3 border-2 border-purple-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                rows={3}
+                            />
+                            <div className="flex justify-end space-x-2 mt-2">
+                                <button
+                                    onClick={() => setIsEditing(false)}
+                                    className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdate}
+                                    className="px-3 py-1 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mt-4 text-gray-800 whitespace-pre-wrap leading-relaxed text-base">
+                            {displayPost.content}
+                        </div>
+                    )}
 
                     {displayPost.images && displayPost.images.length > 0 && (
                         <div className={`mt-4 grid gap-3 ${displayPost.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -220,7 +330,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                 onClick={() => handleLike()}
                             >
                                 {hasLiked ? (
-                                    <span className="text-xl animate-bounce">{REACTION_TYPES[userReaction as keyof typeof REACTION_TYPES].icon}</span>
+                                    <HeartIconSolid className="h-6 w-6 text-pink-600" />
                                 ) : (
                                     <HeartIcon className="h-6 w-6" />
                                 )}
@@ -265,7 +375,10 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                             <span className="font-semibold">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
                         </button>
 
-                        <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105">
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
+                        >
                             <ShareIcon className="h-6 w-6" />
                             <span className="font-semibold">Share</span>
                         </button>
