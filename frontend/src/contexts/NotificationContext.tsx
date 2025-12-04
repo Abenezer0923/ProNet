@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 
 interface Notification {
   id: string;
-  type: 'follow' | 'message' | 'like' | 'comment' | 'community_invite';
+  type: 'follow' | 'message' | 'like' | 'comment' | 'community_invite' | 'job_posted' | 'job_application';
   title: string;
   message: string;
   actionUrl: string;

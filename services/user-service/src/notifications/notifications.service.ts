@@ -128,4 +128,44 @@ export class NotificationsService {
       relatedId: postId,
     });
   }
+
+  async createJobPostedNotification(
+    organizationId: string,
+    recipientId: string,
+    jobId: string,
+    organizationName: string,
+    jobTitle: string,
+  ) {
+    if (organizationId === recipientId) return null;
+
+    return await this.create({
+      userId: recipientId,
+      type: NotificationType.JOB_POSTED,
+      title: 'New Job Opportunity',
+      message: `${organizationName} posted ${jobTitle}`,
+      actionUrl: `/jobs/${jobId}`,
+      actorId: organizationId,
+      relatedId: jobId,
+    });
+  }
+
+  async createJobApplicationNotification(
+    applicantId: string,
+    organizationId: string,
+    jobId: string,
+    applicantName: string,
+    jobTitle: string,
+  ) {
+    if (applicantId === organizationId) return null;
+
+    return await this.create({
+      userId: organizationId,
+      type: NotificationType.JOB_APPLICATION,
+      title: 'New Job Application',
+      message: `${applicantName} applied for ${jobTitle}`,
+      actionUrl: `/jobs/${jobId}`,
+      actorId: applicantId,
+      relatedId: jobId,
+    });
+  }
 }

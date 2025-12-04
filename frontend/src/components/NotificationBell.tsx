@@ -35,6 +35,8 @@ export default function NotificationBell() {
       case 'message': return '💬';
       case 'like': return '❤️';
       case 'comment': return '💭';
+      case 'job_posted': return '💼';
+      case 'job_application': return '📄';
       default: return '🔔';
     }
   };

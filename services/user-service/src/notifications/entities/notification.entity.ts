@@ -15,6 +15,8 @@ export enum NotificationType {
   LIKE = 'like',
   COMMENT = 'comment',
   COMMUNITY_INVITE = 'community_invite',
+  JOB_POSTED = 'job_posted',
+  JOB_APPLICATION = 'job_application',
 }
 
 @Entity('notifications')

@@ -42,6 +42,10 @@ export default function NotificationsPage() {
         return '💭';
       case 'community_invite':
         return '🏘️';
+      case 'job_posted':
+        return '💼';
+      case 'job_application':
+        return '📄';
       default:
         return '🔔';
     }

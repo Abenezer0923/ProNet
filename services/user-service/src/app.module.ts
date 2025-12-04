@@ -41,6 +41,7 @@ import { MeetingQA } from './communities/entities/meeting-qa.entity';
 import { MeetingQAUpvote } from './communities/entities/meeting-qa-upvote.entity';
 
 import { HealthController } from './health/health.controller';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { HealthController } from './health/health.controller';
     NotificationsModule,
     UploadModule,
     SearchModule,
+    JobsModule,
   ],
   controllers: [AppController, HealthController],
 })
