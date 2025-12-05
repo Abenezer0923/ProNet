@@ -7,11 +7,56 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import ImageUpload from '@/components/ImageUpload';
 
+const DEFAULT_CATEGORIES = [
+  'Technology',
+  'Business',
+  'Marketing',
+  'Design',
+  'Healthcare',
+  'Education',
+  'Finance',
+  'Engineering',
+  'Sales',
+  'HR',
+  'Other',
+];
+
+const normalizeCategoryResponse = (data: unknown): string[] => {
+  const extractFromArray = (items: unknown[]): string[] =>
+    items
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const record = item as Record<string, unknown>;
+          const candidate = ['name', 'title', 'label']
+            .map((key) => record[key])
+            .find((value): value is string => typeof value === 'string');
+          if (candidate) {
+            return candidate;
+          }
+        }
+        return '';
+      })
+      .filter((item): item is string => Boolean(item));
+
+  if (Array.isArray(data)) {
+    return extractFromArray(data);
+  }
+
+  if (data && typeof data === 'object' && Array.isArray((data as any).categories)) {
+    return extractFromArray((data as any).categories);
+  }
+
+  return [];
+};
+
 export default function CreateCommunityPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -29,14 +74,35 @@ export default function CreateCommunityPage() {
   }, [user, authLoading, router]);
 
   const fetchCategories = async () => {
+    setCategoriesLoading(true);
     try {
       const response = await api.get('/communities/categories');
-      setCategories(response.data);
-      if (response.data.length > 0) {
-        setFormData((prev) => ({ ...prev, category: response.data[0] }));
+      const normalizedCategories = normalizeCategoryResponse(response.data);
+
+      if (normalizedCategories.length === 0) {
+        throw new Error('No categories returned from API');
       }
+
+      setCategories(normalizedCategories);
+      setFormData((prev) => ({
+        ...prev,
+        category: normalizedCategories.includes(prev.category)
+          ? prev.category
+          : normalizedCategories[0],
+      }));
+      setCategoryError(null);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setCategories(DEFAULT_CATEGORIES);
+      setFormData((prev) => ({
+        ...prev,
+        category: DEFAULT_CATEGORIES.includes(prev.category)
+          ? prev.category
+          : DEFAULT_CATEGORIES[0],
+      }));
+      setCategoryError('Unable to load categories from the server. Showing a default list instead.');
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
@@ -45,7 +111,7 @@ export default function CreateCommunityPage() {
   ) => {
     const target = e.target as HTMLInputElement;
     const value = target.type === 'checkbox' ? target.checked : target.value;
-    setFormData({ ...formData, [target.name]: value });
+    setFormData((prev) => ({ ...prev, [target.name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -141,14 +207,24 @@ export default function CreateCommunityPage() {
               value={formData.category}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              disabled={categoriesLoading || categories.length === 0}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
+              {categoriesLoading && categories.length === 0 ? (
+                <option value="">Loading categories...</option>
+              ) : categories.length === 0 ? (
+                <option value="">No categories available</option>
+              ) : (
+                categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))
+              )}
             </select>
+            {categoryError && (
+              <p className="mt-2 text-sm text-rose-600">{categoryError}</p>
+            )}
           </div>
 
           <div className="flex items-center">
@@ -169,7 +245,12 @@ export default function CreateCommunityPage() {
               type="community"
               label="Cover Image"
               currentImage={formData.coverImage}
-              onUploadComplete={(url) => setFormData({ ...formData, coverImage: url })}
+              onUploadComplete={(url) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  coverImage: url,
+                }))
+              }
             />
           </div>
 
@@ -182,7 +263,7 @@ export default function CreateCommunityPage() {
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || categoriesLoading || !formData.category}
               className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create Community'}
