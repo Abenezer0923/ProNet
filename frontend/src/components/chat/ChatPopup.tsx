@@ -32,6 +32,7 @@ export default function ChatPopup() {
         uploadFile,
         getOtherParticipant,
         totalUnread,
+        markAllConversationsAsRead,
     } = useChat();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +49,14 @@ export default function ChatPopup() {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isOpen, isExpanded]);
+
+    useEffect(() => {
+        if (!isOpen || totalUnread === 0) {
+            return;
+        }
+
+        void markAllConversationsAsRead();
+    }, [isOpen, totalUnread, markAllConversationsAsRead]);
 
     const handleToggleOpen = () => {
         setIsOpen(!isOpen);

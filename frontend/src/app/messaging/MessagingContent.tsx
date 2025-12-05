@@ -127,13 +127,12 @@ export default function MessagingContent() {
     }, [conversations]);
 
     useEffect(() => {
-        if (loading) return;
-
-        const hasUnread = conversations.some((conversation) => conversation.unreadCount > 0);
-        if (hasUnread) {
-            void markAllConversationsAsRead();
+        if (loading || totalUnread === 0) {
+            return;
         }
-    }, [loading, conversations, markAllConversationsAsRead]);
+
+        void markAllConversationsAsRead();
+    }, [loading, totalUnread, markAllConversationsAsRead]);
 
     const firstUnreadIndex = useMemo(() => {
         if (!viewerId) return -1;
