@@ -54,6 +54,12 @@ interface Group {
   category?: string;
   privacy: string;
   position: number;
+  ownerId?: string;
+  owner?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 interface Message {
@@ -864,55 +870,67 @@ export default function CommunityPage() {
 
                     {/* Message Input */}
                     <div className="p-3 sm:p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
-                      {messageAttachment && (
-                        <div className="mb-2 p-2 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-gray-700 truncate">{messageAttachment.name}</span>
-                          </div>
-                          <button
-                            onClick={() => setMessageAttachment(null)}
-                            className="text-gray-400 hover:text-red-500 flex-shrink-0 ml-2"
-                          >
-                            <XMarkIcon className="w-4 h-4" />
-                          </button>
+                      {/* Check if user can post in announcement groups */}
+                      {selectedGroup.type === 'announcement' && 
+                       selectedGroup.ownerId !== user?.id && 
+                       !['owner', 'admin', 'moderator'].includes(userRole) ? (
+                        <div className="flex items-center justify-center gap-2 py-3 text-gray-500 text-sm">
+                          <MegaphoneIcon className="w-5 h-5" />
+                          <span>Only the group owner can post announcements</span>
                         </div>
+                      ) : (
+                        <>
+                          {messageAttachment && (
+                            <div className="mb-2 p-2 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 truncate">{messageAttachment.name}</span>
+                              </div>
+                              <button
+                                onClick={() => setMessageAttachment(null)}
+                                className="text-gray-400 hover:text-red-500 flex-shrink-0 ml-2"
+                              >
+                                <XMarkIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                          <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2">
+                            <button
+                              type="button"
+                              onClick={() => document.getElementById('chat-file-input')?.click()}
+                              className="p-2 sm:p-2.5 text-gray-500 hover:bg-gray-100 rounded-full transition flex-shrink-0"
+                              disabled={!isMember || isMessageSending}
+                            >
+                              <PaperClipIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                            <input
+                              type="file"
+                              id="chat-file-input"
+                              className="hidden"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  setMessageAttachment(e.target.files[0]);
+                                }
+                              }}
+                            />
+                            <input
+                              type="text"
+                              value={newMessage}
+                              onChange={handleTyping}
+                              placeholder={isMember ? `Message` : "Join to chat"}
+                              disabled={!isMember || isMessageSending}
+                              className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400 text-sm sm:text-base min-w-0"
+                            />
+                            <button
+                              type="submit"
+                              disabled={(!newMessage.trim() && !messageAttachment) || !isMember || isMessageSending}
+                              className="p-2 sm:p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
+                            >
+                              <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                          </form>
+                        </>
                       )}
-                      <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2">
-                        <button
-                          type="button"
-                          onClick={() => document.getElementById('chat-file-input')?.click()}
-                          className="p-2 sm:p-2.5 text-gray-500 hover:bg-gray-100 rounded-full transition flex-shrink-0"
-                          disabled={!isMember || isMessageSending}
-                        >
-                          <PaperClipIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                        <input
-                          type="file"
-                          id="chat-file-input"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              setMessageAttachment(e.target.files[0]);
-                            }
-                          }}
-                        />
-                        <input
-                          type="text"
-                          value={newMessage}
-                          onChange={handleTyping}
-                          placeholder={isMember ? `Message` : "Join to chat"}
-                          disabled={!isMember || isMessageSending}
-                          className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400 text-sm sm:text-base min-w-0"
-                        />
-                        <button
-                          type="submit"
-                          disabled={(!newMessage.trim() && !messageAttachment) || !isMember || isMessageSending}
-                          className="p-2 sm:p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
-                        >
-                          <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                      </form>
                     </div>
                   </div>
                 )}

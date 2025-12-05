@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Community } from './community.entity';
 import { GroupMessage } from './group-message.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('groups')
 export class Group {
@@ -35,6 +36,12 @@ export class Group {
 
   @Column({ default: 0 })
   position: number;
+
+  @Column({ nullable: true })
+  ownerId: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  owner: User;
 
   @OneToMany(() => GroupMessage, message => message.group)
   messages: GroupMessage[];

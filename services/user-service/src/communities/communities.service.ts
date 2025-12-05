@@ -2,9 +2,10 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { CommunityMember } from './entities/community-member.entity';
 import { Group } from './entities/group.entity';
@@ -18,7 +19,7 @@ import { MessageReaction } from './entities/message-reaction.entity';
 import { MeetingsService } from './meetings.service';
 
 @Injectable()
-export class CommunitiesService {
+export class CommunitiesService implements OnModuleInit {
   constructor(
     @InjectRepository(Community)
     private communityRepository: Repository<Community>,
@@ -34,6 +35,40 @@ export class CommunitiesService {
     private userRepository: Repository<User>,
     private meetingsService: MeetingsService,
   ) { }
+
+  async onModuleInit() {
+    // Migrate existing groups to set owner
+    await this.migrateExistingGroups();
+  }
+
+  private async migrateExistingGroups() {
+    try {
+      // Find all groups without an owner
+      const groupsWithoutOwner = await this.groupRepository.find({
+        where: { ownerId: IsNull() },
+        relations: ['community'],
+      });
+
+      if (groupsWithoutOwner.length === 0) {
+        console.log('✅ All groups have owners assigned');
+        return;
+      }
+
+      console.log(`🔄 Migrating ${groupsWithoutOwner.length} groups to set owners...`);
+
+      for (const group of groupsWithoutOwner) {
+        if (group.community?.createdBy) {
+          group.ownerId = group.community.createdBy;
+          await this.groupRepository.save(group);
+        }
+      }
+
+      console.log(`✅ Successfully migrated ${groupsWithoutOwner.length} groups`);
+    } catch (error) {
+      console.error('❌ Error migrating existing groups:', error);
+      // Don't throw - allow app to start even if migration fails
+    }
+  }
 
   async create(userId: string, createCommunityDto: CreateCommunityDto) {
     console.log(`Creating community for user ${userId}`, createCommunityDto);
@@ -385,6 +420,7 @@ export class CommunitiesService {
     const group = this.groupRepository.create({
       ...createGroupDto,
       community,
+      ownerId: userId, // Set the creator as the owner
     });
 
     return this.groupRepository.save(group);
@@ -393,6 +429,7 @@ export class CommunitiesService {
   async getGroups(communityId: string) {
     return this.groupRepository.find({
       where: { community: { id: communityId } },
+      relations: ['owner'],
       order: { position: 'ASC', createdAt: 'ASC' },
     });
   }
@@ -400,7 +437,7 @@ export class CommunitiesService {
   async getGroup(groupId: string) {
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
-      relations: ['community'],
+      relations: ['community', 'owner'],
     });
 
     if (!group) {
@@ -411,7 +448,14 @@ export class CommunitiesService {
   }
 
   async sendMessage(groupId: string, userId: string, createMessageDto: CreateGroupMessageDto) {
-    const group = await this.getGroup(groupId);
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['community', 'owner'],
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
 
     // Check if user is member of the community
     const member = await this.memberRepository.findOne({
@@ -420,6 +464,16 @@ export class CommunitiesService {
 
     if (!member) {
       throw new ForbiddenException('You must be a member to send messages');
+    }
+
+    // For announcement groups, only the owner or community admins can post
+    if (group.type === 'announcement') {
+      const isGroupOwner = group.ownerId === userId;
+      const isCommunityAdmin = ['owner', 'admin', 'moderator'].includes(member.role);
+      
+      if (!isGroupOwner && !isCommunityAdmin) {
+        throw new ForbiddenException('Only the group owner or community admins can post announcements');
+      }
     }
 
     const message = this.messageRepository.create({

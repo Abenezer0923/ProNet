@@ -192,7 +192,7 @@ export class CommunitiesGateway
 
       console.log(`💬 Saving message to database: group=${groupId}, user=${userId}, content="${content}"`);
 
-      // Save message to database
+      // Save message to database (this will check announcement permissions)
       const message = await this.communitiesService.sendMessage(
         groupId,
         userId,
@@ -208,7 +208,8 @@ export class CommunitiesGateway
     } catch (error) {
       console.error('❌ Error sending message:', error);
       console.error('Error stack:', error.stack);
-      client.emit('error', { message: 'Failed to send message' });
+      const errorMessage = error.message || 'Failed to send message';
+      client.emit('error', { message: errorMessage });
     }
   }
 
