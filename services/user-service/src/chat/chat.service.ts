@@ -215,6 +215,30 @@ export class ChatService {
     return { success: true };
   }
 
+  async markAllConversationsAsRead(userId: string) {
+    const conversations = await this.conversationRepository.find({
+      where: [{ participant1Id: userId }, { participant2Id: userId }],
+      select: ['id'],
+    });
+
+    if (conversations.length === 0) {
+      return { success: true };
+    }
+
+    const conversationIds = conversations.map((conversation) => conversation.id);
+
+    await this.messageRepository
+      .createQueryBuilder()
+      .update(Message)
+      .set({ isRead: true })
+      .where('conversationId IN (:...conversationIds)', { conversationIds })
+      .andWhere('senderId != :userId', { userId })
+      .andWhere('isRead = :isRead', { isRead: false })
+      .execute();
+
+    return { success: true };
+  }
+
   async getUnreadCount(userId: string) {
     const conversations = await this.conversationRepository.find({
       where: [{ participant1Id: userId }, { participant2Id: userId }],

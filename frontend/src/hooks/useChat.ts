@@ -111,6 +111,26 @@ export const useChat = () => {
         }
     }, [user, syncUnreadBadge]);
 
+    const markAllConversationsAsRead = useCallback(async () => {
+        if (!user) return;
+
+        try {
+            await api.put('/chat/conversations/read-all');
+            setConversations((prev) =>
+                prev.length === 0
+                    ? prev
+                    : prev.map((conversation) => ({
+                          ...conversation,
+                          unreadCount: 0,
+                      })),
+            );
+            setTotalUnread(0);
+            syncUnreadBadge(0);
+        } catch (error) {
+            console.error('Error marking all conversations as read:', error);
+        }
+    }, [user, syncUnreadBadge]);
+
     useEffect(() => {
         if (!user) {
             setConversations([]);
@@ -244,5 +264,6 @@ export const useChat = () => {
         fetchConversations, // Exported in case manual refresh is needed
         totalUnread,
         markConversationAsRead,
+        markAllConversationsAsRead,
     };
 };

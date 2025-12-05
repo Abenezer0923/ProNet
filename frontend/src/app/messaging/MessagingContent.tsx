@@ -25,6 +25,7 @@ export default function MessagingContent() {
         sendMessage,
         getOtherParticipant,
         totalUnread,
+        markAllConversationsAsRead,
     } = useChat();
 
     const [newMessage, setNewMessage] = useState('');
@@ -124,6 +125,15 @@ export default function MessagingContent() {
 
         return [...conversations].sort((a, b) => getTimestamp(b) - getTimestamp(a));
     }, [conversations]);
+
+    useEffect(() => {
+        if (loading) return;
+
+        const hasUnread = conversations.some((conversation) => conversation.unreadCount > 0);
+        if (hasUnread) {
+            void markAllConversationsAsRead();
+        }
+    }, [loading, conversations, markAllConversationsAsRead]);
 
     const firstUnreadIndex = useMemo(() => {
         if (!viewerId) return -1;
