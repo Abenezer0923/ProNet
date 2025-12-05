@@ -99,58 +99,52 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const selectedCommunityData = communities.find(c => c.id === selectedCommunity);
 
     return (
-        <div className={`bg-gradient-to-br from-white via-white to-purple-50/30 rounded-2xl shadow-lg border-2 transition-all duration-300 mb-6 ${isFocused ? 'border-purple-300 shadow-purple-200/50' : 'border-transparent'
+        <div className={`bg-white rounded-lg sm:rounded-xl shadow-sm border transition-all duration-300 mb-4 sm:mb-5 ${isFocused ? 'border-primary-300 shadow-md' : 'border-gray-200'
             }`}>
-            <div className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-                    <div className="relative">
+            <div className="p-3 sm:p-4 md:p-5">
+                <div className="flex space-x-3 sm:space-x-4">
+                    <div className="relative flex-shrink-0">
                         <img
                             src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                             alt="Your avatar"
-                            className="h-12 w-12 rounded-full object-cover ring-2 ring-purple-100"
+                            className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border-2 border-gray-200"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                            <SparklesIcon className="h-3 w-3 text-white" />
-                        </div>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                         <form onSubmit={handleSubmit}>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 onFocus={() => setIsFocused(true)}
                                 onBlur={() => !content && !selectedFile && setIsFocused(false)}
-                                placeholder="Share your thoughts, ideas, or updates..."
-                                className="w-full border-none focus:ring-0 resize-none text-gray-800 placeholder-gray-400 text-base min-h-[100px] bg-transparent"
+                                placeholder="What's on your mind?"
+                                className="w-full border-none focus:ring-0 resize-none text-gray-800 placeholder-gray-500 text-sm sm:text-base min-h-[60px] sm:min-h-[80px] bg-transparent p-0"
                             />
 
                             {selectedFile && (
-                                <div className="mb-4 relative inline-block group">
+                                <div className="mb-3 sm:mb-4 relative inline-block group">
                                     <img
                                         src={URL.createObjectURL(selectedFile)}
                                         alt="Selected"
-                                        className="h-32 w-auto rounded-xl border-2 border-purple-100 shadow-md"
+                                        className="h-24 sm:h-32 w-auto rounded-lg sm:rounded-xl border-2 border-gray-200 shadow-sm"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setSelectedFile(null)}
-                                        className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-pink-500 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 transform"
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 sm:p-1.5 shadow-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:scale-110 transform"
                                     >
-                                        <XMarkIcon className="h-4 w-4" />
+                                        <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </button>
                                 </div>
                             )}
 
                             {/* Community Selection */}
                             {communities.length > 0 && (
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Post to Community (Optional)
-                                    </label>
+                                <div className="mb-3 sm:mb-4">
                                     <select
                                         value={selectedCommunity}
                                         onChange={(e) => setSelectedCommunity(e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-white border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-700 font-medium"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-gray-700 text-sm sm:text-base"
                                     >
                                         <option value="">🌍 Public Post</option>
                                         {communities.map((community) => (
@@ -163,53 +157,52 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                             )}
 
                             {selectedCommunityData && (
-                                <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                                <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-primary-50 rounded-lg sm:rounded-xl border border-primary-200">
                                     <div className="flex items-center space-x-2">
-                                        <UserGroupIcon className="h-5 w-5 text-purple-600" />
-                                        <span className="text-sm font-semibold text-purple-900">
+                                        <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+                                        <span className="text-xs sm:text-sm font-semibold text-primary-900">
                                             Posting to {selectedCommunityData.name}
                                         </span>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t-2 border-purple-50">
-                                <div className="flex items-center gap-2 justify-start">
+                            <div className="flex items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
+                                <div className="flex items-center gap-1 sm:gap-2">
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="p-2.5 text-purple-600 hover:bg-purple-50 rounded-xl transition-all hover:scale-105 transform"
+                                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all text-xs sm:text-sm font-medium"
                                         title="Add Photo"
                                     >
-                                        <PhotoIcon className="h-6 w-6" />
+                                        <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                                        <span className="hidden sm:inline">Photo</span>
                                     </button>
                                     <button
                                         type="button"
-                                        className="p-2.5 text-pink-600 hover:bg-pink-50 rounded-xl transition-all hover:scale-105 transform"
+                                        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all text-xs sm:text-sm font-medium"
                                         title="Add Video"
                                     >
-                                        <VideoCameraIcon className="h-6 w-6" />
+                                        <VideoCameraIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+                                        <span className="hidden sm:inline">Video</span>
                                     </button>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={(!content.trim() && !selectedFile) || isSubmitting}
-                                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all transform w-full sm:w-auto text-center ${(!content.trim() && !selectedFile) || isSubmitting
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl hover:scale-105'
+                                    className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all ${(!content.trim() && !selectedFile) || isSubmitting
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
                                         }`}
                                 >
                                     {isSubmitting ? (
-                                        <span className="flex items-center space-x-2">
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            <span>Posting...</span>
+                                        <span className="flex items-center gap-2">
+                                            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                                            <span className="hidden sm:inline">Posting...</span>
                                         </span>
                                     ) : (
-                                        <span className="flex items-center space-x-2">
-                                            <SparklesIcon className="h-4 w-4" />
-                                            <span>Share Post</span>
-                                        </span>
+                                        'Post'
                                     )}
                                 </button>
                             </div>
