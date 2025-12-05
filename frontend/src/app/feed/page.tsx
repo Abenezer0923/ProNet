@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import CreatePost from '@/components/posts/CreatePost';
@@ -241,10 +242,29 @@ export default function FeedPage() {
 
                     {/* Mobile Recommendations */}
                     <div className="lg:hidden space-y-4 sm:space-y-5 pb-6 sm:pb-8">
+                        {/* Find People Card - Mobile */}
+                        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Find People</h3>
+                                <Link href="/discover" className="text-xs sm:text-sm text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+                                    See all
+                                </Link>
+                            </div>
+                            <p className="text-xs sm:text-sm text-gray-600 mb-4">Grow your network by connecting with professionals</p>
+                            <Link
+                                href="/discover"
+                                className="block w-full text-center px-4 py-2.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-semibold text-sm border border-primary-200"
+                            >
+                                Discover People
+                            </Link>
+                        </div>
+
                         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Communities for you</h3>
-                                <button className="text-xs sm:text-sm text-primary-600 font-semibold hover:text-primary-700 transition-colors">See all</button>
+                                <Link href="/communities" className="text-xs sm:text-sm text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+                                    See all
+                                </Link>
                             </div>
                             {loadingRecommendations ? (
                                 <div className="space-y-3 sm:space-y-4">
@@ -290,7 +310,9 @@ export default function FeedPage() {
                         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-semibold text-gray-900 text-sm sm:text-base">People to follow</h3>
-                                <button className="text-xs sm:text-sm text-primary-600 font-semibold hover:text-primary-700 transition-colors">See all</button>
+                                <Link href="/discover" className="text-xs sm:text-sm text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+                                    See all
+                                </Link>
                             </div>
                             {loadingRecommendations ? (
                                 <div className="space-y-3 sm:space-y-4">
@@ -337,13 +359,33 @@ export default function FeedPage() {
                     </div>
 
                     {/* Right Sidebar - Recommendations */}
-                    <div className="hidden lg:block lg:col-span-3">
+                    <div className="hidden lg:block lg:col-span-3 space-y-4">
+                        {/* Find People Card */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-gray-900 text-sm">Find People</h3>
+                                <Link href="/discover" className="text-xs text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                                    See all
+                                </Link>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-4">Grow your network by connecting with professionals</p>
+                            <Link
+                                href="/discover"
+                                className="block w-full text-center px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-semibold text-sm border border-primary-200"
+                            >
+                                Discover People
+                            </Link>
+                        </div>
+
+                        {/* Recommendations Card */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-20 space-y-5">
                             {/* Communities Recommendations */}
                             <div>
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="font-semibold text-gray-900 text-sm">Communities for you</h3>
-                                    <button className="text-xs text-primary-600 hover:text-primary-700 font-semibold transition-colors">See all</button>
+                                    <Link href="/communities" className="text-xs text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                                        See all
+                                    </Link>
                                 </div>
                                 {loadingRecommendations ? (
                                     <div className="space-y-3">
@@ -391,7 +433,9 @@ export default function FeedPage() {
                             <div className="pt-5 border-t border-gray-100">
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="font-semibold text-gray-900 text-sm">People to follow</h3>
-                                    <button className="text-xs text-primary-600 hover:text-primary-700 font-semibold transition-colors">See all</button>
+                                    <Link href="/discover" className="text-xs text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                                        See all
+                                    </Link>
                                 </div>
                                 {loadingRecommendations ? (
                                     <div className="space-y-3">
