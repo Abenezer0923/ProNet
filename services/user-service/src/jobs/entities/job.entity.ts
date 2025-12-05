@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { JobApplication } from './job-application.entity';
 
 @Entity('jobs')
 export class Job {
@@ -83,4 +85,7 @@ export class Job {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => JobApplication, (application) => application.job)
+  applications: JobApplication[];
 }

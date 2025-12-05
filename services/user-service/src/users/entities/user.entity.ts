@@ -9,6 +9,9 @@ import {
 import { UserSkill } from './user-skill.entity';
 import { Experience } from './experience.entity';
 import { Education } from './education.entity';
+import { Certification } from './certification.entity';
+import { ProductService } from './product-service.entity';
+import { OrganizationMedia } from './organization-media.entity';
 
 @Entity('users')
 export class User {
@@ -88,14 +91,14 @@ export class User {
   @OneToMany(() => Education, (education) => education.user)
   educations: Education[];
 
-  @OneToMany(() => import('./certification.entity').Certification, (cert) => cert.user)
-  certifications: import('./certification.entity').Certification[];
+  @OneToMany(() => Certification, (cert) => cert.user)
+  certifications: Certification[];
 
-  @OneToMany(() => import('./product-service.entity').ProductService, (ps) => ps.user)
-  productServices: import('./product-service.entity').ProductService[];
+  @OneToMany(() => ProductService, (ps) => ps.user)
+  productServices: ProductService[];
 
-  @OneToMany(() => import('./organization-media.entity').OrganizationMedia, (media) => media.user)
-  organizationMedia: import('./organization-media.entity').OrganizationMedia[];
+  @OneToMany(() => OrganizationMedia, (media) => media.user)
+  organizationMedia: OrganizationMedia[];
 
   @CreateDateColumn()
   createdAt: Date;
