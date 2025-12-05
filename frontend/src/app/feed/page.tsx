@@ -124,7 +124,7 @@ export default function FeedPage() {
         <div className="min-h-screen bg-gray-50">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Left Sidebar - Profile Summary */}
                     <div className="hidden lg:block lg:col-span-3">
@@ -190,6 +190,91 @@ export default function FeedPage() {
                                 ))}
                             </div>
                         )}
+                    </div>
+
+                    {/* Mobile Recommendations */}
+                    <div className="lg:hidden space-y-6">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+                            <h3 className="font-bold text-gray-900">Communities for you</h3>
+                            {loadingRecommendations ? (
+                                <div className="space-y-3">
+                                    {[1, 2].map((i) => (
+                                        <div key={i} className="flex items-start space-x-3 animate-pulse">
+                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
+                                            <div className="flex-1">
+                                                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : recommendedCommunities.length > 0 ? (
+                                <div className="space-y-4">
+                                    {recommendedCommunities.map((community) => (
+                                        <div key={community.id} className="flex items-start space-x-3">
+                                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center flex-shrink-0 font-bold text-purple-700">
+                                                {community.name[0]}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">{community.name}</p>
+                                                <p className="text-xs text-gray-500">{community.memberCount || 0} members</p>
+                                                <button
+                                                    onClick={() => router.push(`/communities/${community.id}`)}
+                                                    className="text-primary-700 text-xs font-medium mt-1 hover:underline"
+                                                >
+                                                    + Join
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-500">No recommendations available</p>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+                            <h3 className="font-bold text-gray-900">People to follow</h3>
+                            {loadingRecommendations ? (
+                                <div className="space-y-3">
+                                    {[1, 2].map((i) => (
+                                        <div key={i} className="flex items-start space-x-3 animate-pulse">
+                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"></div>
+                                            <div className="flex-1">
+                                                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : recommendedUsers.length > 0 ? (
+                                <div className="space-y-4">
+                                    {recommendedUsers.map((recommendedUser) => (
+                                        <div key={recommendedUser.id} className="flex items-start space-x-3">
+                                            <img
+                                                src={recommendedUser.profilePicture || recommendedUser.avatar || `https://ui-avatars.com/api/?name=${recommendedUser.firstName}+${recommendedUser.lastName}`}
+                                                alt={recommendedUser.firstName}
+                                                className="h-10 w-10 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">
+                                                    {recommendedUser.firstName} {recommendedUser.lastName}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">{recommendedUser.profession || 'Member'}</p>
+                                                <button
+                                                    onClick={() => router.push(recommendedUser.username ? `/in/${recommendedUser.username}` : `/profile/${recommendedUser.id}`)}
+                                                    className="text-primary-700 text-xs font-medium mt-1 hover:underline"
+                                                >
+                                                    View Profile
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-500">No recommendations available</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Right Sidebar - Recommendations */}

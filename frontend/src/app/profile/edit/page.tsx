@@ -60,7 +60,7 @@ export default function EditProfilePage() {
 
   const handleDeleteExperience = async (id: string) => {
     if (!confirm('Are you sure you want to delete this experience?')) return;
-    
+
     try {
       await api.delete(`/users/experiences/${id}`);
       setExperiences(experiences.filter(exp => exp.id !== id));
@@ -94,7 +94,7 @@ export default function EditProfilePage() {
 
   const handleDeleteEducation = async (id: string) => {
     if (!confirm('Are you sure you want to delete this education?')) return;
-    
+
     try {
       await api.delete(`/users/educations/${id}`);
       setEducations(educations.filter(edu => edu.id !== id));
@@ -128,7 +128,7 @@ export default function EditProfilePage() {
 
   const handleDeleteCertification = async (id: string) => {
     if (!confirm('Are you sure you want to delete this certification?')) return;
-    
+
     try {
       await api.delete(`/users/certifications/${id}`);
       setCertifications(certifications.filter(cert => cert.id !== id));
@@ -161,7 +161,7 @@ export default function EditProfilePage() {
 
   const handleDeleteProductService = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product/service?')) return;
-    
+
     try {
       await api.delete(`/users/product-services/${id}`);
       setProductServices(productServices.filter(ps => ps.id !== id));
@@ -206,7 +206,7 @@ export default function EditProfilePage() {
 
   const handleDeleteOrganizationMedia = async (id: string) => {
     if (!confirm('Are you sure you want to delete this media?')) return;
-    
+
     try {
       await api.delete(`/users/organization-media/${id}`);
       setOrganizationMedia(organizationMedia.filter(media => media.id !== id));
@@ -261,7 +261,7 @@ export default function EditProfilePage() {
     try {
       // Update profile data
       await api.put('/users/profile', formData);
-      
+
       // Update username if it changed
       if (username && username !== user?.username) {
         if (!usernameAvailable) {
@@ -271,7 +271,7 @@ export default function EditProfilePage() {
         }
         await api.patch('/users/username', { username });
       }
-      
+
       alert('Profile updated successfully!');
       // Always redirect to /profile to maintain consistent UI
       router.push('/profile');
@@ -355,7 +355,7 @@ export default function EditProfilePage() {
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUsername = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     setUsername(newUsername);
-    
+
     // Debounce the availability check
     const timeoutId = setTimeout(() => {
       checkUsernameAvailability(newUsername);
@@ -657,124 +657,124 @@ export default function EditProfilePage() {
           {/* Experience Section - Personal Profiles Only */}
           {user?.profileType === 'personal' && (
             <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
-              <button
-                type="button"
-                onClick={handleAddExperience}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
-              >
-                + Add Experience
-              </button>
-            </div>
-            
-            {experiences.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No experience added yet</p>
-            ) : (
-              <div className="space-y-4">
-                {experiences.map((experience) => (
-                  <div key={experience.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{experience.title}</h3>
-                        <p className="text-gray-600">{experience.company}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(experience.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
-                          {experience.currentlyWorking ? ' Present' : ' ' + new Date(experience.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </p>
-                        {experience.location && (
-                          <p className="text-sm text-gray-500">{experience.location}</p>
-                        )}
-                        {experience.description && (
-                          <p className="text-sm text-gray-700 mt-2">{experience.description}</p>
-                        )}
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditExperience(experience)}
-                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteExperience(experience.id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          Delete
-                        </button>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
+                <button
+                  type="button"
+                  onClick={handleAddExperience}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                >
+                  + Add Experience
+                </button>
+              </div>
+
+              {experiences.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No experience added yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {experiences.map((experience) => (
+                    <div key={experience.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{experience.title}</h3>
+                          <p className="text-gray-600">{experience.company}</p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(experience.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} -
+                            {experience.currentlyWorking ? ' Present' : ' ' + new Date(experience.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </p>
+                          {experience.location && (
+                            <p className="text-sm text-gray-500">{experience.location}</p>
+                          )}
+                          {experience.description && (
+                            <p className="text-sm text-gray-700 mt-2">{experience.description}</p>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditExperience(experience)}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExperience(experience.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Education Section - Personal Profiles Only */}
           {user?.profileType === 'personal' && (
             <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Education</h2>
-              <button
-                type="button"
-                onClick={handleAddEducation}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
-              >
-                + Add Education
-              </button>
-            </div>
-            
-            {educations.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No education added yet</p>
-            ) : (
-              <div className="space-y-4">
-                {educations.map((education) => (
-                  <div key={education.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{education.school}</h3>
-                        <p className="text-gray-600">
-                          {education.degree}
-                          {education.fieldOfStudy && `, ${education.fieldOfStudy}`}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(education.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - 
-                          {education.currentlyStudying ? ' Present' : ' ' + new Date(education.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </p>
-                        {education.grade && (
-                          <p className="text-sm text-gray-500">Grade: {education.grade}</p>
-                        )}
-                        {education.activities && (
-                          <p className="text-sm text-gray-700 mt-1">Activities: {education.activities}</p>
-                        )}
-                        {education.description && (
-                          <p className="text-sm text-gray-700 mt-2">{education.description}</p>
-                        )}
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditEducation(education)}
-                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteEducation(education.id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          Delete
-                        </button>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Education</h2>
+                <button
+                  type="button"
+                  onClick={handleAddEducation}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                >
+                  + Add Education
+                </button>
+              </div>
+
+              {educations.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No education added yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {educations.map((education) => (
+                    <div key={education.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{education.school}</h3>
+                          <p className="text-gray-600">
+                            {education.degree}
+                            {education.fieldOfStudy && `, ${education.fieldOfStudy}`}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(education.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} -
+                            {education.currentlyStudying ? ' Present' : ' ' + new Date(education.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </p>
+                          {education.grade && (
+                            <p className="text-sm text-gray-500">Grade: {education.grade}</p>
+                          )}
+                          {education.activities && (
+                            <p className="text-sm text-gray-700 mt-1">Activities: {education.activities}</p>
+                          )}
+                          {education.description && (
+                            <p className="text-sm text-gray-700 mt-2">{education.description}</p>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditEducation(education)}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEducation(education.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -791,7 +791,7 @@ export default function EditProfilePage() {
                   + Add Certification
                 </button>
               </div>
-              
+
               {certifications.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No certifications added yet</p>
               ) : (
@@ -805,7 +805,7 @@ export default function EditProfilePage() {
                           {cert.issueDate && (
                             <p className="text-sm text-gray-500">
                               Issued {new Date(cert.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                              {cert.expirationDate && !cert.doesNotExpire && 
+                              {cert.expirationDate && !cert.doesNotExpire &&
                                 ` - Expires ${new Date(cert.expirationDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
                               }
                               {cert.doesNotExpire && ' - No Expiration'}
@@ -852,7 +852,7 @@ export default function EditProfilePage() {
                   + Add Product/Service
                 </button>
               </div>
-              
+
               {productServices.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No products or services added yet</p>
               ) : (
@@ -912,7 +912,7 @@ export default function EditProfilePage() {
                   />
                 </label>
               </div>
-              
+
               {organizationMedia.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No media added yet</p>
               ) : (

@@ -101,8 +101,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     return (
         <div className={`bg-gradient-to-br from-white via-white to-purple-50/30 rounded-2xl shadow-lg border-2 transition-all duration-300 mb-6 ${isFocused ? 'border-purple-300 shadow-purple-200/50' : 'border-transparent'
             }`}>
-            <div className="p-6">
-                <div className="flex space-x-4">
+            <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
                     <div className="relative">
                         <img
                             src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
@@ -173,8 +173,8 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                 </div>
                             )}
 
-                            <div className="flex items-center justify-between pt-4 border-t-2 border-purple-50">
-                                <div className="flex space-x-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t-2 border-purple-50">
+                                <div className="flex items-center gap-2 justify-start">
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
@@ -195,7 +195,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                 <button
                                     type="submit"
                                     disabled={(!content.trim() && !selectedFile) || isSubmitting}
-                                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all transform ${(!content.trim() && !selectedFile) || isSubmitting
+                                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all transform w-full sm:w-auto text-center ${(!content.trim() && !selectedFile) || isSubmitting
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl hover:scale-105'
                                         }`}

@@ -220,7 +220,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
     const displayContent = post.isRepost && post.originalPost ? post.originalPost.content : localContent;
 
     return (
-        <div className="bg-gradient-to-br from-white via-white to-purple-50/20 rounded-2xl shadow-lg border-2 border-purple-100/50 p-6 mb-6 hover:shadow-xl hover:border-purple-200/70 transition-all duration-300">
+        <div className="bg-gradient-to-br from-white via-white to-purple-50/20 rounded-2xl shadow-lg border-2 border-purple-100/50 p-4 sm:p-6 mb-6 hover:shadow-xl hover:border-purple-200/70 transition-all duration-300">
             {/* Community Badge */}
             {displayPost.community && (
                 <Link
@@ -243,7 +243,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                 </div>
             )}
 
-            <div className="flex items-start space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-4 sm:space-y-0">
                 <div className="relative">
                     <img
                         src={displayPost.author.profilePicture || displayPost.author.avatar || `https://ui-avatars.com/api/?name=${displayPost.author.firstName}+${displayPost.author.lastName}`}
@@ -253,7 +253,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                         <div>
                             <h3 className="font-bold text-gray-900 hover:text-purple-600 cursor-pointer transition-colors">
                                 {displayPost.author.firstName} {displayPost.author.lastName}
@@ -264,7 +264,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                 {formatDistanceToNow(new Date(displayPost.createdAt), { addSuffix: true })}
                             </p>
                         </div>
-                        <div className="relative">
+                        <div className="relative self-end sm:self-auto">
                             <button
                                 onClick={() => setShowEditMenu(!showEditMenu)}
                                 className="text-gray-400 hover:text-purple-600 rounded-full p-2 hover:bg-purple-50 transition-all"
@@ -329,13 +329,13 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                     )}
 
                     {displayPost.images && displayPost.images.length > 0 && (
-                        <div className={`mt-4 grid gap-3 ${displayPost.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        <div className={`mt-4 grid gap-3 ${displayPost.images.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
                             {displayPost.images.map((img, idx) => (
                                 <img
                                     key={idx}
                                     src={img}
                                     alt="Post content"
-                                    className="rounded-xl w-full h-72 object-cover border-2 border-purple-100 hover:border-purple-300 transition-all"
+                                    className="rounded-xl w-full h-48 sm:h-72 object-cover border-2 border-purple-100 hover:border-purple-300 transition-all"
                                 />
                             ))}
                         </div>
@@ -351,11 +351,11 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                         </div>
                     )}
 
-                    <div className="mt-5 flex items-center justify-between border-t-2 border-purple-50 pt-4">
-                        <div className="relative" onMouseLeave={() => setShowReactionPicker(false)}>
+                    <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t-2 border-purple-50 pt-4">
+                        <div className="relative w-full sm:w-auto" onMouseLeave={() => setShowReactionPicker(false)}>
                             <button
                                 aria-pressed={liked}
-                                className={`group flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all transform hover:scale-105 ${liked
+                                className={`group flex items-center justify-center sm:justify-start space-x-2 px-4 py-2 rounded-xl border transition-all transform hover:scale-[1.02] w-full sm:w-auto ${liked
                                     ? 'bg-blue-50 text-blue-600 border-blue-200 shadow-sm'
                                     : 'text-gray-600 border-transparent hover:text-blue-600 hover:bg-blue-50/60'
                                     }`}
@@ -406,21 +406,23 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                             )}
                         </div>
 
-                        <button
-                            onClick={handleToggleComments}
-                            className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
-                        >
-                            <ChatBubbleLeftIcon className="h-6 w-6" />
-                            <span className="font-semibold">{localCommentCount > 0 ? localCommentCount : 'Comment'}</span>
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={handleToggleComments}
+                                className="flex items-center justify-center sm:justify-start space-x-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-xl transition-all transform hover:scale-[1.02] w-full sm:w-auto"
+                            >
+                                <ChatBubbleLeftIcon className="h-6 w-6" />
+                                <span className="font-semibold">{localCommentCount > 0 ? localCommentCount : 'Comment'}</span>
+                            </button>
 
-                        <button
-                            onClick={handleRepost}
-                            className="flex items-center space-x-2 text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all transform hover:scale-105"
-                        >
-                            <ArrowPathRoundedSquareIcon className="h-6 w-6" />
-                            <span className="font-semibold">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
-                        </button>
+                            <button
+                                onClick={handleRepost}
+                                className="flex items-center justify-center sm:justify-start space-x-2 text-gray-600 hover:text-green-600 hover:bg-green-50 px-4 py-2 rounded-xl transition-all transform hover:scale-[1.02] w-full sm:w-auto"
+                            >
+                                <ArrowPathRoundedSquareIcon className="h-6 w-6" />
+                                <span className="font-semibold">{post.repostCount > 0 ? post.repostCount : 'Repost'}</span>
+                            </button>
+                        </div>
                     </div>
 
                     {showComments && (
@@ -465,13 +467,13 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                             ) : null}
 
                             {/* Comment Input */}
-                            <form onSubmit={handleComment} className="flex space-x-3">
+                            <form onSubmit={handleComment} className="flex flex-col sm:flex-row sm:items-start sm:space-x-3 space-y-3 sm:space-y-0">
                                 <img
                                     src={user?.profilePicture || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                                     alt="Your avatar"
                                     className="h-10 w-10 rounded-full ring-2 ring-purple-100 flex-shrink-0"
                                 />
-                                <div className="flex-1 flex space-x-2">
+                                <div className="flex-1 flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                                     <input
                                         type="text"
                                         value={commentContent}
@@ -486,7 +488,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                     <button
                                         type="submit"
                                         disabled={!commentContent.trim() || isSubmitting}
-                                        className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${!commentContent.trim() || isSubmitting
+                                        className={`px-4 py-2 rounded-xl font-semibold text-sm transition w-full sm:w-auto ${!commentContent.trim() || isSubmitting
                                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
                                             }`}
@@ -500,7 +502,7 @@ export default function PostCard({ post, onPostUpdated }: PostCardProps) {
                                 </div>
                             </form>
                             {commentError && (
-                                <p className="mt-2 text-sm text-red-500 pl-14">{commentError}</p>
+                                <p className="mt-2 text-sm text-red-500 pl-0 sm:pl-14">{commentError}</p>
                             )}
                         </div>
                     )}
