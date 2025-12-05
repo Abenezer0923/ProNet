@@ -1,19 +1,20 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, Fragment } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { useChat } from '@/hooks/useChat';
+import { useChat, type Conversation } from '@/hooks/useChat';
 import { api } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 
 export default function MessagingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const userId = searchParams.get('userId');
+    const targetUserId = searchParams.get('userId');
     const { user, loading: authLoading } = useAuth();
+    const viewerId = user?.id;
     const { isConnected } = useSocket();
     const {
         conversations,
@@ -23,6 +24,7 @@ export default function MessagingContent() {
         selectConversation,
         sendMessage,
         getOtherParticipant,
+        totalUnread,
     } = useChat();
 
     const [newMessage, setNewMessage] = useState('');
@@ -34,7 +36,7 @@ export default function MessagingContent() {
     useEffect(() => {
         setTargetUser(null);
         setIsCreatingConversation(false);
-    }, [userId]);
+    }, [targetUserId]);
 
     const fetchUserInfo = useCallback(async (userId: string) => {
         setLoadingTargetUser(true);
@@ -57,14 +59,14 @@ export default function MessagingContent() {
         }
     }, [user, authLoading, router]);
 
-    // Handle userId parameter - find existing conversation or show prompt to start new one
+    // Handle targetUserId parameter - find existing conversation or show prompt to start new one
     useEffect(() => {
-        if (!userId || loading || selectedConversation) return;
+        if (!targetUserId || loading || selectedConversation) return;
 
         // Find existing conversation with this user
         const existingConversation = conversations.find((conv) => {
             const otherUser = getOtherParticipant(conv);
-            return otherUser?.id === userId;
+            return otherUser?.id === targetUserId;
         });
 
         if (existingConversation) {
@@ -75,8 +77,8 @@ export default function MessagingContent() {
         if (targetUser || isCreatingConversation) return;
 
         setIsCreatingConversation(true);
-        fetchUserInfo(userId);
-    }, [userId, conversations, loading, selectedConversation, isCreatingConversation, targetUser, getOtherParticipant, selectConversation, fetchUserInfo]);
+        fetchUserInfo(targetUserId);
+    }, [targetUserId, conversations, loading, selectedConversation, isCreatingConversation, targetUser, getOtherParticipant, selectConversation, fetchUserInfo]);
 
     const startConversationWithMessage = async (message: string) => {
         if (!targetUser) return;
@@ -87,7 +89,7 @@ export default function MessagingContent() {
             });
             selectConversation(response.data);
             // Send the first message
-            await sendMessage(message);
+            await sendMessage(message, response.data.id);
             setTargetUser(null);
         } catch (error: any) {
             console.error('Error starting conversation:', error);
@@ -103,6 +105,33 @@ export default function MessagingContent() {
         setNewMessage('');
     };
 
+    const prioritizedConversations = useMemo(() => {
+        const getTimestamp = (conversation: Conversation) => {
+            if (conversation.lastMessage?.createdAt) {
+                return new Date(conversation.lastMessage.createdAt).getTime();
+            }
+            if (conversation.lastMessageAt) {
+                return new Date(conversation.lastMessageAt).getTime();
+            }
+            if (conversation.updatedAt) {
+                return new Date(conversation.updatedAt).getTime();
+            }
+            if (conversation.createdAt) {
+                return new Date(conversation.createdAt).getTime();
+            }
+            return 0;
+        };
+
+        return [...conversations].sort((a, b) => getTimestamp(b) - getTimestamp(a));
+    }, [conversations]);
+
+    const firstUnreadIndex = useMemo(() => {
+        if (!viewerId) return -1;
+        return messages.findIndex(
+            (message) => message.senderId !== viewerId && !message.isRead,
+        );
+    }, [messages, viewerId]);
+
     if (loading || authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -110,6 +139,9 @@ export default function MessagingContent() {
             </div>
         );
     }
+
+    let unreadLabelRendered = false;
+    let earlierLabelRendered = false;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -137,11 +169,21 @@ export default function MessagingContent() {
                         <aside className="md:w-1/3 border-b md:border-b-0 md:border-r border-gray-100">
                             <div className="flex flex-col h-64 md:h-full">
                                 <div className="p-4 border-b border-gray-100">
-                                    <h2 className="text-lg font-semibold text-gray-900">Inbox</h2>
-                                    <p className="text-xs text-gray-500 mt-1">Your recent conversations</p>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <h2 className="text-lg font-semibold text-gray-900">Inbox</h2>
+                                            <p className="text-xs text-gray-500 mt-1">Your recent conversations</p>
+                                        </div>
+                                        {totalUnread > 0 && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                                                <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
+                                                {totalUnread} unread
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto">
-                                    {conversations.length === 0 ? (
+                                    {prioritizedConversations.length === 0 ? (
                                         <div className="p-6 text-center text-gray-500">
                                             <p className="font-medium">No conversations yet</p>
                                             <Link
@@ -153,39 +195,82 @@ export default function MessagingContent() {
                                         </div>
                                     ) : (
                                         <div className="divide-y divide-gray-100">
-                                            {conversations.map((conversation) => {
+                                            {prioritizedConversations.map((conversation) => {
                                                 const otherUser = getOtherParticipant(conversation);
                                                 if (!otherUser) return null;
 
+                                                const isActive = selectedConversation?.id === conversation.id;
+                                                const isUnread = conversation.unreadCount > 0;
+                                                const lastMessageTime = conversation.lastMessage?.createdAt
+                                                    ? new Date(conversation.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                    : null;
+                                                const showUnreadLabel = isUnread && !unreadLabelRendered;
+                                                const showEarlierLabel = !isUnread && unreadLabelRendered && !earlierLabelRendered;
+
+                                                if (showUnreadLabel) {
+                                                    unreadLabelRendered = true;
+                                                }
+
+                                                if (showEarlierLabel) {
+                                                    earlierLabelRendered = true;
+                                                }
+
                                                 return (
-                                                    <button
-                                                        key={conversation.id}
-                                                        onClick={() => selectConversation(conversation)}
-                                                        className={`w-full px-4 py-3 text-left transition-smooth hover:bg-primary-50/60 focus:outline-none ${selectedConversation?.id === conversation.id ? 'bg-primary-50/80' : ''}`}
-                                                    >
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary-600 to-primary-500 text-white font-semibold flex items-center justify-center flex-shrink-0">
-                                                                {otherUser.firstName[0]}{otherUser.lastName[0]}
+                                                    <Fragment key={conversation.id}>
+                                                        {showUnreadLabel && (
+                                                            <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-primary-700 bg-primary-50/60 border-y border-primary-100">
+                                                                Unread
                                                             </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between gap-2">
-                                                                    <p className="font-semibold text-gray-900 truncate">
-                                                                        {otherUser.firstName} {otherUser.lastName}
-                                                                    </p>
-                                                                    {conversation.unreadCount > 0 && (
-                                                                        <span className="bg-primary-600 text-white text-[11px] rounded-full px-2 py-0.5">
-                                                                            {conversation.unreadCount}
-                                                                        </span>
-                                                                    )}
+                                                        )}
+                                                        {showEarlierLabel && (
+                                                            <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400 bg-gray-50 border-y border-gray-100">
+                                                                Earlier
+                                                            </div>
+                                                        )}
+                                                        <button
+                                                            onClick={() => selectConversation(conversation)}
+                                                            className={`group w-full px-4 py-3 text-left transition-smooth border-l-4 focus:outline-none ${isActive
+                                                                ? 'bg-primary-50/80 border-primary-600'
+                                                                : isUnread
+                                                                    ? 'bg-primary-50/50 border-primary-400'
+                                                                    : 'border-transparent hover:bg-primary-50/60'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div className={`w-11 h-11 rounded-full bg-gradient-to-br from-primary-600 to-primary-500 text-white font-semibold flex items-center justify-center flex-shrink-0 ${isUnread ? 'ring-2 ring-primary-200' : ''}`}>
+                                                                    {otherUser.firstName[0]}{otherUser.lastName[0]}
                                                                 </div>
-                                                                {conversation.lastMessage && (
-                                                                    <p className="text-sm text-gray-500 truncate">
-                                                                        {conversation.lastMessage.content}
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-start justify-between gap-2">
+                                                                        <div>
+                                                                            <p className={`font-semibold truncate ${isUnread ? 'text-primary-900' : 'text-gray-900'}`}>
+                                                                                {otherUser.firstName} {otherUser.lastName}
+                                                                            </p>
+                                                                            {isUnread && (
+                                                                                <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-primary-600 uppercase tracking-wide">
+                                                                                    <span className="flex items-center gap-1">
+                                                                                        <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
+                                                                                        New
+                                                                                    </span>
+                                                                                    <span className="bg-primary-100 text-primary-700 rounded-full px-2 py-0.5">
+                                                                                        {conversation.unreadCount}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        {lastMessageTime && (
+                                                                            <span className={`text-xs ${isUnread ? 'text-primary-600 font-semibold' : 'text-gray-400'}`}>
+                                                                                {lastMessageTime}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <p className={`mt-1 text-sm truncate ${isUnread ? 'text-primary-700 font-semibold' : 'text-gray-500'}`}>
+                                                                        {conversation.lastMessage?.content || 'Say hello to start the conversation'}
                                                                     </p>
-                                                                )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </button>
+                                                        </button>
+                                                    </Fragment>
                                                 );
                                             })}
                                         </div>
@@ -214,27 +299,36 @@ export default function MessagingContent() {
                                     </header>
 
                                     <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 bg-gray-50">
-                                        {messages.map((message) => {
+                                        {messages.map((message, index) => {
                                             const isOwn = message.senderId === user?.id;
+                                            const showUnreadDivider = firstUnreadIndex !== -1 && index === firstUnreadIndex;
+                                            const isUnreadMessage = !isOwn && !message.isRead;
+
                                             return (
-                                                <div
-                                                    key={message.id}
-                                                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                                                >
-                                                    <div
-                                                        className={`max-w-[80%] md:max-w-[65%] px-4 py-3 rounded-2xl shadow-sm ${isOwn
-                                                            ? 'bg-primary-600 text-white'
-                                                            : 'bg-white text-gray-900 border border-gray-100'
-                                                            }`}
-                                                    >
-                                                        <p className="text-sm sm:text-base break-words">{message.content}</p>
-                                                        <p
-                                                            className={`text-[11px] mt-2 ${isOwn ? 'text-primary-100' : 'text-gray-400'}`}
+                                                <Fragment key={message.id}>
+                                                    {showUnreadDivider && (
+                                                        <div className="flex items-center gap-2 my-2 text-[11px] font-semibold uppercase tracking-wide text-primary-600">
+                                                            <span className="flex-1 h-px bg-primary-100" />
+                                                            <span>Unread messages</span>
+                                                            <span className="flex-1 h-px bg-primary-100" />
+                                                        </div>
+                                                    )}
+                                                    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                                                        <div
+                                                            className={`max-w-[80%] md:max-w-[65%] px-4 py-3 rounded-2xl shadow-sm ${isOwn
+                                                                ? 'bg-primary-600 text-white'
+                                                                : `bg-white text-gray-900 border ${isUnreadMessage ? 'border-primary-200 ring-2 ring-primary-100 bg-primary-50/70' : 'border-gray-100'}`
+                                                                }`}
                                                         >
-                                                            {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
+                                                            <p className="text-sm sm:text-base break-words">{message.content}</p>
+                                                            <p
+                                                                className={`text-[11px] mt-2 ${isOwn ? 'text-primary-100' : 'text-gray-400'}`}
+                                                            >
+                                                                {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                </Fragment>
                                             );
                                         })}
                                     </div>

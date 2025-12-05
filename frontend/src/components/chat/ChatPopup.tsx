@@ -31,6 +31,7 @@ export default function ChatPopup() {
         sendMessage,
         uploadFile,
         getOtherParticipant,
+        totalUnread,
     } = useChat();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -104,9 +105,14 @@ export default function ChatPopup() {
             <div className="fixed bottom-6 right-6 z-50">
                 <button
                     onClick={handleToggleOpen}
-                    className="bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                    className="relative bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                 >
                     <MessageSquare className="w-6 h-6" />
+                    {totalUnread > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[1.5rem] rounded-full bg-white px-1.5 py-0.5 text-xs font-semibold text-primary-700 shadow">
+                            {totalUnread > 99 ? '99+' : totalUnread}
+                        </span>
+                    )}
                 </button>
             </div>
         );

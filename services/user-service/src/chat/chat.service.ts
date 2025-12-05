@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Not } from 'typeorm';
 import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -187,6 +187,34 @@ export class ChatService {
     return this.messageRepository.save(message);
   }
 
+  async markConversationAsRead(conversationId: string, userId: string) {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    if (
+      conversation.participant1Id !== userId &&
+      conversation.participant2Id !== userId
+    ) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    await this.messageRepository
+      .createQueryBuilder()
+      .update(Message)
+      .set({ isRead: true })
+      .where('conversationId = :conversationId', { conversationId })
+      .andWhere('senderId != :userId', { userId })
+      .andWhere('isRead = :isRead', { isRead: false })
+      .execute();
+
+    return { success: true };
+  }
+
   async getUnreadCount(userId: string) {
     const conversations = await this.conversationRepository.find({
       where: [{ participant1Id: userId }, { participant2Id: userId }],
@@ -202,6 +230,7 @@ export class ChatService {
       where: {
         conversationId: In(conversationIds),
         isRead: false,
+        senderId: Not(userId),
       },
     });
 

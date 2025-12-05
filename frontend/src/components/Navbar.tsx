@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/Logo';
 import SearchBar from '@/components/SearchBar';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import {
     HomeIcon,
     UserGroupIcon,
@@ -28,6 +29,7 @@ export default function Navbar() {
     const router = useRouter();
     const { user, logout } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const { unreadMessages } = useUnreadMessages();
 
     const navItems = [
         { name: 'Feed', href: '/feed', icon: HomeIcon, activeIcon: HomeIconSolid },
@@ -66,12 +68,17 @@ export default function Navbar() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-smooth ${isActive
+                                    className={`relative flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-smooth ${isActive
                                         ? 'text-primary-900 border-b-2 border-primary-700'
                                         : 'text-gray-500 hover:text-primary-800 hover:bg-primary-50'
                                         }`}
                                 >
                                     <Icon className="h-6 w-6 mb-1" />
+                                    {item.name === 'Messaging' && unreadMessages > 0 && (
+                                        <span className="absolute -top-1 right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-600 px-1.5 text-[11px] font-semibold text-white shadow-sm">
+                                            {unreadMessages > 99 ? '99+' : unreadMessages}
+                                        </span>
+                                    )}
                                     <span className="hidden md:block">{item.name}</span>
                                 </Link>
                             );

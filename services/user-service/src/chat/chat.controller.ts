@@ -43,6 +43,11 @@ export class ChatController {
     return this.chatService.getUnreadCount(req.user.sub);
   }
 
+  @Put('conversations/:id/read')
+  async markConversationAsRead(@Request() req, @Param('id') id: string) {
+    return this.chatService.markConversationAsRead(id, req.user.sub);
+  }
+
   @Put('messages/:id/read')
   async markAsRead(@Request() req, @Param('id') id: string) {
     return this.chatService.markAsRead(id, req.user.sub);
