@@ -632,6 +632,7 @@ export class CommunitiesService implements OnModuleInit {
   async editMessage(messageId: string, userId: string, content: string) {
     const message = await this.messageRepository.findOne({
       where: { id: messageId },
+      relations: ['group', 'group.owner', 'group.community'],
     });
 
     if (!message) {
@@ -642,9 +643,59 @@ export class CommunitiesService implements OnModuleInit {
       throw new ForbiddenException('You can only edit your own messages');
     }
 
+    // For announcement groups, verify user still has permission to post
+    if (message.group.type === 'announcement') {
+      const member = await this.memberRepository.findOne({
+        where: { communityId: message.group.community.id, userId },
+      });
+
+      const isGroupOwner = message.group.ownerId === userId;
+      const isCommunityAdmin = member && ['owner', 'admin', 'moderator'].includes(member.role);
+
+      if (!isGroupOwner && !isCommunityAdmin) {
+        throw new ForbiddenException('You no longer have permission to edit messages in this announcement group');
+      }
+    }
+
     message.content = content;
     message.isEdited = true;
     return await this.messageRepository.save(message);
+  }
+
+  // Message Deletion
+  async deleteMessage(messageId: string, userId: string) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+      relations: ['group', 'group.owner', 'group.community'],
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    // Check if user is the author or an admin
+    const member = await this.memberRepository.findOne({
+      where: { communityId: message.group.community.id, userId },
+    });
+
+    const isAuthor = message.authorId === userId;
+    const isAdmin = member && ['owner', 'admin', 'moderator'].includes(member.role);
+
+    if (!isAuthor && !isAdmin) {
+      throw new ForbiddenException('You can only delete your own messages or you must be an admin');
+    }
+
+    // For announcement groups, if user is the author, verify they still have permission
+    if (message.group.type === 'announcement' && isAuthor && !isAdmin) {
+      const isGroupOwner = message.group.ownerId === userId;
+      
+      if (!isGroupOwner) {
+        throw new ForbiddenException('You no longer have permission to delete messages in this announcement group');
+      }
+    }
+
+    await this.messageRepository.remove(message);
+    return { message: 'Message deleted successfully' };
   }
 
   // Message Threading

@@ -226,6 +226,15 @@ export class CommunitiesController {
     return this.communitiesService.editMessage(messageId, req.user.sub, content);
   }
 
+  // Message Deletion
+  @Delete('groups/:groupId/messages/:messageId')
+  async deleteMessage(
+    @Param('messageId') messageId: string,
+    @Request() req,
+  ) {
+    return this.communitiesService.deleteMessage(messageId, req.user.sub);
+  }
+
   // Message Threading
   @Get('groups/:groupId/messages/:messageId/thread')
   async getThread(@Param('messageId') messageId: string) {

@@ -470,6 +470,20 @@ export default function CommunityPage() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!selectedGroup) return;
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    
+    try {
+      await api.delete(`/communities/groups/${selectedGroup.id}/messages/${messageId}`);
+      await fetchMessages();
+    } catch (error: any) {
+      console.error('Error deleting message:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to delete message';
+      alert(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -847,6 +861,7 @@ export default function CommunityPage() {
                             currentUserId={user?.id || ''}
                             isAdmin={['owner', 'admin', 'moderator'].includes(userRole)}
                             onEdit={handleEditMessage}
+                            onDelete={handleDeleteMessage}
                             onPin={handlePinMessage}
                             onRefresh={fetchMessages}
                           />
