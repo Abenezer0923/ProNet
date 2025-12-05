@@ -122,7 +122,7 @@ export default function FeedPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
             <Navbar />
 
             <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
@@ -134,7 +134,7 @@ export default function FeedPage() {
                             <div className="h-16 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 relative">
                                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoMTJ2MTJIMzZ6bTI0IDBoMTJ2MTJINjB6TTEyIDM0aDEydjEySDF2LTEyem0yNCAwaDEydjEySDM2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
                             </div>
-                            
+
                             <div className="px-4 pb-5">
                                 <div className="relative flex justify-center -mt-10 mb-3">
                                     <div className="relative">
@@ -146,9 +146,9 @@ export default function FeedPage() {
                                         <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="text-center mb-4">
-                                    <h2 
+                                    <h2
                                         className="font-semibold text-gray-900 text-base hover:underline cursor-pointer hover:text-primary-700 transition-colors"
                                         onClick={() => router.push(`/profile/${user.id}`)}
                                     >
@@ -169,7 +169,7 @@ export default function FeedPage() {
                                 </div>
 
                                 <div className="border-t border-gray-100 pt-3 mt-3">
-                                    <button 
+                                    <button
                                         onClick={() => router.push(`/profile/${user.id}`)}
                                         className="w-full flex items-center justify-center space-x-2 py-2 text-xs font-semibold text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all duration-200"
                                     >
@@ -453,7 +453,7 @@ export default function FeedPage() {
                                     <div className="space-y-3">
                                         {recommendedUsers.map((recommendedUser) => (
                                             <div key={recommendedUser.id} className="flex items-center justify-between group">
-                                                <div 
+                                                <div
                                                     className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
                                                     onClick={() => router.push(recommendedUser.username ? `/in/${recommendedUser.username}` : `/profile/${recommendedUser.id}`)}
                                                 >
