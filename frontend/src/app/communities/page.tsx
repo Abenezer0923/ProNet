@@ -61,11 +61,11 @@ export default function CommunitiesPage() {
       }
 
       console.log(`Found ${communitiesData.length} communities`);
-      
+
       if (communitiesData.length === 0) {
         console.warn('No communities found in database');
       }
-      
+
       let enhancedCommunities = communitiesData;
 
       // If user is logged in, check which communities they're a member of
@@ -151,39 +151,40 @@ export default function CommunitiesPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-amber-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href={user ? "/dashboard" : "/"} className="flex items-center space-x-2 group">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex justify-between items-center gap-2">
+            <Link href={user ? "/dashboard" : "/"} className="flex items-center space-x-2 group flex-shrink-0">
               <Logo />
             </Link>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               {user ? (
                 <>
                   <Link
                     href="/communities/my"
-                    className="text-gray-600 hover:text-primary-800 font-medium transition-smooth"
+                    className="hidden sm:block text-gray-600 hover:text-primary-800 font-medium transition-smooth text-sm lg:text-base"
                   >
                     My Communities
                   </Link>
                   <Link
                     href="/communities/create"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-xs sm:text-sm lg:text-base"
                   >
-                    <PlusIcon className="w-5 h-5" />
-                    Create Community
+                    <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden xs:inline">Create</span>
+                    <span className="hidden sm:inline">Community</span>
                   </Link>
                 </>
               ) : (
                 <>
                   <Link
                     href="/login"
-                    className="text-gray-600 hover:text-primary-800 font-medium transition-smooth px-4 py-2"
+                    className="text-gray-600 hover:text-primary-800 font-medium transition-smooth px-2 sm:px-4 py-2 text-sm sm:text-base"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/register"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-xs sm:text-sm lg:text-base"
                   >
                     Get Started
                   </Link>
@@ -199,36 +200,36 @@ export default function CommunitiesPage() {
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTM0aDEydjEySDF2LTEyem0yNCAwaDEydjEySDM2em0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyem0yNC0yNGgxMnYxMkg2MHptLTI0IDBoMTJ2MTJIMzZ6bS0yNCAwaDEydjEySDF2LTEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
-              <SparklesIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Discover Amazing Communities</span>
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm rounded-full mb-4 sm:mb-6">
+              <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-xs sm:text-sm font-medium">Discover Amazing Communities</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-4">
               Connect, Learn & Grow Together
             </h1>
-            <p className="text-lg sm:text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed px-4">
               Join vibrant communities of professionals, share knowledge, and build meaningful connections
             </p>
 
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl p-2 shadow-2xl">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 bg-white rounded-xl sm:rounded-2xl p-2 shadow-2xl">
                 <div className="relative flex-1">
-                  <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search communities..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 pr-4 py-3 w-full rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
+                    className="pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 w-full rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900 text-sm sm:text-base"
                   />
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-6 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 bg-gray-50 text-gray-900 font-medium cursor-pointer"
+                  className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600 bg-gray-50 text-gray-900 font-medium cursor-pointer text-sm sm:text-base"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -238,20 +239,20 @@ export default function CommunitiesPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 mt-12 max-w-2xl mx-auto">
+            <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-4xl font-bold mb-1">{communities.length}</div>
-                <div className="text-white/80 text-sm">Communities</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{communities.length}</div>
+                <div className="text-white/80 text-xs sm:text-sm">Communities</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-1">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">
                   {communities.reduce((sum, c) => sum + (c.memberCount || 0), 0)}
                 </div>
-                <div className="text-white/80 text-sm">Members</div>
+                <div className="text-white/80 text-xs sm:text-sm">Members</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-1">{categories.length - 1}</div>
-                <div className="text-white/80 text-sm">Categories</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{categories.length - 1}</div>
+                <div className="text-white/80 text-xs sm:text-sm">Categories</div>
               </div>
             </div>
           </div>
@@ -259,23 +260,23 @@ export default function CommunitiesPage() {
       </div>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div className="flex-1">
-                <h3 className="text-red-900 font-semibold mb-1">Error Loading Communities</h3>
-                <p className="text-red-700 text-sm">{error}</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-red-900 font-semibold mb-1 text-sm sm:text-base">Error Loading Communities</h3>
+                <p className="text-red-700 text-xs sm:text-sm break-words">{error}</p>
                 <button
                   onClick={() => {
                     setError(null);
                     setLoading(true);
                     fetchCommunities();
                   }}
-                  className="mt-3 text-sm font-semibold text-red-700 hover:text-red-900 underline"
+                  className="mt-3 text-xs sm:text-sm font-semibold text-red-700 hover:text-red-900 underline"
                 >
                   Try Again
                 </button>
@@ -283,38 +284,38 @@ export default function CommunitiesPage() {
             </div>
           </div>
         )}
-        
+
         {filteredCommunities.length === 0 && !error ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
-            <UserGroupIcon className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No communities found</h3>
-            <p className="text-gray-500 mb-8 text-lg">
-              {communities.length === 0 
-                ? "No communities have been created yet. Be the first to start one!" 
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-12 md:p-16 text-center">
+            <UserGroupIcon className="w-16 h-16 sm:w-20 sm:h-20 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">No communities found</h3>
+            <p className="text-gray-500 mb-6 sm:mb-8 text-base sm:text-lg px-4">
+              {communities.length === 0
+                ? "No communities have been created yet. Be the first to start one!"
                 : "Try adjusting your search or create a new community."}
             </p>
             {user && (
               <Link
                 href="/communities/create"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-lg"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary-800 to-primary-700 text-white rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-105 transition-smooth font-medium text-base sm:text-lg"
               >
-                <PlusIcon className="w-6 h-6" />
+                <PlusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                 Create Community
               </Link>
             )}
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {selectedCategory === 'All' ? 'All Communities' : `${selectedCategory} Communities`}
               </h2>
-              <div className="text-sm text-gray-500">
+              <div className="text-xs sm:text-sm text-gray-500">
                 {filteredCommunities.length} {filteredCommunities.length === 1 ? 'community' : 'communities'}
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredCommunities.map((community) => (
                 <Link
                   key={community.id}

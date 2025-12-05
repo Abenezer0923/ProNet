@@ -516,7 +516,7 @@ export default function CommunityPage() {
       {/* Cover Photo */}
       <div className="relative group">
         <div
-          className="h-80 w-full bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 relative overflow-hidden"
+          className="h-48 sm:h-64 md:h-80 w-full bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 relative overflow-hidden"
           style={{
             backgroundImage: community.coverImage ? `url(${community.coverImage})` : undefined,
             backgroundSize: 'cover',
@@ -531,24 +531,24 @@ export default function CommunityPage() {
 
         {/* Community Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-32 flex flex-col md:flex-row items-end gap-8 pb-8">
+          <div className="relative -mt-16 sm:-mt-24 md:-mt-32 flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 md:gap-8 pb-6 sm:pb-8">
             {/* Logo Section */}
             <div className="relative z-10">
               {community.avatar ? (
                 <div className="relative group/logo">
-                  <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
+                  <div className="absolute inset-0 bg-black/20 rounded-2xl sm:rounded-3xl blur-xl transform translate-y-4"></div>
                   <img
                     src={community.avatar}
                     alt={community.name}
-                    className="relative w-48 h-48 rounded-3xl border-[6px] border-white shadow-2xl object-cover bg-white transition-transform duration-300 transform hover:scale-105 hover:rotate-3"
+                    className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-2xl sm:rounded-3xl border-4 sm:border-[6px] border-white shadow-2xl object-cover bg-white transition-transform duration-300 transform hover:scale-105 hover:rotate-3"
                   />
                 </div>
               ) : (
-                <div className="relative w-48 h-48 group/logo cursor-default">
-                  <div className="absolute inset-0 bg-black/20 rounded-3xl blur-xl transform translate-y-4"></div>
-                  <div className="relative w-full h-full bg-primary-800 rounded-3xl flex items-center justify-center transform rotate-3 transition-transform duration-300 hover:rotate-6 hover:scale-105 shadow-2xl border-[6px] border-white">
-                    <div className="w-[85%] h-[85%] border-2 border-primary-300/30 rounded-2xl transform -rotate-6 flex items-center justify-center bg-gradient-to-br from-primary-700 to-primary-900">
-                      <span className="font-bold text-white text-6xl tracking-tighter drop-shadow-lg">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 group/logo cursor-default">
+                  <div className="absolute inset-0 bg-black/20 rounded-2xl sm:rounded-3xl blur-xl transform translate-y-4"></div>
+                  <div className="relative w-full h-full bg-primary-800 rounded-2xl sm:rounded-3xl flex items-center justify-center transform rotate-3 transition-transform duration-300 hover:rotate-6 hover:scale-105 shadow-2xl border-4 sm:border-[6px] border-white">
+                    <div className="w-[85%] h-[85%] border-2 border-primary-300/30 rounded-xl sm:rounded-2xl transform -rotate-6 flex items-center justify-center bg-gradient-to-br from-primary-700 to-primary-900">
+                      <span className="font-bold text-white text-3xl sm:text-4xl md:text-6xl tracking-tighter drop-shadow-lg">
                         {community.name.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -558,37 +558,37 @@ export default function CommunityPage() {
             </div>
 
             {/* Content Section */}
-            <div className="flex-1 text-white md:mb-2 z-10">
+            <div className="flex-1 text-white text-center md:text-left md:mb-2 z-10">
               <div className="flex flex-col gap-2">
-                <h1 className="text-5xl font-extrabold text-white tracking-tight drop-shadow-lg leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight drop-shadow-lg leading-tight">
                   {community.name}
                 </h1>
-                <p className="text-white/90 text-xl font-medium max-w-2xl leading-relaxed drop-shadow-md line-clamp-2">
+                <p className="text-white/90 text-sm sm:text-base md:text-lg lg:text-xl font-medium max-w-2xl leading-relaxed drop-shadow-md line-clamp-2">
                   {community.description}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mt-6">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm">
-                  <UsersIcon className="w-5 h-5 text-primary-200" />
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 sm:gap-4 mt-4 sm:mt-6">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm text-sm sm:text-base">
+                  <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary-200" />
                   <span className="font-semibold text-white">{community.members?.length || 0}</span>
-                  <span className="text-primary-100 text-sm">members</span>
+                  <span className="text-primary-100 text-xs sm:text-sm">members</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm capitalize">
-                  <span className={`w-2.5 h-2.5 rounded-full ${community.privacy === 'public' ? 'bg-green-400' : 'bg-amber-400'} shadow-[0_0_8px_rgba(74,222,128,0.5)]`}></span>
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm capitalize text-sm sm:text-base">
+                  <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${community.privacy === 'public' ? 'bg-green-400' : 'bg-amber-400'} shadow-[0_0_8px_rgba(74,222,128,0.5)]`}></span>
                   <span className="font-medium text-white">{community.privacy} Group</span>
                 </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 mt-4 md:mt-0 md:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3 mt-4 md:mt-0 md:mb-4 w-full md:w-auto justify-center md:justify-end">
               {isMember ? (
                 <>
                   {userRole !== 'owner' && (
                     <button
                       onClick={handleLeaveCommunity}
-                      className="px-6 py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-xl hover:bg-white hover:text-red-600 font-semibold shadow-sm transition-all duration-200"
+                      className="px-4 sm:px-6 py-2 sm:py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-lg sm:rounded-xl hover:bg-white hover:text-red-600 font-semibold shadow-sm transition-all duration-200 text-sm sm:text-base"
                     >
                       Leave
                     </button>
@@ -596,7 +596,7 @@ export default function CommunityPage() {
                   {['owner', 'admin'].includes(userRole) && (
                     <Link
                       href={`/communities/${communityId}/settings`}
-                      className="px-6 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold shadow-lg hover:shadow-primary-500/30 transition-all duration-200"
+                      className="px-4 sm:px-6 py-2 sm:py-2.5 bg-primary-600 text-white rounded-lg sm:rounded-xl hover:bg-primary-700 font-semibold shadow-lg hover:shadow-primary-500/30 transition-all duration-200 text-sm sm:text-base"
                     >
                       Settings
                     </Link>
@@ -605,7 +605,7 @@ export default function CommunityPage() {
               ) : (
                 <button
                   onClick={handleJoinCommunity}
-                  className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-bold shadow-lg hover:shadow-primary-500/40 transition-all duration-200 transform hover:-translate-y-0.5"
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-primary-600 text-white rounded-lg sm:rounded-xl hover:bg-primary-700 font-bold shadow-lg hover:shadow-primary-500/40 transition-all duration-200 transform hover:-translate-y-0.5 text-sm sm:text-base"
                 >
                   Join Community
                 </button>
@@ -618,21 +618,21 @@ export default function CommunityPage() {
       {/* Tabs Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8 overflow-x-auto" aria-label="Tabs">
+          <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide" aria-label="Tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`
-                  py-4 px-1 border-b-2 font-medium text-sm transition-all whitespace-nowrap flex items-center
+                  py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap flex items-center flex-shrink-0
                   ${activeTab === tab.id
                     ? 'border-primary-600 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >
-                <tab.icon className={`w-5 h-5 mr-2 ${activeTab === tab.id ? 'text-primary-600' : 'text-gray-400'}`} />
-                {tab.label}
+                <tab.icon className={`w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 ${activeTab === tab.id ? 'text-primary-600' : 'text-gray-400'}`} />
+                <span className="hidden xs:inline">{tab.label}</span>
               </button>
             ))}
           </nav>
@@ -640,12 +640,12 @@ export default function CommunityPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Sidebar - Groups (Only visible on Groups tab or desktop) */}
           {(activeTab === 'groups') && (
             <div className="w-full lg:w-80 flex-shrink-0">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-32">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 lg:sticky lg:top-32">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-gray-900 text-lg">Groups</h3>
                   {['owner', 'admin', 'moderator'].includes(userRole) && (
@@ -767,24 +767,24 @@ export default function CommunityPage() {
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
             {activeTab === 'home' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
                 <div className="prose max-w-none">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About {community.name}</h2>
-                  <p className="text-gray-600 leading-relaxed">{community.description}</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About {community.name}</h2>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{community.description}</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-gray-100">
-                  <div className="p-6 bg-primary-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-primary-600 mb-1">{community.members?.length || 0}</div>
-                    <div className="text-sm font-medium text-gray-600">Members</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-100">
+                  <div className="p-4 sm:p-6 bg-primary-50 rounded-xl text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-primary-600 mb-1">{community.members?.length || 0}</div>
+                    <div className="text-xs sm:text-sm font-medium text-gray-600">Members</div>
                   </div>
-                  <div className="p-6 bg-accent-orange-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-accent-orange-600 mb-1">{community.groups?.length || 0}</div>
-                    <div className="text-sm font-medium text-gray-600">Groups</div>
+                  <div className="p-4 sm:p-6 bg-accent-orange-50 rounded-xl text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-accent-orange-600 mb-1">{community.groups?.length || 0}</div>
+                    <div className="text-xs sm:text-sm font-medium text-gray-600">Groups</div>
                   </div>
-                  <div className="p-6 bg-gray-50 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-gray-700 mb-1 capitalize">{community.privacy}</div>
-                    <div className="text-sm font-medium text-gray-600">Privacy</div>
+                  <div className="p-4 sm:p-6 bg-gray-50 rounded-xl text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-gray-700 mb-1 capitalize">{community.privacy}</div>
+                    <div className="text-xs sm:text-sm font-medium text-gray-600">Privacy</div>
                   </div>
                 </div>
               </div>
@@ -803,7 +803,7 @@ export default function CommunityPage() {
                   </div>
                 ) : (
                   // Regular Chat UI
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-[600px]">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-[500px] sm:h-[600px]">
                     {/* Pinned Messages Bar */}
                     <PinnedMessages
                       groupId={selectedGroup.id}
@@ -812,24 +812,25 @@ export default function CommunityPage() {
                     />
 
                     {/* Group Header */}
-                    <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
-                      <div>
-                        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                          <span className="text-primary-500">#</span> {selectedGroup.name}
+                    <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2 truncate">
+                          <span className="text-primary-500">#</span> 
+                          <span className="truncate">{selectedGroup.name}</span>
                         </h2>
                         {selectedGroup.description && (
-                          <p className="text-sm text-gray-500 mt-0.5">{selectedGroup.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">{selectedGroup.description}</p>
                         )}
                       </div>
-                      <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-400'}`} title={isConnected ? 'Connected' : 'Disconnected'} />
+                      <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full flex-shrink-0 ml-2 ${isConnected ? 'bg-green-500' : 'bg-red-400'}`} title={isConnected ? 'Connected' : 'Disconnected'} />
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-white">
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 bg-white">
                       {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                          <ChatBubbleLeftRightIcon className="w-12 h-12 mb-2 opacity-50" />
-                          <p>No messages yet. Start the conversation!</p>
+                          <ChatBubbleLeftRightIcon className="w-10 h-10 sm:w-12 sm:h-12 mb-2 opacity-50" />
+                          <p className="text-sm sm:text-base text-center px-4">No messages yet. Start the conversation!</p>
                         </div>
                       ) : (
                         messages.map((message: Message) => (
@@ -862,29 +863,29 @@ export default function CommunityPage() {
                     </div>
 
                     {/* Message Input */}
-                    <div className="p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
+                    <div className="p-3 sm:p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
                       {messageAttachment && (
                         <div className="mb-2 p-2 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <PaperClipIcon className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm text-gray-700 truncate max-w-[200px]">{messageAttachment.name}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-gray-700 truncate">{messageAttachment.name}</span>
                           </div>
                           <button
                             onClick={() => setMessageAttachment(null)}
-                            className="text-gray-400 hover:text-red-500"
+                            className="text-gray-400 hover:text-red-500 flex-shrink-0 ml-2"
                           >
                             <XMarkIcon className="w-4 h-4" />
                           </button>
                         </div>
                       )}
-                      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                      <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2">
                         <button
                           type="button"
                           onClick={() => document.getElementById('chat-file-input')?.click()}
-                          className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-full transition"
+                          className="p-2 sm:p-2.5 text-gray-500 hover:bg-gray-100 rounded-full transition flex-shrink-0"
                           disabled={!isMember || isMessageSending}
                         >
-                          <PaperClipIcon className="w-5 h-5" />
+                          <PaperClipIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                         <input
                           type="file"
@@ -900,16 +901,16 @@ export default function CommunityPage() {
                           type="text"
                           value={newMessage}
                           onChange={handleTyping}
-                          placeholder={isMember ? `Message #${selectedGroup.name}` : "Join community to chat"}
+                          placeholder={isMember ? `Message` : "Join to chat"}
                           disabled={!isMember || isMessageSending}
-                          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400"
+                          className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white shadow-sm disabled:bg-gray-100 disabled:text-gray-400 text-sm sm:text-base min-w-0"
                         />
                         <button
                           type="submit"
                           disabled={(!newMessage.trim() && !messageAttachment) || !isMember || isMessageSending}
-                          className="p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                          className="p-2 sm:p-2.5 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
                         >
-                          <PaperAirplaneIcon className="w-5 h-5" />
+                          <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       </form>
                     </div>
@@ -919,63 +920,63 @@ export default function CommunityPage() {
             )}
 
             {activeTab === 'groups' && !selectedGroup && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center h-[600px] flex flex-col items-center justify-center">
-                <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
-                  <ChatBubbleLeftRightIcon className="w-8 h-8 text-primary-600" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center h-[400px] sm:h-[500px] md:h-[600px] flex flex-col items-center justify-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+                  <ChatBubbleLeftRightIcon className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Group</h3>
-                <p className="text-gray-500 max-w-sm">Choose a group from the sidebar to start chatting with other community members.</p>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Select a Group</h3>
+                <p className="text-sm sm:text-base text-gray-500 max-w-sm px-4">Choose a group from the sidebar to start chatting with other community members.</p>
               </div>
             )}
 
             {activeTab === 'posts' && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Create Post - Only for Community Owner */}
                 {isMember && userRole === 'owner' && (
-                  <div className="bg-gradient-to-br from-white via-white to-primary-50/30 rounded-2xl shadow-lg border-2 border-primary-100/50 p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Create Post</h3>
+                  <div className="bg-gradient-to-br from-white via-white to-primary-50/30 rounded-xl sm:rounded-2xl shadow-lg border-2 border-primary-100/50 p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Create Post</h3>
                     <form onSubmit={handleCreatePost}>
                       <textarea
                         value={postContent}
                         onChange={(e) => setPostContent(e.target.value)}
                         placeholder="Share something with your community..."
                         rows={4}
-                        className="w-full px-4 py-3 border-2 border-primary-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white resize-none"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-primary-100 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white resize-none text-sm sm:text-base"
                       />
 
                       {postImage && (
-                        <div className="mt-4 relative inline-block group">
+                        <div className="mt-3 sm:mt-4 relative inline-block group">
                           <img
                             src={URL.createObjectURL(postImage)}
                             alt="Selected"
-                            className="h-32 w-auto rounded-xl border-2 border-primary-100 shadow-md"
+                            className="h-24 sm:h-32 w-auto rounded-lg sm:rounded-xl border-2 border-primary-100 shadow-md"
                           />
                           <button
                             type="button"
                             onClick={() => setPostImage(null)}
                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 transform"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between mt-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 sm:mt-4">
                         <button
                           type="button"
                           onClick={() => postImageInputRef.current?.click()}
-                          className="flex items-center space-x-2 px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-xl transition"
+                          className="flex items-center justify-center space-x-2 px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg sm:rounded-xl transition text-sm sm:text-base"
                         >
-                          <PhotoIcon className="w-5 h-5" />
+                          <PhotoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                           <span className="font-medium">Add Photo</span>
                         </button>
 
                         <button
                           type="submit"
                           disabled={(!postContent.trim() && !postImage) || isPostingSubmitting}
-                          className={`px-6 py-2.5 rounded-xl font-semibold transition ${(!postContent.trim() && !postImage) || isPostingSubmitting
+                          className={`px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold transition text-sm sm:text-base ${(!postContent.trim() && !postImage) || isPostingSubmitting
                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             : 'bg-gradient-to-r from-primary-600 to-primary-800 text-white hover:from-primary-700 hover:to-primary-900 shadow-lg hover:shadow-xl'
                             }`}
@@ -1036,22 +1037,22 @@ export default function CommunityPage() {
             )}
 
             {activeTab === 'members' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <UsersIcon className="w-6 h-6 text-gray-400" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+                  <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" />
                   Members
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {community.members?.map((member: any) => (
-                    <div key={member.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl border border-gray-100 transition">
-                      <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-lg border border-primary-200">
+                    <div key={member.id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-gray-50 rounded-lg sm:rounded-xl border border-gray-100 transition">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-base sm:text-lg border border-primary-200 flex-shrink-0">
                         {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                           {member.user?.firstName} {member.user?.lastName}
                         </div>
-                        <div className="text-sm text-gray-500 capitalize px-2 py-0.5 bg-gray-100 rounded-full inline-block mt-1">
+                        <div className="text-xs sm:text-sm text-gray-500 capitalize px-2 py-0.5 bg-gray-100 rounded-full inline-block mt-1">
                           {member.role}
                         </div>
                       </div>
@@ -1062,20 +1063,20 @@ export default function CommunityPage() {
             )}
 
             {activeTab === 'articles' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">Articles</h2>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Articles</h2>
                   {isMember && (
                     <Link
                       href={`/communities/${communityId}/articles/new`}
-                      className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition shadow-sm font-medium"
+                      className="w-full sm:w-auto text-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition shadow-sm font-medium text-sm sm:text-base"
                     >
                       Write Article
                     </Link>
                   )}
                 </div>
 
-                <div className="grid gap-6">
+                <div className="grid gap-4 sm:gap-6">
                   {articles.length > 0 ? (
                     articles.map((article) => (
                       <ArticleCard
@@ -1085,11 +1086,11 @@ export default function CommunityPage() {
                       />
                     ))
                   ) : (
-                    <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
-                      <NewspaperIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                      <p className="text-gray-500 text-lg font-medium">No articles yet.</p>
+                    <div className="text-center py-12 sm:py-16 bg-white rounded-xl shadow-sm border border-gray-100 px-4">
+                      <NewspaperIcon className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500 text-base sm:text-lg font-medium">No articles yet.</p>
                       {isMember && (
-                        <p className="text-gray-400 mt-2">
+                        <p className="text-gray-400 mt-2 text-sm sm:text-base">
                           Be the first to share your knowledge!
                         </p>
                       )}
