@@ -58,7 +58,7 @@ import { JobsModule } from './jobs/jobs.module';
         autoLoadEntities: true,
         synchronize: true, // Set to false in production
         logging: (process.env.TYPEORM_LOGGING || 'true') === 'true',
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false),
       }),
     }),
     AuthModule,
