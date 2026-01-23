@@ -31,10 +31,13 @@ async function bootstrap() {
       allowedHeaders: ['Content-Type', 'Authorization'],
     });
 
-    const port = process.env.PORT || 3001;
+  // Default to 8000 which is commonly used by some hosting health checks
+  // (e.g., Koyeb / platform defaults). If your platform sets PORT explicitly,
+  // that value will be used instead.
+  const port = process.env.PORT || 8000;
     await app.listen(port);
 
-    console.log(`🚀 User Service running on http://localhost:${port}`);
+  console.log(`🚀 User Service running on http://localhost:${port}`);
     console.log(`📊 Database: ${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}`);
     console.log(`📦 Database Name: ${process.env.DATABASE_NAME}`);
 

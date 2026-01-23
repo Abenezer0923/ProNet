@@ -48,7 +48,10 @@ import { JobsModule } from './jobs/jobs.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
-        host: process.env.DATABASE_HOST || 'localhost',
+  // Default to the Docker Compose service name 'postgres' when running
+  // in containerized environments. Falling back to 'localhost' can
+  // cause confusion when the DB runs in a separate container.
+  host: process.env.DATABASE_HOST || 'postgres',
         port: parseInt(process.env.DATABASE_PORT || '5432'),
         username: process.env.DATABASE_USER || 'postgres',
         password: process.env.DATABASE_PASSWORD || 'postgres',

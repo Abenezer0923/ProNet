@@ -149,7 +149,9 @@ export default function LoginPage() {
 
                 <button
                   onClick={() => {
-                    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001';
+                    // Prefer explicit auth URL, then API URL, then current origin so builds
+                    // without environment variables don't accidentally point to old Render URLs.
+                    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || window.location.origin;
                     window.location.href = `${authUrl}/api/auth/google`;
                   }}
                   className="mt-6 w-full flex items-center justify-center space-x-3 px-6 py-3.5 bg-white border border-gray-300 rounded-full hover:bg-gray-50 transition-colors font-medium text-gray-700"

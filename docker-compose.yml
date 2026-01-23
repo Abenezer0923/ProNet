@@ -63,9 +63,9 @@ services:
       dockerfile: Dockerfile
     container_name: profession-user-service
     ports:
-      - "3001:3001"
+      - "8000:8000"
     environment:
-      PORT: 3001
+      PORT: 8000
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
@@ -90,7 +90,7 @@ services:
     environment:
       PORT: 3000
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      USER_SERVICE_URL: http://user-service:3001
+      USER_SERVICE_URL: http://user-service:8000
     depends_on:
       - user-service
     networks:
