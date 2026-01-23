@@ -19,46 +19,53 @@ A modern social platform where professionals connect, learn, and grow together t
 - 🚧 **Real-time Chat** - Connect with professionals (Coming soon)
 - 🚧 **Mentorship** - Find mentors and mentees (Coming soon)
 
-## 🚀 Quick Start
-
-### One-Command Setup
+## 🚀 Quick Start (Docker)
 
 ```bash
 # Clone the repository
 git clone https://github.com/Abenezer0923/ProNet.git
 cd ProNet
 
-# Start everything with Docker
-./docker-start.sh
+# Build and start everything
+docker compose up --build
 ```
 
-Then visit **http://localhost:3100** 🎉
+Then visit **http://localhost:3100** (frontend) and **http://localhost:3000** (API Gateway). The user-service listens on **http://localhost:8000**. PostgreSQL is exposed on **localhost:5433**.
 
-### Manual Setup
+### Manual Development (without Docker)
+
+In three terminals:
 
 ```bash
-# Start infrastructure
-docker-compose up -d
+# 1) API Gateway
+cd services/api-gateway
+npm install
+npm run start:dev
 
-# Install dependencies
-cd services/api-gateway && npm install && cd ../..
-cd services/user-service && npm install && cd ../..
-cd frontend && npm install && cd ..
+# 2) User Service
+cd services/user-service
+npm install
+npm run start:dev
 
-# Start services (3 terminals)
-cd services/api-gateway && npm run start:dev
-cd services/user-service && npm run start:dev
-cd frontend && npm run dev
+# 3) Frontend
+cd frontend
+npm install
+npm run dev
 ```
+
+Infrastructure defaults:
+- Postgres: `localhost:5433` (container: `postgres:5432`)
+- Redis: `localhost:6379`
+- MongoDB: `localhost:27017`
 
 ## 🌐 Access Points
 
-| Service        | URL                          | Description          |
+| Service        | URL/Port                     | Description          |
 |----------------|------------------------------|----------------------|
 | Frontend       | http://localhost:3100        | Next.js application  |
 | API Gateway    | http://localhost:3000        | Main API endpoint    |
-| User Service   | http://localhost:3001        | User management      |
-| PostgreSQL     | localhost:5432               | Primary database     |
+| User Service   | http://localhost:8000        | User management      |
+| PostgreSQL     | localhost:5433 (host)        | Primary database     |
 | Redis          | localhost:6379               | Cache & sessions     |
 | MongoDB        | localhost:27017              | Document storage     |
 
@@ -78,7 +85,7 @@ cd frontend && npm run dev
                │
                ▼
 ┌─────────────────────────────────────┐
-│ User Service (http://localhost:3001)│
+│ User Service (http://localhost:8000)│
 │    Business Logic & Database        │
 └──────────────┬──────────────────────┘
                │
@@ -121,13 +128,9 @@ Real-time Chat:     ░░░░░░░░░░░░░░░░░░░░
 
 ## 📚 Documentation
 
-- [Quick Start Guide](QUICK_START.md)
-- [Features Implemented](FEATURES_IMPLEMENTED.md)
-- [Implementation Status](IMPLEMENTATION_STATUS.md)
-- [Docker Guide](DOCKER_GUIDE.md)
-- [Deployment Guide](DEPLOYMENT.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-
+- The repository currently ships without additional Markdown guides (deprecated Render docs were removed).
+- Key defaults: user-service `PORT=8000`, API Gateway `PORT=3000`, Postgres mapped to host `5433`.
+- Deployment (current target): backend on Koyeb, database on Neon, frontend on Vercel.
 
 ## 🧪 Testing
 
@@ -159,13 +162,7 @@ curl -X GET http://localhost:3000/api/users/auth/me \
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Fork the repo, open a branch, and submit a PR. With the auxiliary guides removed, please include any setup notes relevant to your changes in your PR description.
 
 ## 📝 License
 
@@ -210,4 +207,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for professional communities**
 
-*Last Updated: 2024*
+*Last Updated: 2026*

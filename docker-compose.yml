@@ -9,8 +9,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: profession_db
+    # Map to 5433 on the host to avoid collisions if you already have Postgres
+    # running locally. Inside the compose network, services use the default
+    # port 5432 and host "postgres".
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
