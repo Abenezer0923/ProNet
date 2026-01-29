@@ -25,10 +25,16 @@ async function bootstrap() {
 
     // Enable CORS
     app.enableCors({
-      origin: true, // Allow all origins in development
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:3100',
+        'https://pro-net-ten.vercel.app',
+        'https://pro-net-git-main-abenezers-projects-0923.vercel.app',
+        /\.vercel\.app$/,
+      ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     });
 
     // Default to 8000 which is commonly used by some hosting health checks

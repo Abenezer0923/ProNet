@@ -69,7 +69,26 @@ export class ProxyService {
       // Log response for debugging
       console.log(`Response status: ${response.status}`);
 
-      res.status(response.status).json(response.data);
+      // Forward headers from the backend to the client
+      // We exclude specific headers that might cause conflicts or are hop-by-hop
+      const excludedHeaders = [
+        'host',
+        'connection',
+        'content-length',
+        'transfer-encoding',
+        'access-control-allow-origin',
+        'access-control-allow-methods',
+        'access-control-allow-headers',
+        'access-control-allow-credentials',
+      ];
+
+      Object.keys(response.headers).forEach((key) => {
+        if (!excludedHeaders.includes(key.toLowerCase())) {
+          res.setHeader(key, response.headers[key]);
+        }
+      });
+
+      res.status(response.status).send(response.data);
     } catch (error) {
       console.error(`Proxy error for ${req.url}:`, error.message);
       console.error('Error stack:', error.stack);
