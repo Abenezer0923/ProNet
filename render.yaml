@@ -16,7 +16,7 @@ services:
       - key: PORT
         value: 3001
       - key: DATABASE_HOST
-        value: dpg-d4askkpe2q1c73b80mrg-a
+        value: dpg-d4askkpe2q1c73b80mrg-a.oregon-postgres.render.com
       - key: DATABASE_PORT
         value: 5432
       - key: DATABASE_USER
