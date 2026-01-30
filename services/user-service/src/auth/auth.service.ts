@@ -77,17 +77,29 @@ export class AuthService {
 
       // Generate and send verification OTP
       console.log('Generating verification OTP...');
-      const otp = await this.generateAndSendOtp(email);
-      console.log('Verification OTP sent successfully');
+      let otp = '';
+      try {
+        otp = await this.generateAndSendOtp(email);
+        console.log('Verification OTP sent successfully');
+      } catch (otpError) {
+        console.error('Failed to generate/send OTP:', otpError);
+        // Don't fail registration if OTP fails - user can request resend
+        console.log('Continuing registration despite OTP failure');
+      }
 
       return {
         user: this.sanitizeUser(user),
         requiresVerification: true,
         message: 'Registration successful. Please check your email for verification code.',
-        otp: otp, // Include OTP for demo purposes
+        otp: otp || 'OTP generation failed - please request resend', // Include OTP for demo purposes
       };
     } catch (error) {
       console.error('Registration error:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
       throw error;
     }
   }

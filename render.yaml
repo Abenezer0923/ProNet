@@ -77,11 +77,13 @@ services:
     envVars:
       - key: PORT
         value: 3000
+      - key: NODE_ENV
+        value: production
       - key: USER_SERVICE_URL
         fromService:
           type: web
           name: pronet-user-service
-          property: hostport
+          envVarKey: RENDER_EXTERNAL_URL
       - key: JWT_SECRET
         sync: false
 

@@ -9,19 +9,35 @@ export class ProxyService {
     users: process.env.USER_SERVICE_URL || 'http://localhost:3001',
   };
 
+  constructor() {
+    console.log('🔧 Proxy Service Initialized');
+    console.log('📍 User Service URL:', this.serviceUrls.users);
+    console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
+  }
+
   async forward(req: Request, res: Response, service: string) {
     try {
       let serviceUrl = this.serviceUrls[service];
       
+      if (!serviceUrl) {
+        console.error(`Service URL not configured for: ${service}`);
+        throw new Error(`Service ${service} not configured`);
+      }
+
       // Ensure protocol is present (Render internal URLs might come as host:port)
       if (!serviceUrl.startsWith('http://') && !serviceUrl.startsWith('https://')) {
-        serviceUrl = `http://${serviceUrl}`;
+        // On Render, internal services should use https
+        serviceUrl = `https://${serviceUrl}`;
       }
 
       const url = `${serviceUrl}${req.url}`;
 
       console.log(`Forwarding ${req.method} ${req.url} to ${url}`);
+      console.log(`Service URL: ${serviceUrl}`);
       console.log(`Content-Type: ${req.headers['content-type']}`);
+      if (req.body) {
+        console.log(`Request body:`, JSON.stringify(req.body).substring(0, 200));
+      }
 
       // Check if this is a multipart/form-data request (file upload)
       const isMultipart =
@@ -98,14 +114,31 @@ export class ProxyService {
     } catch (error) {
       console.error(`Proxy error for ${req.url}:`, error.message);
       console.error('Error stack:', error.stack);
+      console.error('Service URL attempted:', this.serviceUrls[service]);
+      
       if (error.response) {
         console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
+        console.error('Error response data:', JSON.stringify(error.response.data));
         res.status(error.response.status).json(error.response.data);
+      } else if (error.code === 'ECONNREFUSED') {
+        console.error('Connection refused - service may be down or URL is incorrect');
+        res.status(503).json({
+          message: 'Service temporarily unavailable',
+          error: 'Unable to connect to backend service',
+          details: error.message,
+        });
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
+        console.error('Connection timeout or DNS resolution failed');
+        res.status(504).json({
+          message: 'Gateway timeout',
+          error: 'Backend service did not respond in time',
+          details: error.message,
+        });
       } else {
         res.status(500).json({
-          message: 'Service unavailable',
+          message: 'Internal gateway error',
           error: error.message,
+          code: error.code,
         });
       }
     }
