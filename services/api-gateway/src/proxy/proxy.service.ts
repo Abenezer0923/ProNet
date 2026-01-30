@@ -11,7 +11,13 @@ export class ProxyService {
 
   async forward(req: Request, res: Response, service: string) {
     try {
-      const serviceUrl = this.serviceUrls[service];
+      let serviceUrl = this.serviceUrls[service];
+      
+      // Ensure protocol is present (Render internal URLs might come as host:port)
+      if (!serviceUrl.startsWith('http://') && !serviceUrl.startsWith('https://')) {
+        serviceUrl = `http://${serviceUrl}`;
+      }
+
       const url = `${serviceUrl}${req.url}`;
 
       console.log(`Forwarding ${req.method} ${req.url} to ${url}`);

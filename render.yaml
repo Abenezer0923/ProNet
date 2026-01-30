@@ -48,7 +48,7 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_CALLBACK_URL
-        value: https://pronet-user-service.onrender.com/api/auth/google/callback
+        value: https://pronet-user-service-qpe6.onrender.com/api/auth/google/callback
       - key: FRONTEND_URL
         value: https://pro-net-ten.vercel.app
       - key: EMAIL_USER
@@ -80,7 +80,10 @@ services:
       - key: PORT
         value: 3000
       - key: USER_SERVICE_URL
-        value: https://pronet-user-service.onrender.com
+        fromService:
+          type: web
+          name: pronet-user-service
+          property: hostport
       - key: JWT_SECRET
         generateValue: true
 
