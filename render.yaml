@@ -15,6 +15,10 @@ services:
     envVars:
       - key: PORT
         value: 3001
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_SSL
+        value: true
       - key: DATABASE_HOST
         value: dpg-d4askkpe2q1c73b80mrg-a.oregon-postgres.render.com
       - key: DATABASE_PORT
