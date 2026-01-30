@@ -20,51 +20,51 @@ services:
       - key: DATABASE_SSL
         value: true
       - key: DATABASE_HOST
-        value: dpg-d4askkpe2q1c73b80mrg-a.oregon-postgres.render.com
+        sync: false
       - key: DATABASE_PORT
-        value: 5432
+        sync: false
       - key: DATABASE_USER
-        value: profession_db_user
+        sync: false
       - key: DATABASE_PASSWORD
-        value: A7FSv3naAi5oIJkYlHKiTT5jcoLvkEla
+        sync: false
       - key: DATABASE_NAME
-        value: profession_db
+        sync: false
       - key: JWT_SECRET
-        value: "VY2Lf3iix4PILDFNK7HggRhhHIiyQY3qB381Cq0Yui0="
+        sync: false
       - key: CLOUDINARY_CLOUD_NAME
-        value: dgl4cpuik
+        sync: false
       - key: CLOUDINARY_API_KEY
-        value: 637454513411741
+        sync: false
       - key: CLOUDINARY_API_SECRET
-        value: 7JHtL4bTAYqwq7RaQM60Ocf43fw
+        sync: false
       - key: GOOGLE_CLIENT_ID
-        value: 716006181490-r1fvklb9s9b26nk7jdmf69vf315b9uaa.apps.googleusercontent.com
+        sync: false
       - key: GOOGLE_CLIENT_SECRET
-        value: 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
+        sync: false
       - key: GOOGLE_CALLBACK_URL
-        value: https://pronet-user-service-qpe6.onrender.com/api/auth/google/callback
+        sync: false
       - key: FRONTEND_URL
-        value: https://pro-net-ten.vercel.app
+        sync: false
       - key: EMAIL_USER
-        value: abenezerforjobs2@gmail.com
+        sync: false
       - key: EMAIL_PASSWORD
-        value: fzrlxrluiynrujpl
+        sync: false
       - key: SMTP_HOST
-        value: smtp.gmail.com
+        sync: false
       - key: SMTP_PORT
-        value: 587
+        sync: false
       - key: SMTP_SECURE
-        value: false
+        sync: false
       - key: GOOGLE_REFRESH_TOKEN
-        value: 1//03WvAwhk0kBmvCgYIARAAGAMSNwF-L9IrVrB4IjKBUMWr0aB0DviIeWaHGXXVjwRjCxOdTgdd0nS7dcZWnJJ4FSQT_C5VGSFo1Sk
+        sync: false
       - key: RESEND_API_KEY
-        value: re_4vTKv6Cz_HZ2iX37wBfEzcmntFxVS49Jt
+        sync: false
       - key: DAILY_API_KEY
-        value: d19964998b42867784f5ee7e9cf95ee4a05c044861b44aae14754eaa5fb47876
+        sync: false
       - key: STREAM_API_KEY
-        value: djqf3q9q4ygj
+        sync: false
       - key: STREAM_SECRET_KEY
-        value: rtv72856wrcq4946hv6srztkdgyqnh7xcrwnhse5r8f7aj7zhfp7ycnrkffmhfp5
+        sync: false
         
   # API Gateway
   - type: web
@@ -83,6 +83,6 @@ services:
           name: pronet-user-service
           property: hostport
       - key: JWT_SECRET
-        value: "VY2Lf3iix4PILDFNK7HggRhhHIiyQY3qB381Cq0Yui0="
+        sync: false
 
 
