@@ -13,18 +13,17 @@ jobs:
     
     steps:
       - name: Deploy API Gateway
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: ${{ secrets.RENDER_DEPLOY_HOOK_URL_GATEWAY }}
-          method: 'GET'
-          preventFailureOnNoResponse: 'true'
+        if: "${{ secrets.RENDER_DEPLOY_HOOK_URL_GATEWAY != '' }}"
+        run: curl -X GET "${{ secrets.RENDER_DEPLOY_HOOK_URL_GATEWAY }}"
           
       - name: Deploy User Service
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: ${{ secrets.RENDER_DEPLOY_HOOK_URL_USER_SERVICE }}
-          method: 'GET'
-          preventFailureOnNoResponse: 'true'
-          
-      - name: Deployment Notification
-        run: echo "✅ Triggered deployment on Render"
+        if: "${{ secrets.RENDER_DEPLOY_HOOK_URL_USER_SERVICE != '' }}"
+        run: curl -X GET "${{ secrets.RENDER_DEPLOY_HOOK_URL_USER_SERVICE }}"
+
+      - name: Deployment Status
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL_GATEWAY }}" ] && [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL_USER_SERVICE }}" ]; then
+            echo "ℹ️ No Deploy Hooks found. Relying on Render's Auto-Deploy (triggered by git push)."
+          else
+            echo "✅ Triggered manual deployment via Hooks."
+          fi
