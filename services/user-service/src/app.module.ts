@@ -43,6 +43,9 @@ import { MeetingQAUpvote } from './communities/entities/meeting-qa-upvote.entity
 import { HealthController } from './health/health.controller';
 import { JobsModule } from './jobs/jobs.module';
 
+// Helper to parse boolean env vars
+const parseBoolean = (val: string | undefined) => val === 'true' || val === '1';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -61,7 +64,13 @@ import { JobsModule } from './jobs/jobs.module';
         autoLoadEntities: true,
         synchronize: true, // Set to false in production
         logging: (process.env.TYPEORM_LOGGING || 'true') === 'true',
-        ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false),
+        // Explicitly handle SSL for Render and other cloud providers
+        ssl: parseBoolean(process.env.DATABASE_SSL) || process.env.NODE_ENV === 'production',
+        extra: {
+          ssl: (parseBoolean(process.env.DATABASE_SSL) || process.env.NODE_ENV === 'production')
+            ? { rejectUnauthorized: false }
+            : null,
+        },
       }),
     }),
     AuthModule,
