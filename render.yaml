@@ -10,7 +10,7 @@ services:
     runtime: node
     plan: free
     rootDir: services/user-service
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: npm install --production=false --legacy-peer-deps && npm run build
     startCommand: npm run start
     envVars:
       - key: PORT
@@ -72,7 +72,7 @@ services:
     runtime: node
     plan: free
     rootDir: services/api-gateway
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: npm install --production=false --legacy-peer-deps && npm run build
     startCommand: npm run start
     envVars:
       - key: PORT
