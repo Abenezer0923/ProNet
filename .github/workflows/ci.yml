@@ -47,6 +47,34 @@ jobs:
         working-directory: ./services/api-gateway
         run: npm run build
 
+      - name: Create .env file for User Service
+        working-directory: ./services/user-service
+        run: |
+          echo "CLOUDINARY_API_KEY=637454513411741" >> .env
+          echo "CLOUDINARY_API_SECRET=7JHtL4bTAYqwq7RaQM60Ocf43fw" >> .env
+          echo "CLOUDINARY_CLOUD_NAME=dgl4cpuik" >> .env
+          echo "DAILY_API_KEY=d19964998b42867784f5ee7e9cf95ee4a05c044861b44aae14754eaa5fb47876" >> .env
+          echo "DATABASE_HOST=dpg-d4askkpe2q1c73b80mrg-a" >> .env
+          echo "DATABASE_NAME=profession_db" >> .env
+          echo "DATABASE_PASSWORD=A7FSv3naAi5oIJkYlHKiTT5jcoLvkEla" >> .env
+          echo "DATABASE_PORT=5432" >> .env
+          echo "DATABASE_USER=profession_db_user" >> .env
+          echo "EMAIL_PASSWORD=fzrlxrluiynrujpl" >> .env
+          echo "EMAIL_USER=abenezerforjobs2@gmail.com" >> .env
+          echo "FRONTEND_URL=https://pro-net-ten.vercel.app" >> .env
+          echo "GOOGLE_CALLBACK_URL=https://pronet-user-service-qpe6.onrender.com/api/auth/google/callback" >> .env
+          echo "GOOGLE_CLIENT_ID=716006181490-r1fvklb9s9b26nk7jdmf69vf315b9uaa.apps.googleusercontent.com" >> .env
+          echo "GOOGLE_CLIENT_SECRET=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" >> .env
+          echo "GOOGLE_REFRESH_TOKEN=1//03WvAwhk0kBmvCgYIARAAGAMSNwF-L9IrVrB4IjKBUMWr0aB0DviIeWaHGXXVjwRjCxOdTgdd0nS7dcZWnJJ4FSQT_C5VGSFo1Sk" >> .env
+          echo "JWT_SECRET=\"VY2Lf3iix4PILDFNK7HggRhhHIiyQY3qB381Cq0Yui0=\"" >> .env
+          echo "PORT=3001" >> .env
+          echo "RESEND_API_KEY=re_4vTKv6Cz_HZ2iX37wBfEzcmntFxVS49Jt" >> .env
+          echo "SMTP_HOST=smtp.gmail.com" >> .env
+          echo "SMTP_PORT=587" >> .env
+          echo "SMTP_SECURE=false" >> .env
+          echo "STREAM_API_KEY=djqf3q9q4ygj" >> .env
+          echo "STREAM_SECRET_KEY=rtv72856wrcq4946hv6srztkdgyqnh7xcrwnhse5r8f7aj7zhfp7ycnrkffmhfp5" >> .env
+
       - name: Build User Service
         working-directory: ./services/user-service
         run: npm run build

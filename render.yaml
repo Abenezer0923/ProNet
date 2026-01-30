@@ -1,7 +1,7 @@
-databases:
-  - name: pronet-postgres
-    databaseName: profession_db
-    plan: free
+# databases:
+#   - name: pronet-postgres
+#     databaseName: profession_db
+#     plan: free
 
 services:
   # User Service
@@ -16,27 +16,17 @@ services:
       - key: PORT
         value: 3001
       - key: DATABASE_HOST
-        fromDatabase:
-          name: pronet-postgres
-          property: host
+        value: dpg-d4askkpe2q1c73b80mrg-a
       - key: DATABASE_PORT
-        fromDatabase:
-          name: pronet-postgres
-          property: port
+        value: 5432
       - key: DATABASE_USER
-        fromDatabase:
-          name: pronet-postgres
-          property: user
+        value: profession_db_user
       - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: pronet-postgres
-          property: password
+        value: A7FSv3naAi5oIJkYlHKiTT5jcoLvkEla
       - key: DATABASE_NAME
-        fromDatabase:
-          name: pronet-postgres
-          property: database
+        value: profession_db
       - key: JWT_SECRET
-        generateValue: true
+        value: "VY2Lf3iix4PILDFNK7HggRhhHIiyQY3qB381Cq0Yui0="
       - key: CLOUDINARY_CLOUD_NAME
         value: dgl4cpuik
       - key: CLOUDINARY_API_KEY
@@ -44,29 +34,33 @@ services:
       - key: CLOUDINARY_API_SECRET
         value: 7JHtL4bTAYqwq7RaQM60Ocf43fw
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        value: 716006181490-r1fvklb9s9b26nk7jdmf69vf315b9uaa.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
-        sync: false
+        value: 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
       - key: GOOGLE_CALLBACK_URL
         value: https://pronet-user-service-qpe6.onrender.com/api/auth/google/callback
       - key: FRONTEND_URL
         value: https://pro-net-ten.vercel.app
       - key: EMAIL_USER
-        sync: false
+        value: abenezerforjobs2@gmail.com
       - key: EMAIL_PASSWORD
-        sync: false
+        value: fzrlxrluiynrujpl
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
       - key: SMTP_SECURE
         value: false
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: SENDGRID_FROM
-        sync: false
       - key: GOOGLE_REFRESH_TOKEN
-        sync: false
+        value: 1//03WvAwhk0kBmvCgYIARAAGAMSNwF-L9IrVrB4IjKBUMWr0aB0DviIeWaHGXXVjwRjCxOdTgdd0nS7dcZWnJJ4FSQT_C5VGSFo1Sk
+      - key: RESEND_API_KEY
+        value: re_4vTKv6Cz_HZ2iX37wBfEzcmntFxVS49Jt
+      - key: DAILY_API_KEY
+        value: d19964998b42867784f5ee7e9cf95ee4a05c044861b44aae14754eaa5fb47876
+      - key: STREAM_API_KEY
+        value: djqf3q9q4ygj
+      - key: STREAM_SECRET_KEY
+        value: rtv72856wrcq4946hv6srztkdgyqnh7xcrwnhse5r8f7aj7zhfp7ycnrkffmhfp5
         
   # API Gateway
   - type: web
@@ -85,6 +79,6 @@ services:
           name: pronet-user-service
           property: hostport
       - key: JWT_SECRET
-        generateValue: true
+        value: "VY2Lf3iix4PILDFNK7HggRhhHIiyQY3qB381Cq0Yui0="
 
 
