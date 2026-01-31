@@ -36,21 +36,11 @@ export class AuthController {
       const result = await this.authService.googleLogin(req.user);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-      // If OTP verification is required, redirect to OTP page (without OTP for security)
-      if (result.requiresVerification) {
-        const params = new URLSearchParams({
-          email: req.user.email,
-          type: 'login',
-        });
-        res.redirect(`${frontendUrl}/verify-otp?${params.toString()}`);
-        return;
-      }
-
-      // Normal flow - redirect to callback with token
+      // Google OAuth is secure - redirect directly with token
       const params = new URLSearchParams({
         token: result.token,
-        requiresVerification: 'false',
         email: req.user.email,
+        isNewUser: result.isNewUser.toString(),
       });
       res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error) {
@@ -68,8 +58,8 @@ export class AuthController {
   @Post('resend-otp')
   async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
     await this.authService.resendOtp(resendOtpDto.email);
-    // Don't return OTP in response for security
     return {
+      success: true,
       message: 'Verification code sent successfully',
       email: resendOtpDto.email
     };
@@ -83,8 +73,8 @@ export class AuthController {
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
-    // Don't return OTP in response for security
     return {
+      success: true,
       message: 'If an account exists with this email, you will receive a verification code.',
       email: forgotPasswordDto.email
     };

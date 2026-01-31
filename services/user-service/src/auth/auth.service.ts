@@ -77,9 +77,8 @@ export class AuthService {
 
       // Generate and send verification OTP
       console.log('Generating verification OTP...');
-      let otp = '';
       try {
-        otp = await this.generateAndSendOtp(email);
+        await this.generateAndSendOtp(email, 'verify');
         console.log('Verification OTP sent successfully');
       } catch (otpError) {
         console.error('Failed to generate/send OTP:', otpError);
@@ -88,10 +87,10 @@ export class AuthService {
       }
 
       return {
-        user: this.sanitizeUser(user),
-        requiresVerification: true,
+        success: true,
         message: 'Registration successful. Please check your email for verification code.',
-        otp: otp || 'OTP generation failed - please request resend', // Include OTP for demo purposes
+        email: user.email,
+        requiresVerification: true,
       };
     } catch (error) {
       console.error('Registration error:', error);
@@ -121,35 +120,22 @@ export class AuthService {
 
     // Check if email is verified
     if (!user.isEmailVerified) {
-      throw new UnauthorizedException('Please verify your email address before logging in');
-    }
-
-    // Check if user needs OTP verification (logged out previously)
-    const session = await this.loginSessionRepository.findOne({
-      where: { userId: user.id },
-    });
-
-    if (session && session.requiresOtp) {
-      // Generate and send OTP
-      await this.generateAndSendOtp(email);
-
       return {
-        requiresOtp: true,
+        success: false,
+        requiresVerification: true,
+        message: 'Please verify your email address before logging in',
         email: user.email,
-        message: 'OTP sent to your email',
       };
     }
 
-    // Create or update session
-    await this.updateLoginSession(user.id, email, false);
-
-    // Generate token
+    // Generate token - no OTP required for normal login
     const token = this.generateToken(user);
 
     return {
+      success: true,
       user: this.sanitizeUser(user),
       token,
-      requiresOtp: false,
+      message: 'Login successful',
     };
   }
 
@@ -203,41 +189,23 @@ export class AuthService {
           user.profilePicture = picture;
           await this.userRepository.save(user);
         }
+        
+        // Mark email as verified if not already (OAuth confirms email)
+        if (!user.isEmailVerified) {
+          user.isEmailVerified = true;
+          await this.userRepository.save(user);
+        }
       }
 
-      // Try to generate OTP - if it fails, allow login without OTP
-      let requiresVerification = false;
-      let otpCode = '';
-      try {
-        console.log('Generating OTP for Google authentication');
-        otpCode = await this.generateAndSendOtp(email);
-        requiresVerification = true;
-        console.log('OTP generated successfully');
-      } catch (otpError) {
-        console.error('OTP generation failed (table may not exist yet):', otpError);
-        console.log('Allowing login without OTP verification');
-        requiresVerification = false;
-      }
-
-      // If OTP verification is required, don't generate token yet
-      if (requiresVerification) {
-        return {
-          user: this.sanitizeUser(user),
-          token: null,
-          requiresVerification: true,
-          isNewUser,
-          otpCode, // Include OTP for demo purposes
-        };
-      }
-
-      // No OTP required - generate token and allow login
+      // Generate token immediately - OAuth is already secure, no OTP needed
       const token = this.generateToken(user);
 
       return {
+        success: true,
         user: this.sanitizeUser(user),
         token,
-        requiresVerification: false,
         isNewUser,
+        message: 'Google login successful',
       };
     } catch (error) {
       console.error('Google login error:', error);
@@ -246,7 +214,7 @@ export class AuthService {
     }
   }
 
-  async generateAndSendOtp(email: string): Promise<string> {
+  async generateAndSendOtp(email: string, purpose: 'verify' | 'reset' | 'login' = 'verify'): Promise<string> {
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -265,17 +233,20 @@ export class AuthService {
     });
     await this.otpRepository.save(otpEntity);
 
-    // Log OTP immediately for console fallback
-    console.log(`📧 OTP for ${email}: ${otp}`);
-    console.log(`⏰ OTP expires at: ${expiresAt}`);
+    // Log OTP for development/debugging (remove in production or use proper logging)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📧 [DEV] OTP for ${email}: ${otp}`);
+      console.log(`⏰ [DEV] OTP expires at: ${expiresAt}`);
+    }
 
     // Send OTP via email (Fire and forget to avoid timeout)
-    this.emailService.sendOtpEmail(email, otp)
+    const emailSubject = purpose === 'reset' ? 'Password Reset Code' : 'Email Verification Code';
+    this.emailService.sendOtpEmail(email, otp, emailSubject)
       .then(() => console.log(`✅ OTP email sent successfully to ${email}`))
       .catch((error) => console.error(`⚠️  Failed to send email to ${email}:`, error.message));
 
-    // Return OTP for demo purposes
-    return otp;
+    // Don't return OTP in production for security
+    return process.env.NODE_ENV === 'development' ? otp : '';
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{ success: boolean; message: string }> {
@@ -347,22 +318,27 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
+    // Determine purpose based on verification status
+    const purpose = user.isEmailVerified ? 'reset' : 'verify';
+
     // Generate and send new OTP
-    await this.generateAndSendOtp(email);
+    await this.generateAndSendOtp(email, purpose);
   }
 
   async logout(userId: string) {
-    // Mark session as requiring OTP on next login
-    await this.updateLoginSession(userId, null, true);
-
-    return { message: 'Logged out successfully' };
+    // Simple logout - just invalidate the token on client side
+    // No need to track sessions or require OTP on next login
+    return { 
+      success: true,
+      message: 'Logged out successfully' 
+    };
   }
 
   async loginWithOtp(verifyOtpDto: VerifyOtpDto) {
-    // Verify OTP first
+    // This endpoint is now only for special cases (e.g., suspicious activity)
+    // Not used in normal flow
     await this.verifyOtp(verifyOtpDto);
 
-    // Find user
     const user = await this.userRepository.findOne({
       where: { email: verifyOtpDto.email }
     });
@@ -371,15 +347,13 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Create or update session - mark as not requiring OTP (until next logout)
-    await this.updateLoginSession(user.id, user.email, false);
-
-    // Generate token
     const token = this.generateToken(user);
 
     return {
+      success: true,
       user: this.sanitizeUser(user),
       token,
+      message: 'Login successful',
     };
   }
 
@@ -391,8 +365,8 @@ export class AuthService {
       return;
     }
 
-    // Generate and send OTP
-    await this.generateAndSendOtp(email);
+    // Generate and send OTP for password reset
+    await this.generateAndSendOtp(email, 'reset');
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
@@ -414,31 +388,10 @@ export class AuthService {
     user.password = hashedPassword;
     await this.userRepository.save(user);
 
-    // Invalidate all sessions but allow immediate login without OTP (since they just verified)
-    await this.updateLoginSession(user.id, user.email, false);
-
-    return { message: 'Password reset successfully' };
-  }
-
-  private async updateLoginSession(userId: string, email: string | null, requiresOtp: boolean) {
-    let session = await this.loginSessionRepository.findOne({
-      where: { userId },
-    });
-
-    if (session) {
-      session.requiresOtp = requiresOtp;
-      session.lastLoginAt = new Date();
-      if (email) session.email = email;
-    } else {
-      session = this.loginSessionRepository.create({
-        userId,
-        email: email || '',
-        requiresOtp,
-        lastLoginAt: new Date(),
-      });
-    }
-
-    await this.loginSessionRepository.save(session);
+    return { 
+      success: true,
+      message: 'Password reset successfully. You can now login with your new password.' 
+    };
   }
 
   private sanitizeUser(user: User) {

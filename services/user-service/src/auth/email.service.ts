@@ -45,7 +45,7 @@ export class EmailService {
     }
   }
 
-  async sendOtpEmail(email: string, otp: string): Promise<void> {
+  async sendOtpEmail(email: string, otp: string, subject: string = 'Your ProNet Verification Code'): Promise<void> {
     // Always log to console as fallback
     console.log(`📧 OTP for ${email}: ${otp}`);
     console.log(`⏰ OTP expires in 10 minutes`);
@@ -53,13 +53,13 @@ export class EmailService {
     try {
       if (this.emailProvider === 'resend') {
         console.log('🚀 Attempting to send email via Resend API...');
-        await this.sendWithResend(email, otp);
+        await this.sendWithResend(email, otp, subject);
       } else if (this.emailProvider === 'gmail-api') {
         console.log('🚀 Attempting to send email via Gmail API...');
-        await this.sendWithGmailApi(email, otp);
+        await this.sendWithGmailApi(email, otp, subject);
       } else if (this.emailProvider === 'smtp') {
         console.log('🚀 Attempting to send email via SMTP...');
-        await this.sendWithSmtp(email, otp);
+        await this.sendWithSmtp(email, otp, subject);
       } else {
         console.log('📝 Email service not configured - OTP logged to console only');
       }
@@ -70,7 +70,7 @@ export class EmailService {
     }
   }
 
-  private async sendWithResend(email: string, otp: string) {
+  private async sendWithResend(email: string, otp: string, subject: string) {
     try {
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -81,8 +81,8 @@ export class EmailService {
         body: JSON.stringify({
           from: 'ProNet <onboarding@resend.dev>', // Use your verified domain or resend.dev for testing
           to: [email],
-          subject: 'Your ProNet Verification Code',
-          html: this.getEmailTemplate(otp),
+          subject: subject,
+          html: this.getEmailTemplate(otp, subject),
         }),
       });
 
@@ -100,12 +100,11 @@ export class EmailService {
     }
   }
 
-  private async sendWithGmailApi(email: string, otp: string) {
+  private async sendWithGmailApi(email: string, otp: string, subject: string) {
     try {
       const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
       // Create the raw email string
-      const subject = 'Your ProNet Verification Code';
       const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
       const messageParts = [
         `From: ProNet <${process.env.EMAIL_USER}>`,
@@ -114,7 +113,7 @@ export class EmailService {
         'Content-Type: text/html; charset=utf-8',
         'MIME-Version: 1.0',
         '',
-        this.getEmailTemplate(otp),
+        this.getEmailTemplate(otp, subject),
       ];
       const message = messageParts.join('\n');
 
@@ -140,14 +139,20 @@ export class EmailService {
     }
   }
 
-  private async sendWithSmtp(email: string, otp: string) {
+  private async sendWithSmtp(email: string, otp: string, subject: string) {
     // ... Legacy SMTP implementation if needed, but likely unused on Render ...
     // For brevity, we can keep a minimal version or just throw an error if we want to force API usage.
     // But let's keep it simple for now and assume the user will use the API.
-    throw new Error('SMTP is blocked on Render. Please configure Gmail API.');
+    throw new Error('SMTP is blocked on Render. Please configure Gmail API or Resend.');
   }
 
-  private getEmailTemplate(otp: string): string {
+  private getEmailTemplate(otp: string, subject: string): string {
+    const isPasswordReset = subject.toLowerCase().includes('reset');
+    const title = isPasswordReset ? '🔐 Password Reset' : '🔐 Email Verification';
+    const greeting = isPasswordReset 
+      ? 'You requested to reset your password for ProNet.' 
+      : 'You requested to verify your email address for ProNet.';
+    
     return `
       <!DOCTYPE html>
       <html>
@@ -165,11 +170,11 @@ export class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🔐 ProNet Verification</h1>
+            <h1>${title}</h1>
           </div>
           <div class="content">
             <h2>Hello!</h2>
-            <p>You requested to verify your email address for ProNet. Use the code below to complete your verification:</p>
+            <p>${greeting} Use the code below to complete the process:</p>
             
             <div class="otp-box">
               <p style="margin: 0; font-size: 14px; color: #666;">Your verification code is:</p>
@@ -195,4 +200,3 @@ export class EmailService {
     `;
   }
 }
-
