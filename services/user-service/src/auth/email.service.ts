@@ -4,21 +4,11 @@ import { google } from 'googleapis';
 
 @Injectable()
 export class EmailService {
-  private emailProvider: 'resend' | 'gmail-api' | 'smtp' | 'console';
+  private emailProvider: 'gmail-api' | 'smtp' | 'console';
   private oauth2Client: any;
-  private resendApiKey: string;
 
   constructor() {
-    // Priority 1: Resend API (Most reliable for production)
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (resendApiKey) {
-      this.resendApiKey = resendApiKey;
-      this.emailProvider = 'resend';
-      console.log('📧 Email service initialized with Resend API');
-      return;
-    }
-
-    // Priority 2: Gmail API
+    // Priority 1: Gmail API (Preferred for Google Workspace)
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
@@ -30,9 +20,15 @@ export class EmailService {
       this.emailProvider = 'gmail-api';
       console.log('📧 Email service initialized with Gmail API');
       return;
+    } else {
+      console.warn('⚠️ Gmail API not initialized. Missing config:');
+      if (!clientId) console.warn(' - GOOGLE_CLIENT_ID is missing');
+      if (!clientSecret) console.warn(' - GOOGLE_CLIENT_SECRET is missing');
+      if (!refreshToken) console.warn(' - GOOGLE_REFRESH_TOKEN is missing');
+      if (!emailUser) console.warn(' - EMAIL_USER is missing');
     }
 
-    // Priority 3: SMTP (will likely fail on Render free tier)
+    // Priority 2: SMTP (Fallback)
     const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
     const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD;
 
@@ -51,52 +47,19 @@ export class EmailService {
     console.log(`⏰ OTP expires in 10 minutes`);
 
     try {
-      if (this.emailProvider === 'resend') {
-        console.log('🚀 Attempting to send email via Resend API...');
-        await this.sendWithResend(email, otp, subject);
-      } else if (this.emailProvider === 'gmail-api') {
+      if (this.emailProvider === 'gmail-api') {
         console.log('🚀 Attempting to send email via Gmail API...');
         await this.sendWithGmailApi(email, otp, subject);
       } else if (this.emailProvider === 'smtp') {
         console.log('🚀 Attempting to send email via SMTP...');
         await this.sendWithSmtp(email, otp, subject);
       } else {
-        console.log('📝 Email service not configured - OTP logged to console only');
+        console.log('� Emtail service not configured - OTP logged to console only');
       }
     } catch (error) {
       console.error('❌ Error sending OTP email:', error.message);
       console.log('📝 Falling back to console OTP due to email service error');
       console.log(`🔑 Use OTP: ${otp} (expires in 10 minutes)`);
-    }
-  }
-
-  private async sendWithResend(email: string, otp: string, subject: string) {
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'ProNet <onboarding@resend.dev>', // Use your verified domain or resend.dev for testing
-          to: [email],
-          subject: subject,
-          html: this.getEmailTemplate(otp, subject),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
-      }
-
-      const data = await response.json();
-      console.log(`✅ OTP email sent successfully via Resend to ${email}`);
-      console.log(`📬 Email ID: ${data.id}`);
-    } catch (error) {
-      console.error('💥 Resend API Send Error:', error.message);
-      throw error;
     }
   }
 
@@ -140,10 +103,29 @@ export class EmailService {
   }
 
   private async sendWithSmtp(email: string, otp: string, subject: string) {
-    // ... Legacy SMTP implementation if needed, but likely unused on Render ...
-    // For brevity, we can keep a minimal version or just throw an error if we want to force API usage.
-    // But let's keep it simple for now and assume the user will use the API.
-    throw new Error('SMTP is blocked on Render. Please configure Gmail API or Resend.');
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER || process.env.EMAIL_USER,
+          pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `ProNet <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: subject,
+        html: this.getEmailTemplate(otp, subject),
+      });
+
+      console.log(`✅ OTP email sent successfully via SMTP to ${email}`);
+    } catch (error) {
+      console.error('💥 SMTP Send Error:', error.message);
+      throw error;
+    }
   }
 
   private getEmailTemplate(otp: string, subject: string): string {
