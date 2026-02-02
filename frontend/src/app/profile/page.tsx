@@ -235,9 +235,9 @@ export default function ProfilePage() {
 
           {/* Profile Info */}
           <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-5 mt-4 sm:-mt-16 lg:-mt-20 relative mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-5 relative">
               {/* Profile Picture */}
-              <div className="relative group mx-auto sm:mx-0">
+              <div className="relative group mx-auto sm:mx-0 flex-shrink-0 -mt-16 sm:-mt-20">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white relative">
                   {profile.profilePicture || profile.avatar ? (
                     <img
@@ -273,8 +273,8 @@ export default function ProfilePage() {
               </div>
 
               {/* Name and Title */}
-              <div className="mt-4 sm:mt-0 flex-1 text-center sm:text-left">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+              <div className="mt-4 sm:mt-0 sm:mb-4 flex-1 text-center sm:text-left min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight break-words">
                   {displayName}
                 </h1>
                 {displaySubtitle && (
@@ -307,7 +307,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-2">
+              <div className="mt-6 sm:mt-0 flex flex-wrap justify-center sm:justify-end gap-3 sm:mb-4 flex-shrink-0">
                 {isOrg && profile.website && (
                   <a
                     href={profile.website}
