@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards, Request, Req, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -19,8 +20,16 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    const result = await this.authService.login(loginDto);
+    
+    // If user needs email verification, return 403 Forbidden with details
+    if (result.requiresVerification) {
+      return res.status(403).json(result);
+    }
+    
+    // Successful login
+    return res.status(200).json(result);
   }
 
   @Get('google')
