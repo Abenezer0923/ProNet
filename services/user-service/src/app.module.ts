@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -42,12 +43,14 @@ import { MeetingQAUpvote } from './communities/entities/meeting-qa-upvote.entity
 
 import { HealthController } from './health/health.controller';
 import { JobsModule } from './jobs/jobs.module';
+import { KeepAliveService } from './keep-alive.service';
 
 // Helper to parse boolean env vars
 const parseBoolean = (val: string | undefined) => val === 'true' || val === '1';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
@@ -86,5 +89,6 @@ const parseBoolean = (val: string | undefined) => val === 'true' || val === '1';
     JobsModule,
   ],
   controllers: [AppController, HealthController],
+  providers: [KeepAliveService],
 })
 export class AppModule { }
