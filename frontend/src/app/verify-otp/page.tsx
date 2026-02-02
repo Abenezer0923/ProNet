@@ -15,11 +15,11 @@ function VerifyOtpForm() {
   const [resending, setResending] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const [verificationType, setVerificationType] = useState<'register' | 'login'>('register');
+  const [verificationType, setVerificationType] = useState<'register' | 'login' | 'verify'>('register');
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
-    const typeParam = searchParams.get('type') as 'register' | 'login' | null;
+    const typeParam = searchParams.get('type') as 'register' | 'login' | 'verify' | null;
 
     if (emailParam) {
       setEmail(emailParam);
@@ -54,9 +54,7 @@ function VerifyOtpForm() {
       // Use different endpoint based on verification type
       const endpoint = verificationType === 'login'
         ? `${apiUrl}/api/auth/login-with-otp`
-        : verificationType === 'register'
-          ? `${apiUrl}/api/auth/verify-email`
-          : `${apiUrl}/api/auth/verify-otp`;
+        : `${apiUrl}/api/auth/verify-email`;
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -72,19 +70,14 @@ function VerifyOtpForm() {
         throw new Error(data.message || 'Verification failed');
       }
 
-      // For login, store token and set user in context
-      if (verificationType === 'login' && data.token && data.user) {
-        localStorage.setItem('token', data.token);
-      }
-
-      // For registration verification, store token and set user
-      if (verificationType === 'register' && data.token && data.user) {
+      // For login or verification, store token and set user in context
+      if (data.token && data.user) {
         localStorage.setItem('token', data.token);
       }
 
       setSuccess('Verification successful! Redirecting...');
       setTimeout(() => {
-        window.location.href = '/dashboard'; // Use window.location for full page reload
+        window.location.href = '/feed'; // Redirect to feed after verification
       }, 1000);
     } catch (err: any) {
       setError(err.message || 'Verification failed');
@@ -151,6 +144,11 @@ function VerifyOtpForm() {
             {verificationType === 'login' && (
               <p className="text-sm text-gray-500 mt-2">
                 For security, we need to verify it's you
+              </p>
+            )}
+            {verificationType === 'verify' && (
+              <p className="text-sm text-gray-500 mt-2">
+                Please verify your email to continue
               </p>
             )}
           </div>

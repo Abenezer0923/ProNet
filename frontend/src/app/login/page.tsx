@@ -24,10 +24,15 @@ export default function LoginPage() {
     try {
       const response = await authAPI.login({ email, password });
 
-      // Check if OTP is required
+      // Check if OTP is required (legacy)
       if (response.data.requiresOtp) {
-        // Redirect to OTP verification page
         router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=login`);
+        return;
+      }
+
+      // Check if email verification is required
+      if (response.data.requiresVerification) {
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=verify`);
         return;
       }
 
@@ -37,6 +42,16 @@ export default function LoginPage() {
       loginWithToken(user, token);
       router.push('/feed');
     } catch (err: any) {
+      // Handle 403 - Email verification required
+      if (err.response?.status === 403) {
+        const data = err.response?.data;
+        if (data?.requiresVerification) {
+          // Redirect to verification page
+          router.push(`/verify-otp?email=${encodeURIComponent(data.email || email)}&type=verify`);
+          return;
+        }
+      }
+      
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
