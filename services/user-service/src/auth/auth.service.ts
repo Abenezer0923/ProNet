@@ -120,10 +120,18 @@ export class AuthService {
 
     // Check if email is verified
     if (!user.isEmailVerified) {
+      // Automatically send verification OTP
+      try {
+        await this.generateAndSendOtp(user.email, 'verify');
+        console.log(`Verification OTP resent to unverified user: ${user.email}`);
+      } catch (otpError) {
+        console.error('Failed to send verification OTP:', otpError);
+      }
+
       return {
         success: false,
         requiresVerification: true,
-        message: 'Please verify your email address before logging in',
+        message: 'Please verify your email address. A new verification code has been sent to your email.',
         email: user.email,
       };
     }
