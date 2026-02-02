@@ -29,6 +29,15 @@ export class ProxyController {
     if (req.url === '/health' || req.url === '/') {
       return;
     }
+    
+    // For OAuth routes, don't proxy - redirect directly to user service
+    if (req.url.startsWith('/api/auth/google')) {
+      const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:3001';
+      const redirectUrl = `${userServiceUrl}${req.url}`;
+      console.log(`Redirecting OAuth request to: ${redirectUrl}`);
+      return res.redirect(redirectUrl);
+    }
+    
     return this.proxyService.forward(req, res, 'users');
   }
 }
